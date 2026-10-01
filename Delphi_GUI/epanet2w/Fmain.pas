@@ -315,8 +315,14 @@ type
       var S: String; var WW: Boolean);
     procedure TBOptionsClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure TBAIClick(Sender: TObject);
+    procedure AIMenuModeClick(Sender: TObject);
   private
     { Private declarations }
+    PopupAIMenu: TPopupMenu;
+    TBAI: TToolButton;
+    MnuAI: TMenuItem;
+    procedure InitAIControls;
     procedure ClearAll;
     procedure CloseForms;
     procedure CreateTempFiles;
@@ -360,7 +366,8 @@ uses
   Fbrowser, Fcalib, Fcontour, Fenergy, Fgraph, Fmap, Fovmap, Fproped,
   Fsimul, Fstatus, Fsummary, Ftable, Dabout, Dcalib1, Dcalib2, Ddefault,
   Ddataexp, Dfind, Dgraph, Dgrouped, Dmapexp, Dprefers, Dquery,
-  Dtable, Uexport, Ufileio, Uimport, Uinifile, Uinput, Uoutput, Ureport;
+  Dtable, Uexport, Ufileio, Uimport, Uinifile, Uinput, Uoutput, Ureport,
+  Uai_bridge, Fai_assistant;
 
 
 //===================================================================
@@ -462,6 +469,9 @@ begin
 // Set font style
   Uglobals.SetFont(self);
   Uglobals.SetFont(PropEditForm);
+
+// Initialize AI button and context menu (Roadmap Sec. 1-4)
+  InitAIControls;
 
 // Prevent form from repainting itself for now
   LockWindowUpdate(Handle);
@@ -2441,6 +2451,77 @@ end;
 procedure TMainForm.MnuHelpTutorialClick(Sender: TObject);
 begin
   HtmlHelp(GetDesktopWindow, EpanetDir + TUTORFILE, HH_DISPLAY_TOC, 0);
+end;
+
+
+//===================================================================
+//              AI Assistant Toolbar & Context Menu
+//===================================================================
+
+procedure TMainForm.InitAIControls;
+var
+  M: TAIMode;
+  Item, SubItem: TMenuItem;
+  SepBtn: TToolButton;
+begin
+  // 1. Create Context PopupMenu for the AI Button (Roadmap Sec. 1 & 2)
+  PopupAIMenu := TPopupMenu.Create(Self);
+  for M := Low(TAIMode) to High(TAIMode) do
+  begin
+    Item := TMenuItem.Create(PopupAIMenu);
+    Item.Caption := AI_MODE_CAPTIONS[M];
+    Item.Tag := Ord(M);
+    Item.OnClick := AIMenuModeClick;
+    PopupAIMenu.Items.Add(Item);
+  end;
+
+  // 2. Add Separator and AI Button to StdToolBar
+  SepBtn := TToolButton.Create(StdToolBar);
+  SepBtn.Style := tbsSeparator;
+  SepBtn.Width := 8;
+  SepBtn.Left := TBOptions.Left + TBOptions.Width + 4;
+  SepBtn.Parent := StdToolBar;
+
+  TBAI := TToolButton.Create(StdToolBar);
+  TBAI.Caption := 'AI';
+  TBAI.Hint := 'AI Ассистент (Что происходит? / Найти проблемы / Отчёт)';
+  TBAI.ShowHint := True;
+  TBAI.Style := tbsDropDown;
+  TBAI.DropdownMenu := PopupAIMenu;
+  TBAI.ImageIndex := 8;
+  TBAI.Left := SepBtn.Left + SepBtn.Width + 4;
+  TBAI.OnClick := TBAIClick;
+  TBAI.Parent := StdToolBar;
+
+  // 3. Add Top-Level "AI" Menu to MainMenu1
+  MnuAI := TMenuItem.Create(MainMenu1);
+  MnuAI.Caption := '&AI Ассистент';
+  for M := Low(TAIMode) to High(TAIMode) do
+  begin
+    SubItem := TMenuItem.Create(MnuAI);
+    SubItem.Caption := AI_MODE_CAPTIONS[M];
+    SubItem.Tag := Ord(M);
+    SubItem.OnClick := AIMenuModeClick;
+    MnuAI.Add(SubItem);
+  end;
+  MainMenu1.Items.Add(MnuAI);
+end;
+
+procedure TMainForm.TBAIClick(Sender: TObject);
+begin
+  // Default click on AI button opens "Что происходит?" mode for current viewport
+  ShowAIAssistant(aimWhatHappens);
+end;
+
+procedure TMainForm.AIMenuModeClick(Sender: TObject);
+var
+  Mode: TAIMode;
+begin
+  if Sender is TMenuItem then
+  begin
+    Mode := TAIMode(TMenuItem(Sender).Tag);
+    ShowAIAssistant(Mode);
+  end;
 end;
 
 end.

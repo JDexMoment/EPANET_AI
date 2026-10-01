@@ -56,7 +56,9 @@ uses
   Dchart in 'Dchart.pas' {ChartOptionsDlg},
   Vcl.Themes,
   Vcl.Styles,
-  Dsource in 'Dsource.pas' {SourceForm};
+  Dsource in 'Dsource.pas' {SourceForm},
+  Uai_bridge in 'Uai_bridge.pas',
+  Fai_assistant in 'Fai_assistant.pas' {AIAssistantForm};
 
 {$R *.RES}
 

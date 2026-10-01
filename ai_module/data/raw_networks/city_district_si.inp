@@ -1,0 +1,58 @@
+[TITLE]
+District Water Network - Baseline SI (LPS)
+
+[JUNCTIONS]
+;ID      Elev    Demand   Pattern
+J-101    115.0   12.0     PAT1
+J-102    118.0   18.5     PAT1
+J-103    122.0   24.0     PAT1
+J-104    128.5   20.0     PAT1
+J-105    120.0   15.0     PAT1
+J-106    112.0   10.0     PAT1
+
+[RESERVOIRS]
+;ID      Head
+R-1      162.0
+
+[TANKS]
+;ID      Elev    InitLvl  MinLvl   MaxLvl   Diam     MinVol
+T-1      145.0   4.5      1.0      8.0      12.0     0.0
+
+[PIPES]
+;ID      Node1   Node2   Length   Diam     Roughness  MinorLoss  Status
+P-101    R-1     J-101   450      300      120        0          Open
+P-102    J-101   J-102   600      250      110        0          Open
+P-103    J-102   J-103   750      200      105        0          Open
+P-104    J-103   J-104   950      175      90         0          Open
+P-105    J-101   J-105   550      200      115        0          Open
+P-106    J-105   J-103   650      200      115        0          Open
+P-107    J-105   J-106   800      200      115        0          Open
+P-108    J-102   T-1     500      200      115        0          Open
+
+[PATTERNS]
+;ID      Multipliers
+PAT1     0.7  0.6  0.8  1.2  1.4  1.1  0.9  0.8
+
+[TIMES]
+Duration           24:00
+Hydraulic Timestep 1:00
+Pattern Timestep   3:00
+Report Timestep    1:00
+
+[OPTIONS]
+Units              LPS
+Headloss           H-W
+Tolerance          0.01
+
+[COORDINATES]
+;Node    X-Coord   Y-Coord
+R-1      100.0     500.0
+J-101    300.0     500.0
+J-102    550.0     650.0
+J-103    800.0     650.0
+J-104    1050.0    650.0
+J-105    550.0     350.0
+J-106    850.0     350.0
+T-1      550.0     850.0
+
+[END]

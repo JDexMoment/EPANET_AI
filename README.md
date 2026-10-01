@@ -31,3 +31,35 @@ epanet@epa.gov
 
 # EPA Disclaimer
 The United States Environmental Protection Agency (EPA) GitHub project code is provided on an "as is" basis and the user assumes responsibility for its use. EPA has relinquished control of the information and no longer has responsibility to protect the integrity, confidentiality, or availability of the information. Any reference to specific commercial products, processes, or services by service mark, trademark, manufacturer, or otherwise, does not constitute or imply their endorsement, recommendation or favoring by EPA. The EPA seal and logo shall not be used in any manner to imply endorsement of any commercial product or activity by EPA or the United States Government.
+
+---
+
+# AI Assistant Module (Qwen3 Local, Data-first)
+
+This repository now also contains a complete **local AI engineering assistant** for EPANET 2.2,
+implemented per `roadmap.pdf` (Дорожная карта разработки AI-модуля).
+
+**Quick start:**
+```bash
+pip install -r ai_module/requirements.txt
+python -m ai_module.run_service          # local FastAPI service on 127.0.0.1:8765
+python -m pytest ai_module/tests -q      # 29 tests
+```
+
+**Documentation:**
+- [`ai_module/README.md`](ai_module/README.md) — full architecture, data formats, QLoRA training, benchmark
+- [`AI_INTEGRATION_GUIDE.md`](AI_INTEGRATION_GUIDE.md) — Delphi + VS Code step-by-step integration guide
+
+**What was added:**
+| Area | Files |
+|------|-------|
+| Delphi UI | `Fmain.pas` (AI toolbar button + menu), `Fmap.pas` (right-click AI), `Fai_assistant.pas/.dfm` (assistant window), `Uai_bridge.pas` (context collector + HTTP bridge) |
+| Python AI layer | `ai_module/` — ctypes engine adapter, deterministic analytics, context builder, Qwen3 client, report generator, FastAPI service |
+| Training | `ai_module/training/` — scenario/SFT dataset generator, validation quality gate, QLoRA trainer, benchmark harness |
+| Demo data | `ai_module/data/raw_networks/city_district_si.inp`, `city_district_upgraded.inp`, `tutorial.inp` |
+| Build | `SRC_engines/CMakeLists.txt` (optional CMake build of the C engine) |
+
+**Design principle:** the LLM (Qwen3 4B/8B) only *interprets and explains*. All hydraulic numbers
+come from the deterministic EPANET 2.2 C engine + a deterministic analytics layer, so every
+numeric statement in an AI answer is traceable to a computed field
+(zero-hallucination gate: `python -m ai_module.training.validate_dataset`).

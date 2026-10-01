@@ -143,6 +143,8 @@ type
     procedure Timer2Timer(Sender: TObject);
     procedure FormMouseWheel(Sender: TObject; Shift: TShiftState;
       WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+    procedure PopupAIExplainClick(Sender: TObject);
+    procedure PopupAIWhyClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -259,7 +261,7 @@ implementation
 {$R *.DFM}
 
 uses Dcopy, Dlabel, Dmap, Dmapdim, Fmain, Fbrowser, Fovmap, Fproped,
-     Uinput, Uoutput;
+     Uinput, Uoutput, Uai_bridge, Fai_assistant;
 
 var
   FlyOverX  : Integer;
@@ -281,6 +283,7 @@ procedure TMapForm.FormCreate(Sender: TObject);
 //-------------------------------------------------
 var
   y: Integer;
+  AIItem: TMenuItem;
 begin
     Left := 0;
     Top := 0;
@@ -354,6 +357,21 @@ begin
   MainForm.MnuNodeLegend.Checked := PopupNodeLegend.Checked;
   MainForm.MnuLinkLegend.Checked := PopupLinkLegend.Checked;
   MainForm.MnuTimeLegend.Checked := PopupTimeLegend.Checked;
+
+//Add AI items to Map right-click PopupMenu1
+  AIItem := TMenuItem.Create(PopupMenu1);
+  AIItem.Caption := '-';
+  PopupMenu1.Items.Add(AIItem);
+
+  AIItem := TMenuItem.Create(PopupMenu1);
+  AIItem.Caption := 'AI: Объяснить выбранный объект';
+  AIItem.OnClick := PopupAIExplainClick;
+  PopupMenu1.Items.Add(AIItem);
+
+  AIItem := TMenuItem.Create(PopupMenu1);
+  AIItem.Caption := 'AI: Почему это произошло?';
+  AIItem.OnClick := PopupAIWhyClick;
+  PopupMenu1.Items.Add(AIItem);
 end;
 
 
@@ -2989,6 +3007,16 @@ begin
     Screen.Cursor := crDefault;
     EndJob;
   end;
+end;
+
+procedure TMapForm.PopupAIExplainClick(Sender: TObject);
+begin
+  ShowAIAssistant(aimExplainObject);
+end;
+
+procedure TMapForm.PopupAIWhyClick(Sender: TObject);
+begin
+  ShowAIAssistant(aimWhyHappened);
 end;
 
 end.
