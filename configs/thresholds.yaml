@@ -1,0 +1,105 @@
+# ─────────────────────────────────────────────────────────────
+# thresholds.yaml — единственный источник правды по «нормативам»
+# Все пороги, которые видит LLM, приходят ОТСЮДА (Analytics Engine),
+# модель не имеет права придумывать свои пороги.
+# ─────────────────────────────────────────────────────────────
+version: 1
+units: { pressure: "м вод.ст.", flow: "л/с", velocity: "м/с", level: "м" }
+
+rules:
+  - id: low_pressure_warning
+    metric: pressure
+    op: "<"
+    value: 20.0
+    severity: warning
+    text: "Давление ниже 20 м вод.ст. — риск нарушения качества услуги у потребителя."
+
+  - id: low_pressure_critical
+    metric: pressure
+    op: "<"
+    value: 10.0
+    severity: critical
+    text: "Давление ниже 10 м вод.ст. — критическое нарушение подачи."
+
+  - id: high_pressure_warning
+    metric: pressure
+    op: ">"
+    value: 60.0
+    severity: warning
+    text: "Давление выше 60 м вод.ст. — риск порывов и износа арматуры."
+
+  - id: high_velocity_warning
+    metric: velocity
+    op: ">"
+    value: 1.5
+    severity: warning
+    text: "Скорость выше 1,5 м/с — рост потерь напора и риск гидроудара."
+
+  - id: high_velocity_critical
+    metric: velocity
+    op: ">"
+    value: 3.0
+    severity: critical
+    text: "Скорость выше 3,0 м/с — недопустимый режим."
+
+  - id: reverse_flow
+    metric: flowrate
+    op: "sign_change"
+    severity: info
+    text: "Смена направления потока — возможен переток между зонами / авария."
+
+  - id: supply_deficit_warning
+    metric: demand_deficit_pct
+    op: ">"
+    value: 5.0
+    severity: warning
+    text: "Подаётся меньше расчётного расхода (>5%) — начало дефицита подачи."
+
+  - id: supply_deficit_critical
+    metric: demand_deficit_pct
+    op: ">"
+    value: 20.0
+    severity: critical
+    text: "Дефицит подачи более 20% расчётного расхода — потребители недополучают воду."
+
+  - id: pipe_closed
+    metric: link_status
+    op: "=="
+    value: closed
+    severity: critical
+    text: "Участок отключён (закрыт) — структура сети нарушена, потоки перераспределяются."
+
+  - id: pipe_flow_stopped
+    metric: link_status
+    op: "=="
+    value: flow_stopped
+    severity: info
+    text: "Поток по участку прекращён в ходе расчёта (часто — следствие другого события: пустой резервуар, отключение, отрицательное давление)."
+
+  - id: tank_near_min
+    metric: tank_level
+    op: "<="
+    value: "min_level + 0.3"
+    severity: warning
+    text: "Уровень в резервуаре у минимальной отметки — запас почти исчерпан."
+
+  - id: tank_at_min
+    metric: tank_level
+    op: "<="
+    value: "min_level + 0.05"
+    severity: critical
+    text: "Резервуар опустошён — регулирование потеряно."
+
+  - id: pump_beyond_curve
+    metric: pump_flow
+    op: ">"
+    value: "1.15 * max_curve_flow"
+    severity: warning
+    text: "Насос работает за пределами характеристики — режим вне расчётной области."
+
+# Ранжирование аномалий для Top-K (влияет на порядок в контексте LLM)
+ranking:
+  severity_weight: {critical: 3.0, warning: 1.0, info: 0.3}
+  population_affected: true     # кол-во узлов в зоне учитывается
+  duration_weight: 0.5          # длительность события учитывается
+  deviation_weight: 1.0         # нормированное отклонение от порога/базлайна

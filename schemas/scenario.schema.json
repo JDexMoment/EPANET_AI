@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "epanet-ai/scenario.schema.json",
+  "title": "Scenario (сценарий расчёта EPANET) — служебная единица датасета",
+  "type": "object",
+  "required": ["scenario_id", "network_id", "created", "base_inp", "edits", "truth", "result_ref"],
+  "properties": {
+    "scenario_id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+    "network_id": {"type": "string"},
+    "created": {"type": "string"},
+    "seed": {"type": "integer"},
+    "base_inp": {"type": "string"},
+    "scenario_inp": {"type": "string", "description": "Путь к .inp после применения правок"},
+    "edits": {
+      "type": "array",
+      "description": "Список правок модели. Именно они формируют ground truth.",
+      "items": {
+        "type": "object",
+        "required": ["op", "target"],
+        "properties": {
+          "op": {"enum": ["set_roughness", "set_diameter", "set_status", "set_demand",
+                          "scale_demand", "set_pump_curve_scale", "set_tank_init_level",
+                          "set_tank_levels", "set_base_demand", "none"]},
+          "target": {"type": "string"},
+          "value": {},
+          "note": {"type": "string"}
+        }
+      }
+    },
+    "truth": {
+      "type": "object",
+      "description": "Ответный ключ сценария. НИКОГДА не попадает в llm_context.",
+      "properties": {
+        "is_faulted": {"type": "boolean"},
+        "primary_fault": {"type": ["string", "null"], "description": "id из configs/labels.yaml → categories"},
+        "fault_severity": {"type": ["string", "null"], "enum": ["critical", "warning", "info", null]},
+        "expected_effects": {"type": "array", "items": {"type": "string"}},
+        "difficulty": {"enum": ["easy", "medium", "hard"]},
+        "notes_for_expert": {"type": "string", "description": "Подсказка инженеру-разметчику (не модели)"}
+      }
+    },
+    "result_ref": {
+      "type": "object",
+      "required": ["dir", "converged"],
+      "properties": {
+        "dir": {"type": "string"},
+        "converged": {"type": "boolean"},
+        "solver_warnings": {"type": "array", "items": {"type": "string"}},
+        "runtime_s": {"type": "number"}
+      }
+    }
+  }
+}

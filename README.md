@@ -1,65 +1,69 @@
-# EPANET 2.2
+# EPANET AI-модуль: подготовка данных и обучение
 
-# Introduction
-EPANET is used to perform extended-period simulation of the hydraulic and water quality behavior within drinking water distribution systems (e.g., pressurized pipe networks), which consist of pipes, nodes (junctions), pumps, valves, storage tanks, and reservoirs. It can be used to track the flow of water in each pipe, the pressure at each node, the height of the water in each tank, a chemical concentration, the age of the water, and source tracing throughout the network during a simulation period.
+Репозиторий отвечает на вопрос «как получить данные и обучить локальную LLM (Qwen3 4B/8B)
+объяснять инженеру результаты расчёта EPANET» — без того, чтобы модель считала гидравлику.
 
-EPANET was developed as a tool for understanding the movement and fate of drinking water constituents within distribution systems, and can be used for many different kinds of applications in distribution systems analysis. Today, engineers and consultants use EPANET to design and size new water infrastructure, retrofit existing aging infrastructure, optimize operations of tanks and pumps, reduce energy usage, investigate water quality problems, and prepare for emergencies. EPANET can also be used to model contamination threats and evaluate resilience to security threats or natural disasters.
+**Главный принцип:** все числа считает детерминированный аналитический слой (EPANET + Analytics),
+LLM отвечает только за интерпретацию и текст. Каждое число в её ответе опирается на факт
+из контекста (ссылка вида `E-007`).
 
-# Description
-This repository was established to provide U.S. EPA’s official release of 2.2.0.  The last official release of EPANET was version 2.00.12, dated 2008.  The release of EPANET 2.2.0 represents a significant step forward in two important ways.  First, the EPANET 2.2.0 release represents a new, open source software project in collaboration with the community at OpenWaterAnalytics (<https://github.com/OpenWaterAnalytics/EPANET>) to maintain and extend EPANET.  The EPANET developers’ community at OWA (<http://community.wateranalytics.org>) is composed of dedicated volunteers from around the world who have a passion for EPANET.  Second, EPANET 2.2.0 includes major updates to the hydraulic and water quality engines of EPANET 2.00.12.
-
-This repository is being set up to bring together the EPANET engine contributions from the EPA/OWA’s release of EPANET 2.2.0 (<https://github.com/OpenWaterAnalytics/EPANET/releases/tag/v2.2>) along with U.S. EPA’s effort to update the Delphi-based user interface, user’s manual, and the integrated Help manual, which resides within the Delphi-based EPANET graphical user interface.
-
-This repository is for archiving the source code and document files associated with the EPA/OWA EPANET 2.2.0 release.  Anyone interested in examining these files can peruse the appropriate folder in this repository.
-
-# Intended Audience
-The intended audience for this repository is anyone working on water distribution system modeling and interested in knowing more about the source code and documentation associated with the official release of EPANET 2.2.0.
-
-# License
-EPANET is released under the MIT license. See the LICENSE.txt file.
-
-# Contributing
-EPANET has an active open source software community including consulting engineers, students, researchers, software companies, professional organizations, other interested members of the public, and EPA partners. An Open Source EPANET Initiative is at <http://community.wateranalytics.org>.  Anyone wanting to contribute to the open source, collaborative project for EPANET should go to <https://github.com/OpenWaterAnalytics/EPANET>.  Everyone is welcome to participate in the EPANET project. Whether you are helping others to resolve issues, reporting a new unknown issue, suggesting a new feature that would benefit your workflow, or writing code, we value and appreciate your time and effort. The path for contribution starts with entering an issue at https://github.com/OpenWaterAnalytics/EPANET/issues. Examine the open issues at this link and the conversation around them, and then get engaged!  
-
-Finally, the issues identified and resolved here were the result of U.S. EPA's efforts to coordinate beta testing of the EPA/OWA EPANET version 2.2.0.  
-
-# Documentation
-The "Read-the-Docs" version of the EPANET User's Manual is available here at https://epanet22.readthedocs.io/en/latest/.  Alternatively, an Acrobat PDF version is available for download within the User Manual folder https://github.com/USEPA/EPANET2.2/tree/master/User_Manual. 
-
-# Contact
-epanet@epa.gov
-
-# EPA Disclaimer
-The United States Environmental Protection Agency (EPA) GitHub project code is provided on an "as is" basis and the user assumes responsibility for its use. EPA has relinquished control of the information and no longer has responsibility to protect the integrity, confidentiality, or availability of the information. Any reference to specific commercial products, processes, or services by service mark, trademark, manufacturer, or otherwise, does not constitute or imply their endorsement, recommendation or favoring by EPA. The EPA seal and logo shall not be used in any manner to imply endorsement of any commercial product or activity by EPA or the United States Government.
-
----
-
-# AI Assistant Module (Qwen3 Local, Data-first)
-
-This repository now also contains a complete **local AI engineering assistant** for EPANET 2.2,
-implemented per `roadmap.pdf` (Дорожная карта разработки AI-модуля).
-
-**Quick start:**
-```bash
-pip install -r ai_module/requirements.txt
-python -m ai_module.run_service          # local FastAPI service on 127.0.0.1:8765
-python -m pytest ai_module/tests -q      # 29 tests
+```
+network.inp ─▶ EPANET (PDA) ─▶ Analytics (KPI, алерты, evidence) ─▶ Context Builder ─▶ LLM
+                                          │                                   ▲
+                                          └──▶ кейсы ─▶ инженеры-эксперты ────┘ (золотые ответы → LoRA)
 ```
 
-**Documentation:**
-- [`ai_module/README.md`](ai_module/README.md) — full architecture, data formats, QLoRA training, benchmark
-- [`AI_INTEGRATION_GUIDE.md`](AI_INTEGRATION_GUIDE.md) — Delphi + VS Code step-by-step integration guide
+## Быстрый старт
 
-**What was added:**
-| Area | Files |
-|------|-------|
-| Delphi UI | `Fmain.pas` (AI toolbar button + menu), `Fmap.pas` (right-click AI), `Fai_assistant.pas/.dfm` (assistant window), `Uai_bridge.pas` (context collector + HTTP bridge) |
-| Python AI layer | `ai_module/` — ctypes engine adapter, deterministic analytics, context builder, Qwen3 client, report generator, FastAPI service |
-| Training | `ai_module/training/` — scenario/SFT dataset generator, validation quality gate, QLoRA trainer, benchmark harness |
-| Demo data | `ai_module/data/raw_networks/city_district_si.inp`, `city_district_upgraded.inp`, `tutorial.inp` |
-| Build | `SRC_engines/CMakeLists.txt` (optional CMake build of the C engine) |
+```bash
+pip install -r requirements.txt
 
-**Design principle:** the LLM (Qwen3 4B/8B) only *interprets and explains*. All hydraulic numbers
-come from the deterministic EPANET 2.2 C engine + a deterministic analytics layer, so every
-numeric statement in an AI answer is traceable to a computed field
-(zero-hallucination gate: `python -m ai_module.training.validate_dataset`).
+bash tools/run_pipeline.sh              # сценарии → аналитика → кейсы → партии → HTML-формы
+
+# что получилось:
+ls tools/ExpertCasePack_*.html          # формы для инженеров (открыть в браузере)
+python -m src.eval.metrics_offline      # состояние датасета
+```
+
+Проверка полного конвейера без инженеров (автотест):
+
+```bash
+python tools/simulate_expert_export.py --batch data/batches/batch_exp_01_01.json
+python -m src.dataset.import_expert_json
+python -m src.dataset.validate_cases --dir data/cases/filled
+python -m src.dataset.export_instruct
+```
+
+## Роли и артефакты
+
+| Кто | Что делает | Куда смотрит |
+|---|---|---|
+| Инженер-гидравлик | размечает сценарии, пишет «золотые» ответы | `tools/ExpertCasePack_*.html` → `data/cases/inbox/` |
+| Разработчик AI | генерация, аналитика, контекст, обучение, бенчмарк | `src/`, `configs/`, `data/splits/` |
+| Ведущий инженер | ревью и согласованность разметки | `data/eval/quality_report.json` |
+
+## Документация
+
+| Файл | О чём |
+|---|---|
+| `docs/01_PROJECT_STRUCTURE.md` | структура проекта, разделение ответственности |
+| `docs/02_DATASET_SPEC.md` | **структура обучающих данных**: форматы, поля, где лежат |
+| `docs/03_DATA_GENERATION.md` | как генерируются сценарии и кейсы, как добавить сеть/неисправность |
+| `docs/04_TRAINING.md` | обучение: QLoRA-рецепт, порядок работ, гиперпараметры, железо |
+| `docs/05_EVAL_BENCHMARK.md` | метрики, пороги допуска, регрессионный набор |
+| `docs/06_ENGINEER_TASKS.md` | **ТЗ для инженеров**: что делать и как присылать ответы |
+| `docs/07_PIPELINE.md` | все команды конвейера и разбор частых проблем |
+
+## Что уже готово в репозитории
+
+- демо-сеть `data/raw/sample_net_01.inp` (9 узлов, башня, насос, кольцо) — проверена расчётом;
+- 31 сценарий (базовый + 30 с неисправностями), аналитика и контексты — воспроизводятся за секунды;
+- 160 кейсов, партии на двух экспертов, 6 готовых HTML-форм и Excel-формы;
+- 3 эталонных примера заполненных кейсов (`data/cases/examples/`);
+- скрипты валидации, IQA, экспорта в SFT и бенчмарка модели.
+
+## Чего в репозитории нет (следующий шаг)
+
+- реальной разметки инженеров (это работа `docs/06_ENGINEER_TASKS.md`);
+- скрипта обучения с GPU (`src/train/qlora_sft.py` — заготовка в `docs/04_TRAINING.md`);
+- inference-сервиса FastAPI для продукта (подключается к `context_builder.build_context`).

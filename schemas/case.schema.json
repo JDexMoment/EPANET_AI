@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "epanet-ai/case.schema.json",
+  "title": "Case — единица обучающих данных (инженерная ситуация). Один JSON = один пример датасета",
+  "type": "object",
+  "required": ["case_id", "scenario_id", "mode", "question", "facts", "label", "gold"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "case_id": {"type": "string", "pattern": "^c_[A-Za-z0-9_]+$"},
+    "scenario_id": {"type": "string"},
+    "network_id": {"type": "string"},
+    "created": {"type": "string"},
+
+    "mode": {
+      "enum": ["whats_happening", "explain_object", "find_problems", "why_happened",
+               "make_report", "compare_scenarios", "ask"],
+      "description": "Тип задачи AI-модуля (см. roadmap п.2)"
+    },
+    "question": {"type": "string", "description": "Формулировка запроса пользователя (можно выдумать 2-3 варианта)"},
+    "selection": {
+      "type": ["object", "null"],
+      "properties": {
+        "type": {"enum": ["junction", "pipe", "pump", "tank", "reservoir", "valve", "zone", "whole_network", null]},
+        "id": {"type": ["string", "null"]}
+      }
+    },
+
+    "facts": {
+      "type": "object",
+      "description": "Замороженный срез аналитики: именно эти факты (и только они) доступны модели",
+      "required": ["context_digest", "evidence"],
+      "properties": {
+        "context_digest": {"type": "string", "description": "sha256 llm_context.json — фиксирует, что видел инженер"},
+        "llm_context_ref": {"type": "string", "description": "Путь к llm_context.json сценария"},
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["evidence_id", "object", "metric", "value", "unit", "statement"],
+            "properties": {
+              "evidence_id": {"type": "string", "pattern": "^E-[0-9]{3,}$"},
+              "object": {"type": "string"},
+              "metric": {"type": "string"},
+              "value": {"type": ["number", "string"]},
+              "unit": {"type": "string"},
+              "time_h": {"type": ["number", "null"]},
+              "threshold_rule": {"type": ["string", "null"]},
+              "statement": {"type": "string", "description": "Готовая формулировка факта на русском"}
+            }
+          }
+        }
+      }
+    },
+
+    "label": {
+      "type": "object",
+      "required": ["has_problem", "category", "severity"],
+      "properties": {
+        "has_problem": {"type": "boolean"},
+        "category": {"type": "string", "description": "id из configs/labels.yaml → categories"},
+        "secondary_categories": {"type": "array", "items": {"type": "string"}},
+        "severity": {"enum": ["critical", "warning", "info"]},
+        "primary_objects": {"type": "array", "items": {"type": "string"}},
+        "evidence_refs": {"type": "array", "items": {"type": "string"}},
+        "confidence": {"enum": ["high", "medium", "low"]},
+        "likely_cause": {"type": ["string", "null"], "description": "Краткая инженерная причина (без чисел)"}
+      }
+    },
+
+    "gold": {
+      "type": "object",
+      "description": "Заполняется инженером-экспертом. Заполненные поля = цель обучения",
+      "properties": {
+        "answer": {
+          "type": ["string", "null"],
+          "description": "Эталонный ответ на question. Структура: Наблюдения / Вероятные причины / Что проверить / Рекомендации / Ограничения"
+        },
+        "answer_structured": {
+          "type": ["object", "null"],
+          "description": "Тот же ответ в структурированном виде (для проверки и для SFT на JSON)",
+          "properties": {
+            "observations": {"type": "array", "items": {"type": "string"}},
+            "probable_causes": {"type": "array", "items": {"type": "object"}},
+            "checks": {"type": "array", "items": {"type": "string"}},
+            "recommendations": {"type": "array", "items": {"type": "string"}},
+            "limitations": {"type": "array", "items": {"type": "string"}},
+            "evidence_refs": {"type": "array", "items": {"type": "string"}}
+          }
+        },
+        "report_markdown": {"type": ["string", "null"], "description": "Для mode=make_report — полный отчёт"},
+        "checklist": {"type": "object", "description": "Трудные места: чего модель НЕ должна утверждать"}
+      }
+    },
+
+    "annotation": {
+      "type": "object",
+      "properties": {
+        "annotator_id": {"type": ["string", "null"]},
+        "annotator_role": {"type": ["string", "null"]},
+        "annotated_at": {"type": ["string", "null"]},
+        "time_spent_min": {"type": ["number", "null"]},
+        "double_annotated": {"type": "boolean"},
+        "reviewer_id": {"type": ["string", "null"]},
+        "review_status": {"enum": ["draft", "submitted", "accepted", "needs_fix", null]},
+        "review_comments": {"type": ["string", "null"]}
+      }
+    },
+
+    "eval": {
+      "type": "object",
+      "description": "Проверяемые утверждения для автооценки модели (лакирование золотых ответов)",
+      "properties": {
+        "required_facts": {"type": "array", "items": {"type": "object"}},
+        "forbidden_claims": {"type": "array", "items": {"type": "string"}},
+        "required_sections": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  }
+}

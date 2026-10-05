@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Партия разметки инженерных кейсов EPANET-AI</title>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#161d26; --panel2:#1d2634; --line:#2a3546; --txt:#e6edf3;
+    --muted:#9aa7b4; --acc:#4da3ff; --acc2:#1178d4; --ok:#3fb950; --warn:#d29922; --crit:#f85149;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#161d26,#131a23);border-bottom:1px solid var(--line);padding:12px 18px}
+  header h1{margin:0 0 4px;font-size:18px}
+  header .meta{color:var(--muted);font-size:13px}
+  .wrap{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 70px)}
+  nav{border-right:1px solid var(--line);padding:12px;overflow:auto;max-height:calc(100vh - 70px);position:sticky;top:70px}
+  nav .item{display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);color:var(--txt);
+            border-radius:8px;padding:8px 10px;margin-bottom:6px;cursor:pointer;font-size:13px}
+  nav .item.active{border-color:var(--acc);background:#16273b}
+  nav .item .sid{display:block;font-family:var(--mono);font-size:12px;color:var(--muted)}
+  nav .item .done{color:var(--ok)}
+  main{padding:18px 22px 80px;max-width:1100px}
+  h2{font-size:20px;margin:6px 0 10px}
+  h3{font-size:16px;margin:22px 0 8px;border-left:3px solid var(--acc);padding-left:8px}
+  h4{font-size:14px;margin:16px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  table{border-collapse:collapse;width:100%;font-size:13px}
+  th,td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+  th{color:var(--muted);font-weight:500}
+  code,pre{font-family:var(--mono)}
+  pre{background:#0b1017;border:1px solid var(--line);border-radius:8px;padding:12px;overflow:auto;max-height:420px;font-size:12px}
+  label{display:block;font-size:13px;color:var(--muted);margin:8px 0 3px}
+  input[type=text],input[type=number],select,textarea{width:100%;background:#0d131b;border:1px solid var(--line);color:var(--txt);
+        border-radius:7px;padding:7px 9px;font:inherit}
+  textarea{min-height:76px;font-size:14px}
+  textarea.tall{min-height:150px}
+  .row{display:grid;grid-template-columns:1fr 160px 1fr auto;gap:6px;align-items:end;margin-bottom:6px}
+  .btn{background:var(--acc2);border:1px solid var(--acc2);color:#fff;border-radius:8px;padding:9px 14px;cursor:pointer;font:inherit}
+  .btn.sec{background:transparent;border-color:var(--line);color:var(--txt)}
+  .btn.warn{background:#6b4b00;border-color:#8a6200}
+  .btn.ok{background:#1c5c2a;border-color:#2a7c3c}
+  .pill{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;border:1px solid var(--line)}
+  .pill.critical{color:#ffb3ae;border-color:#7c2d29;background:#2a1514}
+  .pill.warning{color:#f0d38a;border-color:#6d5417;background:#2a2413}
+  .pill.info{color:#a9d5ff;border-color:#264a6d;background:#132131}
+  .hint{color:var(--muted);font-size:13px}
+  .hidden{display:none}
+  .truth{background:#2a2413;border:1px solid #6d5417;border-radius:8px;padding:10px 12px;margin-top:8px}
+  .stickybar{position:fixed;bottom:0;left:0;right:0;background:#131a23;border-top:1px solid var(--line);
+             padding:10px 18px;display:flex;gap:10px;align-items:center;justify-content:flex-end}
+  .badge{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  details summary{cursor:pointer;color:var(--acc)}
+  .q{border-left:3px solid var(--line);padding-left:10px;margin:10px 0}
+  .q .qtext{font-weight:600;margin-bottom:6px}
+  .saved{color:var(--ok);font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Разметка инженерных кейсов · EPANET AI-модуль</h1>
+  <div class="meta">
+    Партия <b id="hdr-batch">—</b> · эксперт <b id="hdr-expert">—</b> ·
+    кейсов в партии: <b id="hdr-count">0</b> ·
+    <span class="badge">прогресс: <span id="hdr-progress">0 / 0</span></span>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav id="nav"></nav>
+  <main id="main">
+    <div class="card">
+      <h2>Как работать с этой формой</h2>
+      <ol>
+        <li><b>Шаг 0.</b> Прочитайте краткую инструкцию внизу страницы (нажмите «Свернуть подсказки», если мешает).</li>
+        <li><b>Шаг 1. Разметка сценария.</b> Оцените, есть ли проблема, и поставьте метку. Смотрите <i>только</i> на данные: таблицы KPI, алерты, evidence — это ровно то, что увидит модель.</li>
+        <li><b>Шаг 2. Эталонные ответы.</b> Для каждого вопроса заполните поля. Каждое число — с ссылкой вида E-007 на факт из таблицы.</li>
+        <li><b>Шаг 3. Probe-вопросы</b> — обязательные короткие уточнения (наблюдения / причины / ограничения).</li>
+        <li><b>Шаг 4. Сверка.</b> Нажмите «Показать, что внесено в модель» и проверьте: совпала ли ваша версия с внесённой неисправностью. Если нет — напишите, что сбило с толку: это ценные данные.</li>
+        <li><b>Шаг 5. Экспорт.</b> Кнопка «Экспорт JSON сценария» → файл сохраните в <code>data/cases/inbox/</code>. Всё, что не дописано, отметить <code>недостаточно данных</code> нельзя — вместо этого укажите, каких данных не хватает.</li>
+      </ol>
+      <p class="hint">Форма работает офлайн, данные сохраняются в браузере по кнопке. Ничего не отправляется в интернет.</p>
+    </div>
+    <div id="scenario-view"><p class="hint">Выберите сценарий слева.</p></div>
+  </main>
+</div>
+
+<div class="stickybar">
+  <span id="save-state" class="hint"></span>
+  <button class="btn sec" id="btn-reload">Загрузить сохранённое</button>
+  <button class="btn" id="btn-export-scenario">Экспорт JSON сценария</button>
+  <button class="btn ok" id="btn-export-batch">Экспорт всей партии</button>
+</div>
+
+<script id="pack-data" type="application/json">__DATA__</script>
+<script>
+"use strict";
+const PACK = JSON.parse(document.getElementById('pack-data').textContent);
+const CATEGORIES = PACK.categories, SEVERITIES = PACK.severities, CONFIDENCE = PACK.confidence, CHECKS = PACK.check_actions;
+const LS_KEY = 'epanet_ai_pack__' + PACK.batch_id;
+let STATE = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+let current = PACK.scenarios.length ? PACK.scenarios[0].scenario_id : null;
+
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function ensure(sid){
+  STATE[sid] = STATE[sid] || {label:{}, cases:{}, probes:{}, free:[], time_spent_min:null, review_comments:null, scenario_done:false};
+  const s = STATE[sid];
+  s.label = Object.assign({has_problem:null, category:'', secondary_categories:[], severity:'', confidence:'', primary_objects:[], likely_cause:'', evidence_refs:[]}, s.label);
+  s.cases = s.cases || {}; s.probes = s.probes || {}; s.free = s.free || [];
+  return s;
+}
+function savedPackage(){ return {batch_id:PACK.batch_id, expert_id:PACK.expert_id, exported_at:new Date().toISOString(), schema:'expert-pack-1.0', scenarios: STATE}; }
+function persist(){ localStorage.setItem(LS_KEY, JSON.stringify(STATE)); flash('Сохранено в браузере · ' + new Date().toLocaleTimeString()); }
+function flash(msg){ $('#save-state').textContent = msg; setTimeout(()=>{ $('#save-state').textContent=''; }, 2500); }
+
+function download(name, text){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], {type:'application/json'}));
+  a.download = name; a.click(); URL.revokeObjectURL(a.href);
+}
+function scenarioDone(sid){
+  const s = ensure(sid);
+  const labelOk = s.label.has_problem !== null && s.label.category && s.label.severity && s.label.confidence;
+  const scen = PACK.scenarios.find(x=>x.scenario_id===sid);
+  const casesOk = scen.cases.every(c => (s.cases[c.case_id]?.answer || '').trim().length > 40);
+  const probesOk = scen.probe_questions.every(q => (s.probes[q.id] || '').trim().length > 10);
+  return labelOk && casesOk && probesOk;
+}
+
+function renderNav(){
+  const nav = $('#nav'); nav.innerHTML = '';
+  PACK.scenarios.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.className = 'item' + (s.scenario_id === current ? ' active' : '');
+    b.innerHTML = `<span>${i+1}. ${esc(s.short_title)}</span><span class="sid">${esc(s.scenario_id)}</span>`
+      + (scenarioDone(s.scenario_id) ? '<span class="done">✓ готово</span>' : '');
+    b.onclick = () => { current = s.scenario_id; renderNav(); renderScenario(); };
+    nav.appendChild(b);
+  });
+  const done = PACK.scenarios.filter(s=>scenarioDone(s.scenario_id)).length;
+  $('#hdr-progress').textContent = `${done} / ${PACK.scenarios.length}`;
+}
+
+function alertRows(alerts){
+  if(!alerts.length) return '<tr><td colspan="5" class="hint">Алертов нет</td></tr>';
+  return alerts.map(a=>`<tr><td><span class="pill ${esc(a.severity)}">${esc(a.severity)}</span></td>
+    <td>${esc(a.rule)}</td><td><b>${esc(a.object)}</b></td><td>${esc(a.value)} ${esc(a.unit)}</td>
+    <td>${a.time_h ?? '—'} ч · ссылка <code>${esc(a.evidence_id)}</code></td></tr>`).join('');
+}
+function evidenceRows(ev){
+  return ev.map(e=>`<tr><td><code>${esc(e.evidence_id)}</code></td><td>${esc(e.object)}</td><td>${esc(e.metric)}</td>
+    <td>${esc(e.value)} ${esc(e.unit)}</td><td>${e.time_h ?? '—'}</td><td>${esc(e.statement)}</td></tr>`).join('');
+}
+function optionList(items, value, withEmpty){
+  let out = withEmpty ? '<option value="">— выберите —</option>' : '';
+  items.forEach(i => out += `<option value="${esc(i.id)}" ${i.id===value?'selected':''}>${esc(i.ru)}</option>`);
+  return out;
+}
+
+function renderScenario(){
+  const scen = PACK.scenarios.find(x=>x.scenario_id===current);
+  const st = ensure(current);
+  const v = $('#scenario-view');
+  v.innerHTML = `
+    <h2>${esc(scen.short_title)} <span class="badge">${esc(scen.scenario_id)}</span></h2>
+    <div class="card">
+      <h4>Сводка расчёта</h4>
+      <div class="cols3">
+        <div>Мин. давление<br><b>${scen.kpi.min_pressure_m} м</b> (${esc(scen.kpi.min_pressure_node)}, ${scen.kpi.min_pressure_time_h} ч)</div>
+        <div>Макс. давление<br><b>${scen.kpi.max_pressure_m} м</b> (${esc(scen.kpi.max_pressure_node)})</div>
+        <div>Макс. скорость<br><b>${scen.kpi.max_velocity_mps} м/с</b> (${esc(scen.kpi.max_velocity_link)})</div>
+        <div>Пиковый спрос<br><b>${scen.kpi.peak_demand_lps} л/с</b> в ${scen.kpi.peak_demand_time_h} ч</div>
+        <div>Недоподача<br><b>${scen.kpi.unserved_volume_m3 ?? 0} м³</b></div>
+        <div>Расчёт<br><b>${scen.analysis.status}</b>${scen.analysis.solver_warnings.length? ' · предупреждений: '+scen.analysis.solver_warnings.length:''}</div>
+      </div>
+      ${scen.analysis.solver_warnings.length? `<p class="hint">Предупреждения решателя: ${esc(scen.analysis.solver_warnings.join('; '))}</p>`:''}
+    </div>
+
+    <div class="card">
+      <h4>Алерты и Top-проблемы (то, что видит модель)</h4>
+      <table><thead><tr><th>Severity</th><th>Правило</th><th>Объект</th><th>Значение</th><th>Когда / evidence</th></tr></thead>
+      <tbody>${alertRows(scen.alerts)}</tbody></table>
+      <details><summary>Полная таблица фактов (evidence)</summary>
+        <table><thead><tr><th>ID</th><th>Объект</th><th>Метрика</th><th>Значение</th><th>Время</th><th>Формулировка</th></tr></thead>
+        <tbody>${evidenceRows(scen.evidence)}</tbody></table>
+      </details>
+      ${scen.baseline_delta && scen.baseline_delta.summary ? `
+      <h4>Отличия от базового расчёта</h4>
+      <p class="hint">Ухудшилось узлов: ${scen.baseline_delta.summary.nodes_worse}; улучшилось: ${scen.baseline_delta.summary.nodes_better};
+      худший объект: ${esc(scen.baseline_delta.summary.worst_object)} (${scen.baseline_delta.summary.worst_delta_m} м)</p>
+      <details><summary>Показать изменения по объектам</summary><pre>${esc(JSON.stringify(scen.baseline_delta.items, null, 1))}</pre></details>`:''}
+      <details><summary>Контекст для модели (JSON, как отдаём в LLM)</summary><pre>${esc(scen.context_json)}</pre></details>
+    </div>
+
+    <h3>Шаг 1. Разметка сценария</h3>
+    <div class="card">
+      <div class="grid2">
+        <div>
+          <label>Есть ли проблема в этом расчёте?</label>
+          <select id="f-has_problem">
+            <option value="">— выберите —</option>
+            <option value="true" ${st.label.has_problem===true?'selected':''}>да, есть</option>
+            <option value="false" ${st.label.has_problem===false?'selected':''}>нет, режим в норме</option>
+          </select>
+        </div>
+        <div>
+          <label>Основная категория (одна)</label>
+          <select id="f-category">${optionList(CATEGORIES, st.label.category, true)}</select>
+        </div>
+        <div>
+          <label>Severity</label>
+          <select id="f-severity">${optionList(SEVERITIES, st.label.severity, true)}</select>
+        </div>
+        <div>
+          <label>Уверенность разметки</label>
+          <select id="f-confidence">${optionList(CONFIDENCE, st.label.confidence, true)}</select>
+        </div>
+        <div>
+          <label>Главные объекты (через запятую)</label>
+          <input type="text" id="f-primary_objects" value="${esc((st.label.primary_objects||[]).join(', '))}" placeholder="J-105, P-108">
+        </div>
+        <div>
+          <label>Ссылки evidence (через запятую)</label>
+          <input type="text" id="f-evidence_refs" value="${esc((st.label.evidence_refs||[]).join(', '))}" placeholder="E-002, E-005">
+        </div>
+      </div>
+      <label>Инженерная причина (кратко, без чисел)</label>
+      <textarea id="f-likely_cause">${esc(st.label.likely_cause||'')}</textarea>
+      <label>Время на разметку сценария, мин (обязательно)</label>
+      <input type="number" id="f-time" min="1" style="max-width:160px" value="${st.time_spent_min ?? ''}">
+    </div>
+
+    <h3>Шаг 2. Эталонные ответы</h3>
+    ${scen.cases.map(c => caseBlock(c, st)).join('')}
+
+    <h3>Шаг 3. Probe-вопросы</h3>
+    <div class="card">
+      ${scen.probe_questions.map(q => `
+        <div class="q"><div class="qtext">${esc(q.text)}</div>
+        <textarea data-probe="${esc(q.id)}">${esc(st.probes[q.id]||'')}</textarea></div>`).join('')}
+    </div>
+
+    <h3>Шаг 4. Ваши собственные вопросы (по желанию)</h3>
+    <div class="card">
+      <p class="hint">Хорошая практика: 2 вопроса, которые реально задал бы инженер, и эталонные ответы к ним. Они станут кейсами режима «Ответить на вопрос».</p>
+      <div id="free-list">${(st.free||[]).map((f,i)=>freeRow(f,i)).join('')}</div>
+      <button class="btn sec" id="btn-add-free">+ добавить вопрос</button>
+    </div>
+
+    <h3>Шаг 5. Сверка с генератором</h3>
+    <div class="card">
+      <button class="btn warn" id="btn-reveal">Показать, что внесено в модель</button>
+      <div id="truth" class="truth hidden"></div>
+      <label>Что сбило с толку / замечания ревьюеру</label>
+      <textarea id="f-comment">${esc(st.review_comments||'')}</textarea>
+      <label><input type="checkbox" id="f-done" ${st.scenario_done?'checked':''}> сценарий размечен полностью</label>
+    </div>`;
+  bindScenario(scen, st);
+}
+
+function caseBlock(c, st){
+  const g = (st.cases[c.case_id] || {});
+  const pc = g.probable_causes || [];
+  return `
+  <div class="card">
+    <h4>Кейс <code>${esc(c.case_id)}</code> · режим: ${esc(c.mode)}</h4>
+    <div class="q"><div class="qtext">${esc(c.question)}</div></div>
+    <div class="grid2">
+      <div>
+        <label>Наблюдения (по одному в строке; числа — с E-ссылкой)</label>
+        <textarea class="tall" data-case="${esc(c.case_id)}" data-field="observations">${esc((g.observations||[]).join('\n'))}</textarea>
+      </div>
+      <div>
+        <label>Что проверить на сети (по одному в строке)</label>
+        <textarea class="tall" data-case="${esc(c.case_id)}" data-field="checks">${esc((g.checks||[]).join('\n'))}</textarea>
+      </div>
+      <div>
+        <label>Рекомендации (по одной в строке)</label>
+        <textarea class="tall" data-case="${esc(c.case_id)}" data-field="recommendations">${esc((g.recommendations||[]).join('\n'))}</textarea>
+      </div>
+      <div>
+        <label>Ограничения вывода (что утверждать нельзя)</label>
+        <textarea class="tall" data-case="${esc(c.case_id)}" data-field="limitations">${esc((g.limitations||[]).join('\n'))}</textarea>
+      </div>
+    </div>
+    <label>Вероятные причины: гипотеза · уверенность · чем проверить</label>
+    <div class="pc-list" data-case="${esc(c.case_id)}">
+      ${pc.map((p,i)=>pcRow(p,i)).join('')}
+    </div>
+    <button class="btn sec" data-add-pc="${esc(c.case_id)}">+ гипотеза</button>
+
+    ${c.mode === 'make_report' ? `<label>Полный отчёт (markdown)</label>
+      <textarea class="tall" style="min-height:280px" data-case="${esc(c.case_id)}" data-field="report_markdown">${esc(g.report_markdown||'')}</textarea>` : ''}
+
+    <label>Итоговый ответ (обязательно)${c.mode!=='make_report' ? ', 80–320 слов' : ' — резюме отчёта, 80–200 слов'}</label>
+    <textarea class="tall" data-case="${esc(c.case_id)}" data-field="answer">${esc(g.answer||'')}</textarea>
+    <div class="hint">Проверьте: каждое число в ответе есть в таблице фактов и помечено E-xxx; наблюдения отделены от причин; рекомендация не выдана за факт.</div>
+  </div>`;
+}
+function pcRow(p, i){
+  p = p || {};
+  const opts = CONFIDENCE.map(c=>`<option value="${esc(c.id)}" ${c.id===p.confidence?'selected':''}>${esc(c.ru)}</option>`).join('');
+  const checkOpts = ['<option value="">чем проверить…</option>'].concat(CHECKS.map(c=>`<option value="${esc(c.id)}" ${c.id===p.check?'selected':''}>${esc(c.ru)}</option>`)).join('');
+  return `<div class="row">
+    <input type="text" class="pc-text" value="${esc(p.text||'')}" placeholder="Гипотеза (без чисел)">
+    <select class="pc-conf"><option value="">уверенность</option>${opts}</select>
+    <select class="pc-check">${checkOpts}</select>
+    <button class="btn sec pc-del" title="Удалить">✕</button></div>`;
+}
+function freeRow(f, i){
+  f = f || {};
+  return `<div class="card" style="background:var(--panel2)">
+    <input type="text" class="free-q" value="${esc(f.question||'')}" placeholder="Вопрос пользователя">
+    <textarea class="free-a" placeholder="Эталонный ответ" style="margin-top:6px">${esc(f.answer||'')}</textarea>
+  </div>`;
+}
+
+function bindScenario(scen, st){
+  const set = (id, fn) => { const el = $('#f-'+id); if(el) el.addEventListener('input', ()=>{ fn(el.value); persist(); renderNav(); }); };
+  set('has_problem', v => st.label.has_problem = v === '' ? null : (v === 'true'));
+  set('category', v => st.label.category = v);
+  set('severity', v => st.label.severity = v);
+  set('confidence', v => st.label.confidence = v);
+  set('primary_objects', v => st.label.primary_objects = v.split(',').map(s=>s.trim()).filter(Boolean));
+  set('evidence_refs', v => st.label.evidence_refs = v.split(',').map(s=>s.trim()).filter(Boolean));
+  set('likely_cause', v => st.label.likely_cause = v);
+  set('time', v => st.time_spent_min = v === '' ? null : Number(v));
+  set('comment', v => st.review_comments = v);
+  const done = $('#f-done'); if(done) done.addEventListener('change', ()=>{ st.scenario_done = done.checked; persist(); renderNav(); });
+
+  $$('[data-case]').forEach(el => el.addEventListener('input', () => {
+    const cid = el.dataset.case, f = el.dataset.field;
+    st.cases[cid] = st.cases[cid] || {};
+    const raw = el.value;
+    st.cases[cid][f] = (f === 'answer' || f === 'report_markdown') ? raw : raw.split('\n').map(s=>s.trim()).filter(Boolean);
+    persist(); renderNav();
+  }));
+  $$('[data-probe]').forEach(el => el.addEventListener('input', () => { st.probes[el.dataset.probe] = el.value; persist(); renderNav(); }));
+
+  $$('.pc-list').forEach(list => {
+    const cid = list.dataset.case;
+    const sync = () => {
+      st.cases[cid] = st.cases[cid] || {};
+      st.cases[cid].probable_causes = $$('.row', list).map(r => ({
+        text: $('.pc-text', r).value.trim(),
+        confidence: $('.pc-conf', r).value,
+        check: $('.pc-check', r).value,
+      })).filter(p => p.text);
+      persist();
+    };
+    list.addEventListener('input', sync);
+    list.addEventListener('change', sync);
+    list.addEventListener('click', e => { if(e.target.classList.contains('pc-del')){ e.target.closest('.row').remove(); sync(); } });
+  });
+  $$('[data-add-pc]').forEach(btn => btn.addEventListener('click', () => {
+    const list = $(`.pc-list[data-case="${btn.dataset.addPc}"]`);
+    list.insertAdjacentHTML('beforeend', pcRow({}, 0));
+  }));
+  const addFree = $('#btn-add-free');
+  if(addFree) addFree.addEventListener('click', () => {
+    st.free = st.free || []; st.free.push({question:'', answer:''});
+    $('#free-list').insertAdjacentHTML('beforeend', freeRow({}, st.free.length-1));
+    bindFree();
+  });
+  bindFree();
+  const rev = $('#btn-reveal');
+  if(rev) rev.addEventListener('click', () => {
+    const t = $('#truth'); t.classList.remove('hidden');
+    t.innerHTML = `<b>Что внесено генератором:</b> ${esc(scen.truth.summary)}<br>
+      <span class="hint">Метка генератора: ${esc(scen.truth.primary_fault || '—')} · severity: ${esc(scen.truth.fault_severity || '—')} ·
+      ожидаемый эффект: ${esc((scen.truth.expected_effects||[]).join('; '))}</span>
+      ${st.label.likely_cause ? `<br><span class="hint">Ваша версия: ${esc(st.label.likely_cause)}</span>` : ''}`;
+  });
+}
+function bindFree(){
+  $$('.free-q').forEach((el, i) => el.oninput = () => { ensure(current).free[i] = ensure(current).free[i] || {}; ensure(current).free[i].question = el.value; persist(); });
+  $$('.free-a').forEach((el, i) => el.oninput = () => { ensure(current).free[i] = ensure(current).free[i] || {}; ensure(current).free[i].answer = el.value; persist(); });
+}
+
+$('#btn-reload').onclick = () => { STATE = JSON.parse(localStorage.getItem(LS_KEY) || '{}'); renderNav(); renderScenario(); flash('Загружено из браузера'); };
+$('#btn-export-scenario').onclick = () => {
+  download(`${PACK.batch_id}__${current}.json`, JSON.stringify({batch_id:PACK.batch_id, expert_id:PACK.expert_id,
+    exported_at:new Date().toISOString(), schema:'expert-pack-1.0', scenarios:{[current]: ensure(current)}}, null, 2));
+  persist();
+};
+$('#btn-export-batch').onclick = () => { persist(); download(`${PACK.batch_id}__all.json`, JSON.stringify(savedPackage(), null, 2)); };
+window.addEventListener('beforeunload', persist);
+document.addEventListener('input', () => {}, false);
+
+$('#hdr-batch').textContent = PACK.batch_id;
+$('#hdr-expert').textContent = PACK.expert_id;
+$('#hdr-count').textContent = PACK.scenarios.length;
+renderNav(); renderScenario();
+</script>
+</body>
+</html>

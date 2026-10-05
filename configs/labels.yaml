@@ -1,0 +1,44 @@
+# ─────────────────────────────────────────────────────────────
+# labels.yaml — словарь меток. Единый для инженеров, генератора
+# сценариев, валидатора и метрик качества.
+# ─────────────────────────────────────────────────────────────
+categories:
+  # id: {ru — как писать в отчёте, group — группа для метрик}
+  - {id: low_pressure_zone,     ru: "Зона пониженного давления",      group: pressure}
+  - {id: high_pressure_zone,    ru: "Зона повышенного давления",      group: pressure}
+  - {id: supply_deficit,        ru: "Дефицит подачи (недоподача в зоне)", group: pressure}
+  - {id: high_velocity,         ru: "Повышенная скорость / перегрузка участка", group: hydraulics}
+  - {id: reverse_flow,          ru: "Обратный или неопределённый поток", group: hydraulics}
+  - {id: pipe_incrustation,     ru: "Зарастание/сопротивление участка", group: condition}
+  - {id: pipe_closed_section,   ru: "Отключённый участок / авария",    group: condition}
+  - {id: demand_anomaly,        ru: "Аномальное водопотребление / утечка", group: demand}
+  - {id: pump_degradation,      ru: "Деградация насоса",               group: equipment}
+  - {id: tank_level_deficit,    ru: "Недостаток запаса в резервуаре",  group: storage}
+  - {id: tank_overflow,         ru: "Перелив / недоиспользование резервуара", group: storage}
+  - {id: convergence_issue,     ru: "Проблема сходимости расчёта",     group: solver}
+  - {id: no_problem,            ru: "Существенных отклонений нет",     group: none}
+  - {id: insufficient_data,     ru: "Недостаточно данных для вывода",  group: none}
+
+severity:
+  - {id: critical, ru: "Критично",  description: "Требуется немедленное вмешательство"}
+  - {id: warning,  ru: "Предупреждение", description: "Отклонение от нормы, нужен контроль"}
+  - {id: info,     ru: "Информация", description: "Наблюдение без нарушения норм"}
+
+confidence:
+  - {id: high,   ru: "Высокая",  description: "Подтверждается прямой проверкой после разметки"}
+  - {id: medium, ru: "Средняя",  description: "Косвенные признаки, нужна проверка в модели"}
+  - {id: low,    ru: "Низкая",   description: "Гипотеза, требует дополнительных данных"}
+
+# Отдельный словарь «проверок»: что инженер должен рекомендовать проверить.
+# Используется и в gold-ответах, и как база RAG-плейбука.
+verification_actions:
+  - {id: check_valve_state,    ru: "Проверить состояние арматуры на участке (открытие/закрытие)"}
+  - {id: check_roughness,      ru: "Проверить фактическое сопротивление участка (C, шероховатость), отложения"}
+  - {id: check_pump_curve,     ru: "Сверить рабочую точку насоса с паспортной характеристикой"}
+  - {id: check_metering,       ru: "Проверить достоверность измерений расхода (водомер, датчик)"}
+  - {id: check_tank_schedule,  ru: "Проверить график работы резервуара (уровни, подпитка)"}
+  - {id: check_leak_survey,    ru: "Провести поиск утечек на участке"}
+  - {id: check_demand_model,   ru: "Уточнить модель водопотребления (графики, крупные потребители)"}
+  - {id: check_calibration,    ru: "Уточнить калибровку модели по фактическим измерениям"}
+  - {id: check_redundancy,     ru: "Оценить резервирование участка/зоны"}
+  - {id: check_scenario_limits, ru: "Учесть ограничения сценария расчёта"}

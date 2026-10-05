@@ -1,0 +1,51 @@
+# ─────────────────────────────────────────────────────────────
+# dataset.yaml — параметры генерации датасета и контекста
+# ─────────────────────────────────────────────────────────────
+
+project:
+  name: "EPANET AI-module dataset"
+  version: "0.1.0"
+  language: "ru"
+
+epanet:
+  # PDA (Pressure Driven Analysis, EPANET 2.2+): при падении давления ниже требуемого
+  # расчёт честно показывает НЕДОПОДАЧУ вместо физически невозможного спроса.
+  # Для датасета это даёт корректные аварийные сценарии.
+  demand_model: PDA         # DDA | PDA
+  required_pressure_m: 20.0 # ниже этого давления подача начинает снижаться
+  minimum_pressure_m: 0.0   # при давлении <= этого подача = 0
+  pressure_exponent: 0.5
+
+generation:
+  seed: 20261005            # глобальный seed воспроизводимости
+  scenarios:
+    baseline_repeats: 1     # сколько раз писать «чистый» сценарий
+    faults_per_network: 30  # сколько сценариев с неисправностями на сеть
+  demands_jitter_pct: 3     # случайный разброс базового спроса, %
+  # типы возмущений, которые раскидываются по сети (см. docs/03_data_generation.md)
+  fault_mix:
+    pipe_roughness_drop: 0.30   # зарастание/отложения в трубе (C ↓)
+    pipe_closed: 0.10           # закрытие участка (перекрытие/авария)
+    demand_increase: 0.20       # утечка / аномальное водопотребление в узле
+    pump_degradation: 0.15      # износ рабочего колеса (кривая насоса ↓)
+    tank_level_low: 0.10        # потеря запаса в РЧВ/башне
+    pipe_roughness_gain: 0.15   # «гладкая» труба / ошибка коэффициента (C ↑)
+  test_probe_questions_per_case: 2   # сколько probe-вопросов писать в кейс
+
+context:                       # бюджеты контекста для LLM (см. roadmap п.10)
+  max_alerts: 12               # Top-N аномалий в контексте
+  max_objects_in_table: 25     # строк в компактной таблице объектов
+  max_series_points: 25        # точек временного ряда на объект
+  neighbor_depth: 1            # на сколько «шагов» по графу показывать соседей
+  max_context_chars: 12000     # жёсткий предел размера llm_context.json
+
+validation:
+  require_evidence_refs: true  # в gold_answer каждое число должно ссылаться на E-xxx
+  forbid_numbers_without_ref: true
+  min_gold_words: 80
+  max_gold_words: 320
+
+splits:
+  # разбиение идёт ПО СЕТЯМ/СЦЕНАРИЯМ, не по кейсам (защита от утечки данных)
+  strategy: "by_scenario"
+  ratios: {train: 0.70, val: 0.15, test: 0.15}

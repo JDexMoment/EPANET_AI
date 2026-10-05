@@ -1,47 +1,16 @@
-# Python
+# данные генерируются и воспроизводимы
+data/scenarios/
+data/cases/pending/
+data/cases/inbox/
+data/cases/filled/
+data/splits/
+data/batches/
+data/eval/*.json
+tools/ExpertCasePack_*.html
+
+# рабочее
 __pycache__/
-*.py[cod]
-*.egg-info/
+*.pyc
 .venv/
-venv/
+outputs/
 .env
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.coverage
-htmlcov/
-
-# EPANET engine build artifacts (auto-compiled by ai_module/engine_adapter)
-ai_module/engine_adapter/epanet2.dll
-ai_module/engine_adapter/libepanet2.so
-*.exp
-*.lib
-*.o
-*.obj
-
-# Generated AI artifacts (regenerate with ai_module.training.generate_dataset)
-ai_module/data/scenarios/
-ai_module/data/sft_datasets/
-ai_module/data/benchmarks/*.json
-ai_module/reports/generated/
-
-# Training checkpoints (large)
-ai_module/training/checkpoints/
-
-# Delphi build output
-*.dcu
-*.exe
-*.dll
-*.bpl
-*.dcp
-*.~*
-__history/
-*.local
-*.identcache
-*.res.bak
-
-# OS / IDE
-.DS_Store
-Thumbs.db
-.idea/
-.vscode/

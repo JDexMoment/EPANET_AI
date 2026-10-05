@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "case_id": "c_vn01__baseline__ask__00",
+  "scenario_id": "vn01__baseline",
+  "network_id": "vn01",
+  "created": "2026-10-05T09:52:13Z",
+  "mode": "ask",
+  "question": "Какие допущения расчёта сильнее всего влияют на вывод?",
+  "selection": {
+    "type": "whole_network",
+    "id": null
+  },
+  "facts": {
+    "context_digest": "5e36bcb289b3ba6c",
+    "llm_context_ref": "data/scenarios/vn01__baseline/derived/llm_context_ask_00.json",
+    "evidence": [
+      {
+        "evidence_id": "E-002",
+        "object": "J-105",
+        "metric": "pressure",
+        "value": 22.38,
+        "unit": "м вод.ст.",
+        "time_h": null,
+        "threshold_rule": null,
+        "statement": "Сводный KPI min_pressure: J-105 = 22.38 м вод.ст."
+      },
+      {
+        "evidence_id": "E-003",
+        "object": "J-101",
+        "metric": "pressure",
+        "value": 56.29,
+        "unit": "м вод.ст.",
+        "time_h": null,
+        "threshold_rule": null,
+        "statement": "Сводный KPI max_pressure: J-101 = 56.29 м вод.ст."
+      },
+      {
+        "evidence_id": "E-004",
+        "object": "P-102",
+        "metric": "velocity",
+        "value": 1.28,
+        "unit": "м/с",
+        "time_h": null,
+        "threshold_rule": null,
+        "statement": "Сводный KPI max_velocity: P-102 = 1.28 м/с"
+      },
+      {
+        "evidence_id": "E-001",
+        "object": "P-111",
+        "metric": "flowrate",
+        "value": -9.97,
+        "unit": "л/с",
+        "time_h": 3.0,
+        "threshold_rule": "reverse_flow",
+        "statement": "P-111: направление потока меняется в течение суток, минимум -9.97 л/с (обратный поток) в 3 ч"
+      }
+    ]
+  },
+  "label": {
+    "has_problem": false,
+    "category": "no_problem",
+    "secondary_categories": [],
+    "severity": "info",
+    "primary_objects": [
+      "P-111"
+    ],
+    "evidence_refs": [
+      "E-001"
+    ],
+    "confidence": "medium",
+    "likely_cause": "Автотест конвейера: конкретная причина не формулируется."
+  },
+  "gold": {
+    "answer": "На результат влияют модельные суточные графики водопотребления и паспортная характеристика насоса; эти допущения одинаковы во всех сценариях сети (автотест).",
+    "answer_structured": {
+      "observations": [],
+      "probable_causes": [],
+      "checks": [],
+      "recommendations": [],
+      "limitations": [],
+      "evidence_refs": []
+    },
+    "report_markdown": null,
+    "checklist": {
+      "must_not_claim": [],
+      "needs_verification": []
+    }
+  },
+  "probe_questions": [
+    {
+      "id": "observations",
+      "text": "Перечислите главные наблюдаемые отклонения (с числами и ссылками E-xxx).",
+      "answer": null
+    },
+    {
+      "id": "causes",
+      "text": "Назовите наиболее вероятную причину и 1-2 альтернативы; чем их различить на сети.",
+      "answer": null
+    },
+    {
+      "id": "limitations",
+      "text": "Что по этим данным утверждать НЕЛЬЗЯ (ограничения вывода)?",
+      "answer": null
+    }
+  ],
+  "annotation": {
+    "annotator_id": "pipeline_test",
+    "annotator_role": "инженер-гидравлик",
+    "annotated_at": "2026-10-05T09:52:27Z",
+    "time_spent_min": null,
+    "double_annotated": false,
+    "reviewer_id": null,
+    "review_status": "submitted",
+    "review_comments": null
+  },
+  "eval": {
+    "required_facts": [],
+    "forbidden_claims": [],
+    "required_sections": []
+  }
+}
