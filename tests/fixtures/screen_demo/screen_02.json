@@ -1,0 +1,43 @@
+{
+  "screen_id": "demo_02",
+  "file": "screenshots/results_table_j105.png",
+  "labeler": "synthetic_demo",
+  "note": "СИНТЕТИЧЕСКИЙ демо-экран (OCR-блоки), не реальный скриншот. Для бенчмарка — разметка через tools/label_screen.html",
+  "golden": {
+    "screen_type": "results_table",
+    "selected_object": null,
+    "timestep": {
+      "hour": 8
+    },
+    "visible_objects": [
+      {
+        "id": "J-101",
+        "value": 24.1
+      },
+      {
+        "id": "J-105",
+        "value": 9.96
+      },
+      {
+        "id": "J-106",
+        "value": 20.69
+      },
+      {
+        "id": "J-108",
+        "value": 26.4
+      }
+    ],
+    "panels": [
+      "results_table"
+    ],
+    "actions": [
+      "set_timestep",
+      "open_report"
+    ],
+    "ambiguity": {
+      "level": "high",
+      "notes": []
+    },
+    "app": "epanet_ai"
+  }
+}

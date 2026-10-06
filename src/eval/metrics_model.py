@@ -2,7 +2,7 @@
 
 Принимает predictions.jsonl — журнал ответов модели на тестовый набор:
 
-    {"case_id": "...", "answer": "...", "latency_s": 2.4, "vram_mb": 7800, "run": "qwen3-8b-lora-v1"}
+    {"case_id": "...", "answer": "...", "latency_s": 2.4, "vram_mb": 7800, "run": "qwen3.5-9b-lora-v1"}
 
 Считает:
   * Fact accuracy      — доля чисел в ответе, подтверждённых контекстом/evidence;

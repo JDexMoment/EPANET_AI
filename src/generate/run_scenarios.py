@@ -23,9 +23,21 @@ from .. import common, analytics
 
 warnings.filterwarnings("ignore")
 
+# Демо-сеть для проверки конвейера лежит в фикстурах, а не в data/:
+# data/ предназначена только для реальных сетей и разметки (см. data/README.md).
 NETWORKS = {
-    "vn01": "data/raw/sample_net_01.inp",
+    "vn01": "tests/fixtures/networks/vn01_demo.inp",     # демо-сеть для автотестов (tests/fixtures/)
+    # реальные сети кладутся в data/raw/ и прописываются здесь:
+    #   "vn02": "data/raw/vn02.inp",
 }
+
+
+def _rel(path) -> str:
+    """Путь относительно корня проекта, если он внутри него (иначе — как есть)."""
+    try:
+        return str(Path(path).resolve().relative_to(common.ROOT.resolve()))
+    except ValueError:
+        return str(path)
 
 # диапазоны величины неисправности (ground truth)
 FAULT_SPECS = {
@@ -162,7 +174,8 @@ def run_one(base_inp: Path, scenario_id: str, network_id: str, edits: list[tuple
     converged = True
     try:
         sim = wntr.sim.EpanetSimulator(wn)
-        res = sim.run_sim()
+        # file_prefix — временные файлы EPANET уходят в системный temp, а не в CWD проекта
+        res = sim.run_sim(file_prefix=common.epanet_tmp_prefix(scenario_id))
     except Exception as e:  # noqa: BLE001
         common.write_json(sdir / "scenario.json", {
             "scenario_id": scenario_id, "network_id": network_id, "created": common.now_iso(),
@@ -203,12 +216,12 @@ def run_one(base_inp: Path, scenario_id: str, network_id: str, edits: list[tuple
 
     scen = {
         "scenario_id": scenario_id, "network_id": network_id, "created": common.now_iso(),
-        "seed": seed, "base_inp": str(base_inp.relative_to(common.ROOT)) if str(base_inp).startswith(str(common.ROOT)) else str(base_inp),
-        "scenario_inp": str(inp_path.relative_to(common.ROOT)),
+        "seed": seed, "base_inp": _rel(base_inp),
+        "scenario_inp": _rel(inp_path),
         "baseline_ref": baseline_ref,
         "edits": applied,
         "truth": {**truth, "is_faulted": bool(edits)},
-        "result_ref": {"dir": str(sdir.relative_to(common.ROOT)), "converged": converged,
+        "result_ref": {"dir": _rel(sdir), "converged": converged,
                        "solver_warnings": solver_warnings, "result_notes": notes,
                        "runtime_s": round(dur, 2)},
     }

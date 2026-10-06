@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Screen understanding result (что находится на экране)",
+  "type": "object",
+  "required": ["schema_version", "app", "screen_type", "confidence", "panels", "ambiguity", "ui_context"],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "screen_id": {"type": "string", "description": "идентификатор скриншота/кадра"},
+    "captured_at": {"type": "string"},
+    "app": {"type": "string", "enum": ["epanet_ai", "epanet_gui", "unknown"]},
+    "screen_type": {
+      "type": "string",
+      "enum": ["map", "results_table", "object_editor", "time_series", "report", "form", "dialog", "unknown"]
+    },
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "source": {"type": "string", "description": "ocr+heuristics | template | vlm | hybrid"},
+        "engines": {"type": "array", "items": {"type": "string"}},
+        "ocr_blocks": {"type": "integer"},
+        "matched_keywords": {"type": "object"},
+        "network_check": {"type": "string", "description": "ok | unknown_ids:<n> | no_inp"}
+      }
+    },
+    "network": {
+      "type": "object",
+      "properties": {"id": {"type": ["string", "null"]}, "source": {"type": "string"}}
+    },
+    "timestep": {
+      "type": ["object", "null"],
+      "properties": {"hour": {"type": "number"}, "source": {"type": "string"}}
+    },
+    "selected_object": {
+      "type": ["object", "null"],
+      "properties": {
+        "id": {"type": "string"},
+        "type": {"type": ["string", "null"]},
+        "confidence": {"type": "number"},
+        "source": {"type": "string", "description": "label | editor_field | chart_legend | table_row"}
+      }
+    },
+    "visible_objects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": {"type": "string"},
+          "type": {"type": ["string", "null"]},
+          "value": {"type": ["number", "null"]},
+          "unit": {"type": ["string", "null"]},
+          "metric": {"type": ["string", "null"]},
+          "source": {"type": "string"}
+        }
+      }
+    },
+    "panels": {"type": "array", "items": {"type": "string"}},
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["intent"],
+        "properties": {
+          "intent": {"type": "string"},
+          "params": {"type": "object"},
+          "requires_confirmation": {"type": "boolean"}
+        }
+      }
+    },
+    "ambiguity": {
+      "type": "object",
+      "required": ["level"],
+      "properties": {
+        "level": {"type": "string", "enum": ["low", "medium", "high"]},
+        "notes": {"type": "array", "items": {"type": "string"}},
+        "candidates": {
+          "type": "array",
+          "items": {"type": "object", "properties": {"id": {"type": "string"}, "score": {"type": "number"}}}
+        }
+      }
+    },
+    "ui_context": {
+      "type": "object",
+      "description": "блок, который уходит в llm_context.request.ui",
+      "properties": {
+        "screen_type": {"type": "string"},
+        "selected_object": {"type": ["string", "null"]},
+        "object_type": {"type": ["string", "null"]},
+        "timestep_h": {"type": ["number", "null"]},
+        "description_ru": {"type": "string"},
+        "confidence": {"type": "number"}
+      }
+    }
+  }
+}

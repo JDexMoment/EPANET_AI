@@ -1,0 +1,71 @@
+# ─────────────────────────────────────────────────────────────
+# model.yaml — решение по базовой модели и параметры её запуска.
+# Источник значений по умолчанию для src/train/qlora_sft.py и для сервиса ассистента.
+# ─────────────────────────────────────────────────────────────
+version: 2
+
+decision:
+  date: 2026-10-05
+  base_model: Qwen/Qwen3.5-9B
+  status: принято
+  rationale: >
+    Та же «весовая категория», что и Qwen3-8B (~5–6 ГБ в Q4, работает на 16 ГБ RAM без GPU),
+    но новее по качеству, 262К контекста и гибридное внимание Gated DeltaNet (24 из 32 слоёв —
+    линейное), поэтому KV-кэш почти не растёт с длиной контекста. Более сильный русский стиль
+    и следование инструкциям при небольших требованиях к памяти клиента.
+  considered_and_rejected:
+    - name: Qwen/Qwen3-8B
+      why: заменён более новой моделью той же весовой категории
+    - name: yandex/AliceAI-Foundation-80B-A3B-Base
+      why: >
+        80 млрд весов (≈163 ГБ BF16, ≈45–48 ГБ Q4) и экспериментальный рантайм (патч llama.cpp)
+        — не запускается на клиентском ПК; для нашей задачи избыточен. Отклонён 05.10.2026.
+
+fallbacks:
+  weak_pc: Qwen/Qwen3.5-4B          # если 9B на конкретной машине не тянет (8 ГБ RAM)
+  strong_pc: Qwen/Qwen3.5-35B-A3B   # 32 ГБ RAM / 16 ГБ VRAM, если нужен максимум качества
+
+quantization:
+  client_format: GGUF
+  quant: Q4_K_M
+  expected_size_gb: 5.8
+  community_gguf: unsloth/Qwen3.5-9B-GGUF
+  note: >
+    Модель обучена с MTP (multi-token prediction) — доступно спекулятивное декодирование,
+    что даёт ускорение на клиентских машинах.
+
+training:                 # значения по умолчанию для src/train/qlora_sft.py
+  model: Qwen/Qwen3.5-9B
+  lora_r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  epochs: 2
+  lr: 1.5e-4
+  max_len: 6144
+  batch: 1
+  grad_accum: 12
+  warmup_ratio: 0.04
+  seed: 42
+  bf16: true
+  completion_only_loss: true
+  enable_thinking: false  # инженерный режим: ответ без длинных рассуждений
+
+inference:                # сервис ассистента и бенчмарк
+  engine: llama.cpp       # клиент: llama.cpp / Ollama; сервер: vLLM / SGLang
+  temperature: 0.2        # карточка советует 0.7 для чата; нам нужны факты — стартуем с 0.2
+  top_p: 0.8
+  top_k: 20
+  presence_penalty: 0.0
+  repetition_penalty: 1.05
+  max_tokens: 900
+  context_tokens: 8192
+  enable_thinking: false
+  note: >
+    Параметры карточки (temperature 0.7, presence_penalty 1.5) рассчитаны на открытый чат.
+    У нас другой режим — «только факты из контекста», поэтому стартовые значения ниже,
+    а окончательные фиксируются по metrics_model (fact_accuracy / hallucination_rate).
+
+hardware:
+  client_min: {ram_gb: 16, cpu_cores: 4, gpu: "не нужна", disk_gb: 10}
+  client_comfort: {ram_gb: 32, gpu: "NVIDIA 8–12 ГБ", disk_gb: 25}
+  training_gpu: "1×16 ГБ VRAM (QLoRA 4-bit, seq 6144)"

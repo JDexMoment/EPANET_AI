@@ -147,12 +147,26 @@ vn01__pipe_roughness_drop__P106__055/
 | кейсы до разметки | `data/cases/pending/` |
 | выгрузки инженеров (входящие) | `data/cases/inbox/` |
 | размеченные кейсы | `data/cases/filled/` |
-| примеры качества | `data/cases/examples/` |
+| образцы формата для инженеров | `docs/examples/` (синтетические, помечены) |
 | партии и формы | `data/batches/`, `tools/ExpertCasePack_*.html`, `data/engineer_forms/` |
 | датасеты обучения | `data/splits/` |
 | отчёты по качеству | `data/eval/` |
 
-## 6. Эволюция схемы
+## 6. Происхождение данных: только реальные
+
+Каждый кейс несёт поле `annotation.source`:
+
+| source | Что это | Попадает в обучение |
+|---|---|---|
+| `collection_service` | разметка инженера на сервисе (реальная модель) | да |
+| отсутствует | внутренняя разметка по реальным сетям | да |
+| `pipeline_test` | автотест конвейера (`tools/simulate_expert_export.py`) | **нет** (отсекается автоматически) |
+| `synthetic_example` | образцы формата из `docs/examples/` | **нет** |
+| `augmented_*` | осознанная аугментация | только с флагом `--include-synthetic` |
+
+Проверка: `python tools/check_data_purity.py`.
+
+## 7. Эволюция схемы
 
 Поле `schema_version` в кейсе. При изменении полей: поднять версию, обновить
 `schemas/*.schema.json`, пере-сгенерировать кейсы (`build_cases.py` создаёт только новые файлы —

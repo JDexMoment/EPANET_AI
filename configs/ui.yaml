@@ -1,0 +1,79 @@
+# ─────────────────────────────────────────────────────────────
+# ui.yaml — «понимание экрана» (screen understanding) без CV/VLM-модели.
+#
+# Задача: по скриншоту понять, ЧТО на нём находится (тип экрана, выбранный
+# объект, шаг времени, видимые числа) и передать это ОБЫЧНОЙ текстовой LLM
+# вместе с контекстом расчёта. Пиксели в LLM не уходят — уходят факты об экране.
+# ─────────────────────────────────────────────────────────────
+version: 1
+
+ocr:
+  engines: [rapidocr, paddleocr, pytesseract, tesseract_cli]   # первый доступный
+  lang: "rus+eng"
+  min_block_confidence: 0.55
+
+patterns:
+  # ID объектов берём из реальных сетей проекта: J-105, P-105, T-1, R-1, PU-1, C-1
+  node_ids: ['\b[Jj]-?\d{1,4}\b', '\b[TtRr]-?\d{1,3}\b', '\bPU-?\d{1,3}\b']
+  link_ids: ['\b[Pp]-?\d{1,4}\b', '\b[Cc]-?\d{1,3}\b']
+  timestep:
+    # «текущее время» на экране (не «шаг 1 час» и не «в 18 часов» в тексте отчёта)
+    - '(?:текущее\s*время|current\s*time|время|time)\s*[:=]?\s*(\d{1,2})(?::\d{2})?'
+    - '(?<!\d)(\d{1,2}):00(?!\d)'
+    - 'time\s*step\s*(\d{1,2})\s*(?:of|из)'
+    - 'шаг\s*(\d{1,2})\s*(?:of|из)'
+  number: '[-+]?\d+(?:[.,]\d+)?'
+  # для панели свойств: метрика определяется подписью поля, а не единицей
+  label_metrics:
+    - {regex: 'отметк|elevation|высот', metric: elevation}
+    - {regex: 'давлен|pressure|напор', metric: pressure}
+    - {regex: 'спрос|водоразбор|demand', metric: flow}
+    - {regex: 'расход|flow', metric: flow}
+    - {regex: 'скор|velocity', metric: velocity}
+    - {regex: 'уровен|level', metric: level}
+  units:
+    - {regex: 'м\s*вод\.?\s*ст\.?', unit: 'м вод.ст.', metric: pressure}
+    - {regex: '(?<![а-яА-Яa-zA-Z])м(?![а-яА-Я])', unit: 'м вод.ст.', metric: pressure}
+    - {regex: 'л/с|LPS|l/s', unit: 'л/с', metric: flow}
+    - {regex: 'м/с|m/s', unit: 'м/с', metric: velocity}
+    - {regex: 'м³|m3|м3', unit: 'м³', metric: volume}
+
+keywords:
+  map: [карта, схема, легенда, масштаб, map, legend, scale, node, узел]
+  results_table: [результат, таблица, давление, расход, скорость, узел, время, pressure, demand, flow, velocity, node, link, time]
+  object_editor: [отметка, спрос, диаметр, длина, шероховатость, узел, труба, elevation, demand, diameter, length, roughness, junction, pipe]
+  time_series: [график, диаграмма, сутки, часы, ряд, legend, series, time, hours]
+  report: [отчёт, отчет, протокол, заключение, выводы, рекомендации, report, summary]
+
+suggested_actions:
+  map: [select_object, focus_entity, zoom_to_object]
+  results_table: [focus_entity, set_timestep, open_report]
+  object_editor: [explain_object, open_report]
+  time_series: [set_timestep, compare_with_baseline, explain_object]
+  report: [export_report]
+  form: [open_report]
+  unknown: []
+
+ambiguity:
+  # Ниже этого порога уверенности ассистент НЕ отвечает, а уточняет у пользователя
+  ask_user_below_confidence: 0.60
+  # Больше этого числа объектов с привязанными значениями → выбирать объект нельзя
+  # (на таблице результатов «выбранная строка» по OCR определить невозможно)
+  max_objects_with_values_for_selection: 2
+  policy: >
+    Если объект или шаг времени определён ненадёжно, ассистент задаёт уточняющий
+    вопрос и предлагает кандидатов. Молчаливый выбор НЕВЕРНОГО объекта — самый
+    опасный сценарий (инженер получит корректный разбор не того узла).
+
+acceptance:              # пороги для src/eval/metrics_screen.py
+  screen_type_accuracy: 0.95
+  selected_object_accuracy: 0.95
+  wrong_object_rate_max: 0.01
+  value_binding_accuracy: 0.90
+  timestep_accuracy: 0.95
+  action_f1: 0.80
+  abstention_rate_on_ambiguous: 0.90
+
+labels:                  # разметка скриншотов (tools/label_screen.html → data/screen_labels/)
+  dir: data/screen_labels
+  screenshots_dir: data/screen_labels/screenshots

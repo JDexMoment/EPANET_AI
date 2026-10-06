@@ -72,7 +72,7 @@ def make_case(scenario_dir: Path, derived: dict, mode: str, question: str,
             "context_digest": common.sha256_text(
                 (scenario_dir / "derived" / f"llm_context_{mode}.json").read_text(encoding="utf-8")
                 if (scenario_dir / "derived" / f"llm_context_{mode}.json").exists() else ""),
-            "llm_context_ref": str((scenario_dir / "derived" / f"llm_context_{mode}.json").relative_to(common.ROOT)),
+            "llm_context_ref": _rel(scenario_dir / "derived" / f"llm_context_{mode}.json"),
             "evidence": _evidence_for(derived, evidence_all, refs),
         },
         "label": {"has_problem": None, "category": None, "secondary_categories": [], "severity": None,
@@ -90,9 +90,18 @@ def make_case(scenario_dir: Path, derived: dict, mode: str, question: str,
     }
 
 
+def _rel(path) -> str:
+    """Путь относительно корня проекта, если он внутри него (иначе — как есть)."""
+    try:
+        return str(Path(path).resolve().relative_to(common.ROOT.resolve()))
+    except ValueError:
+        return str(path)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="Построение кейсов датасета")
     ap.add_argument("--manifest", default="data/scenarios/manifest.jsonl")
+    ap.add_argument("--scenarios-dir", default="data/scenarios")
     ap.add_argument("--out", default="data/cases/pending")
     ap.add_argument("--only", default=None)
     args = ap.parse_args()
@@ -106,7 +115,7 @@ def main() -> None:
         sid = rec["scenario_id"]
         if args.only and sid != args.only:
             continue
-        sdir = common.ROOT / "data" / "scenarios" / sid
+        sdir = common.ROOT / args.scenarios_dir / sid
         derived = common.read_json(sdir / "derived" / "derived_metrics.json")
 
         # контексты, которые увидит модель, замораживаем сразу

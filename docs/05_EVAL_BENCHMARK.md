@@ -24,7 +24,7 @@
 2. Сохранить журнал построчно:
    ```json
    {"case_id": "c_vn01__…__make_report__05", "answer": "…", "latency_s": 3.1,
-    "prompt_tokens": 2400, "completion_tokens": 260, "vram_mb": 7800, "run": "qwen3-8b-lora-v1"}
+    "prompt_tokens": 2400, "completion_tokens": 260, "vram_mb": 6200, "run": "qwen3.5-9b-lora-v1"}
    ```
    → `data/eval/predictions.jsonl`
 3. Прогнать метрики:
@@ -41,14 +41,14 @@
 
 | Кандидат | Режим | Что сравнить |
 |---|---|---|
-| Qwen3 4B | 4-bit, prompt-only | скорость, базовое качество |
-| Qwen3 4B | +LoRA | прирост качества vs 8B prompt-only |
-| Qwen3 8B | 4-bit, prompt-only | базовое качество 8B |
-| Qwen3 8B | +LoRA | финальный кандидат |
-| Qwen3 14B (опц.) | +LoRA | «премиум» вариант, если хватает железа |
+| Qwen3.5-9B | Q4, prompt-only (наш system prompt + контекст) | базовая линия: что модель умеет без обучения |
+| **Qwen3.5-9B** | +LoRA на нашем датасете | **основной кандидат проекта** |
+| Qwen3.5-4B | +LoRA | резерв для слабых ПК: насколько падает качество |
+| Qwen3.5-35B-A3B | +LoRA | верхняя планка качества для машин «чуть мощнее» |
 
-Правило приёмки MVP: **8B+LoRA должен обойти 8B prompt-only** минимум по трём метрикам,
-не ухудшив fact accuracy и hallucination rate.
+Правило приёмки MVP: **Qwen3.5-9B+LoRA должен обойти Qwen3.5-9B prompt-only** минимум по трём
+метрикам, не ухудшив fact accuracy и hallucination rate. Затем фиксируем, какой из резервных
+вариантов брать для клиентов с 8 ГБ RAM.
 
 ## 4. Контроль качества ДАННЫХ (не модели)
 

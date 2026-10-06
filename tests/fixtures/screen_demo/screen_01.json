@@ -1,0 +1,41 @@
+{
+  "screen_id": "demo_01",
+  "file": "screenshots/map_j105.png",
+  "labeler": "synthetic_demo",
+  "note": "СИНТЕТИЧЕСКИЙ демо-экран (OCR-блоки), не реальный скриншот. Для бенчмарка — разметка через tools/label_screen.html",
+  "golden": {
+    "screen_type": "map",
+    "selected_object": {
+      "id": "J-105",
+      "type": "junction"
+    },
+    "timestep": {
+      "hour": 8
+    },
+    "visible_objects": [
+      {
+        "id": "J-105",
+        "value": 9.96
+      },
+      {
+        "id": "J-106"
+      },
+      {
+        "id": "P-105"
+      }
+    ],
+    "panels": [
+      "map"
+    ],
+    "actions": [
+      "select_object",
+      "focus_entity",
+      "zoom_to_object"
+    ],
+    "ambiguity": {
+      "level": "low",
+      "notes": []
+    },
+    "app": "epanet_ai"
+  }
+}

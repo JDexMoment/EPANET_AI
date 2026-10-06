@@ -8,9 +8,20 @@ data/batches/
 data/eval/*.json
 tools/ExpertCasePack_*.html
 
+# данные сервиса сбора
+service_data/
+deploy/data/
+deploy/service.env
+
 # рабочее
 __pycache__/
 *.pyc
 .venv/
 outputs/
 .env
+
+# временный каталог smoke-теста
+temp.inp
+temp.rpt
+temp.bin
+.verify/

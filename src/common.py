@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import tempfile
 import random
 from datetime import datetime, timezone
 from pathlib import Path
@@ -100,6 +101,18 @@ def human_size(n: int) -> str:
             return f"{n:.0f}{unit}" if unit == "B" else f"{n:.1f}{unit}"
         n /= 1024
     return f"{n:.1f}TB"
+
+
+def epanet_tmp_prefix(tag: str = "run") -> str:
+    """Префикс временных файлов EPANET (temp.inp/.rpt/.bin) ВНЕ репозитория.
+
+    WNTR пишет эти файлы в текущий каталог; если запускать из корня проекта,
+    они попадают в репозиторий. Поэтому всегда направляем их в системный temp.
+    """
+    d = Path(tempfile.gettempdir()) / "epanet_ai_tmp"
+    d.mkdir(parents=True, exist_ok=True)
+    safe = "".join(ch if ch.isalnum() or ch in "-_." else "_" for ch in str(tag))[:48]
+    return str(d / safe)
 
 
 def env_flag(name: str, default: str = "0") -> bool:

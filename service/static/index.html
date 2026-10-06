@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EPANET-AI · разметка гидравлических моделей</title>
+<style>
+  :root{--ink:#0f2231;--muted:#5d7186;--line:#dbe4ec;--accent:#0b6e99;--accent2:#0e8f5f;
+        --bg:#f4f7fa;--warn:#b06a00;--err:#a32222;--ok:#1a6b39;}
+  *{box-sizing:border-box}
+  body{margin:0;font:14px/1.5 "Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+  header{background:#0c2436;color:#fff;padding:12px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  header h1{margin:0;font-size:16px;font-weight:600}
+  header .sp{flex:1}
+  header .who{font-size:12px;opacity:.9}
+  .btn{font:inherit;border:0;border-radius:8px;padding:9px 14px;cursor:pointer;background:#e8eef4;color:var(--ink)}
+  .btn.primary{background:var(--accent);color:#fff}
+  .btn.ok{background:var(--accent2);color:#fff}
+  .btn.ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .wrap{max-width:1180px;margin:0 auto;padding:16px;display:grid;gap:16px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
+  .card h2{margin:0 0 10px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .grid2{display:grid;grid-template-columns:minmax(320px,1fr) minmax(360px,1.15fr);gap:16px;align-items:start}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+  .kpi{border:1px solid var(--line);border-radius:10px;padding:10px}
+  .kpi b{display:block;font-size:19px}
+  .kpi span{font-size:11px;color:var(--muted)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{border-bottom:1px solid var(--line);padding:6px 5px;text-align:left}
+  th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  tbody tr{cursor:pointer}
+  tbody tr:hover{background:#f0f7fc}
+  tbody tr.sel{background:#e3f2fb;font-weight:600}
+  #drop{border:2px dashed var(--line);border-radius:12px;padding:26px;text-align:center;color:var(--muted);cursor:pointer}
+  #drop.on{border-color:var(--accent);background:#eef7fc}
+  label.f{display:block;font-size:12px;color:var(--muted);margin:12px 0 4px}
+  input[type=text],input[type=number],select,textarea{width:100%;padding:8px 10px;border:1px solid var(--line);
+    border-radius:8px;font:inherit;background:#fff}
+  textarea{min-height:78px;resize:vertical}
+  textarea.big{min-height:180px}
+  .row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+  .chip{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:16px;
+    padding:3px 9px;font-size:12px;background:#fff;cursor:pointer}
+  .chip input{margin:0}
+  .tabs{display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap}
+  .tab{padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:13px}
+  .tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .note{font-size:12px;color:var(--muted);margin-top:6px}
+  .issues{border-radius:8px;padding:10px;margin-top:10px;font-size:13px}
+  .issues.bad{background:#fdeceb;border:1px solid #f3c9c5;color:var(--err)}
+  .issues.good{background:#eaf7ef;border:1px solid #bfe3cd;color:var(--ok)}
+  .pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;background:#eef2f6;color:var(--muted)}
+  .pill.crit{background:#fdeceb;color:var(--err)} .pill.warn{background:#fdf3e3;color:var(--warn)}
+  .pill.info{background:#eef2f6;color:var(--muted)}
+  pre{max-height:260px;overflow:auto;background:#0f1e2b;color:#cfe6f5;border-radius:10px;padding:10px;font-size:12px}
+  .hide{display:none}
+  .list{max-height:260px;overflow:auto}
+  footer{padding:18px;text-align:center;color:var(--muted);font-size:12px}
+  .flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<header>
+  <h1>EPANET-AI · разметка гидравлических моделей</h1>
+  <span class="sp"></span>
+  <span class="who" id="who"></span>
+  <button class="btn ghost hide" id="logout">Выйти</button>
+</header>
+
+<div class="wrap">
+  <!-- ВХОД -->
+  <div class="card" id="loginCard">
+    <h2>Вход</h2>
+    <p>Введите токен, который вам выдали. Он определяет ваше авторство в датасете.</p>
+    <p class="note">Если вам прислали персональную ссылку вида <code>…/?token=…</code> — просто откройте её: вход произойдёт автоматически.</p>
+    <div class="flex">
+      <input type="text" id="tokenInput" placeholder="ваш токен" style="max-width:340px">
+      <button class="btn primary" id="loginBtn">Войти</button>
+    </div>
+    <div class="note" id="loginMsg"></div>
+  </div>
+
+  <!-- ШАГ 1: МОДЕЛЬ -->
+  <div class="card hide" id="uploadCard">
+    <h2>Шаг 1 · Загрузить модель</h2>
+    <div id="drop">Перетащите сюда файл модели EPANET<br>
+      <span class="pill">.inp</span> <span class="pill">.NET</span> <span class="pill">.epanet</span>
+      <span class="pill">zip</span>
+      <div class="note">Файл читается на сервере: конвертация, очистка, расчёт суток (PDA).
+        Никакие ваши данные не публикуются — они идут только в датасет обучения.</div>
+    </div>
+    <input type="file" id="file" accept=".inp,.net,.epanet,.zip" style="display:none">
+    <label class="f">Комментарий к модели (необязательно): что это за сеть, что известно о проблемах</label>
+    <textarea id="upNote" placeholder="Например: водопровод посёлка, 2 насосные, зимний режим"></textarea>
+    <div class="note" id="upMsg"></div>
+    <div class="flex" style="margin-top:10px">
+      <button class="btn primary" id="pickBtn">Выбрать файл</button>
+      <button class="btn hide" id="resetBtn">Загрузить другую модель</button>
+    </div>
+  </div>
+
+  <!-- ШАГ 2: МОДЕЛЬ -->
+  <div class="hide" id="modelWrap">
+    <div class="card">
+      <h2>Шаг 2 · Что показал расчёт</h2>
+      <div class="flex" style="margin-bottom:8px">
+        <span class="pill" id="mFile"></span>
+        <span class="pill" id="mNet"></span>
+        <span class="pill" id="mConv"></span>
+        <span class="sp" style="flex:1"></span>
+        <button class="btn" id="dlClean">Скачать очищенный .inp</button>
+        <button class="btn" id="showCtx">Контекст модели (JSON)</button>
+      </div>
+      <div class="kpis" id="kpis"></div>
+      <div id="warnBox"></div>
+      <div class="grid2" style="margin-top:12px">
+        <div>
+          <h2>Алерты расчёта (Top)</h2>
+          <div class="list"><table id="alertsT"><thead><tr><th>#</th><th>Правило</th><th>Объект</th>
+            <th>Значение</th><th>Факт</th></tr></thead><tbody></tbody></table></div>
+        </div>
+        <div>
+          <h2>Объекты сети — нажмите, чтобы разметить</h2>
+          <div class="list"><table id="objT"><thead><tr><th>ID</th><th>Тип</th><th>Мин. P / V макс.</th>
+            <th>Факт</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </div>
+      <pre id="ctxBox" class="hide"></pre>
+    </div>
+
+    <!-- ШАГ 3: РАЗМЕТКА -->
+    <div class="card" id="annCard">
+      <h2>Шаг 3 · Разметка</h2>
+      <div class="tabs">
+        <div class="tab on" data-kind="element_problem">Проблема в элементе</div>
+        <div class="tab" data-kind="report">Эталонный отчёт</div>
+        <div class="tab" data-kind="qa">Вопрос — эталонный ответ</div>
+      </div>
+      <div class="note" id="kindHint"></div>
+
+      <div class="row2">
+        <div>
+          <label class="f">Объект(ы) — выберите в таблице или впишите</label>
+          <input type="text" id="objectId" placeholder="J-105 или через запятую">
+        </div>
+        <div>
+          <label class="f">Тип ответа (режим датасета)</label>
+          <select id="mode"></select>
+        </div>
+      </div>
+
+      <label class="f" id="qLabel">Вопрос, на который отвечает эталон (как спросит пользователь)</label>
+      <input type="text" id="question" placeholder="Почему упало давление в этом узле?">
+
+      <div id="structBlock">
+        <div class="row">
+          <div>
+            <label class="f">Есть проблема?</label>
+            <select id="hasProblem"><option value="yes">да</option><option value="no">нет, отклонений в норме</option>
+              <option value="unknown">недостаточно данных</option></select>
+          </div>
+          <div><label class="f">Категория</label><select id="category"></select></div>
+          <div><label class="f">Severity</label><select id="severity"></select></div>
+        </div>
+        <div class="row2">
+          <div><label class="f">Уверенность</label><select id="confidence"></select></div>
+          <div><label class="f">Сколько времени заняло, мин</label><input type="number" id="timeMin" min="1" value="15"></div>
+        </div>
+
+        <label class="f">Наблюдения (по одному в строке, с числами и ссылками (E-xxx))</label>
+        <textarea id="observations"></textarea>
+        <label class="f">Вероятные причины: гипотеза | уверенность | чем проверить</label>
+        <textarea id="causes"></textarea>
+        <label class="f">Что проверить на сети</label>
+        <textarea id="checks"></textarea>
+        <label class="f">Рекомендации</label>
+        <textarea id="recommendations"></textarea>
+        <label class="f">Ограничения (чего по этим данным утверждать нельзя)</label>
+        <textarea id="limitations"></textarea>
+      </div>
+
+      <label class="f">Итоговый эталонный ответ <span id="answerHint"></span></label>
+      <textarea id="answer" class="big" placeholder="Связный инженерный текст 80–320 слов: наблюдение → причина → проверка → рекомендация → ограничения. Каждое число — со ссылкой (E-xxx)."></textarea>
+
+      <label class="f">Ссылки на факты (E-xxx) — отметьте использованные</label>
+      <div class="chips" id="evChips"></div>
+
+      <div class="issues hide" id="issues"></div>
+      <div class="flex" style="margin-top:12px">
+        <button class="btn ok" id="saveBtn">Сохранить в датасет</button>
+        <button class="btn" id="checkBtn">Проверить ответ</button>
+        <button class="btn" id="clearBtn">Очистить форму</button>
+        <span class="note" id="saveMsg"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Мои разметки</h2>
+      <div id="myStats" class="note"></div>
+      <div class="list"><table id="myT"><thead><tr><th>Когда</th><th>Модель</th><th>Тип</th>
+        <th>Объект</th><th>Слов</th><th>Проверка</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<footer>EPANET-AI · сервис сбора «золотых» ответов · данные уходят только в датасет обучения</footer>
+
+<script>
+// Безопасное локальное хранилище: в песочнице предпросмотра localStorage может быть
+// недоступен — тогда работаем в памяти и интерфейс не падает.
+const LS = (() => {
+  try { LS.setItem("__t", "1"); LS.removeItem("__t"); return localStorage; }
+  catch (e) {
+    const mem = {};
+    return { getItem: k => (k in mem ? mem[k] : null),
+             setItem: (k, v) => { mem[k] = String(v); },
+             removeItem: k => { delete mem[k]; } };
+  }
+})();
+
+const $ = s => document.querySelector(s);
+const state = { token: LS.getItem("expert_token") || "", meta: null, model: null,
+                row: null, kind: "element_problem", drafts: {} };
+
+async function api(path, opts = {}) {
+  const headers = Object.assign({}, opts.headers || {});
+  if (state.token) headers["X-Expert-Token"] = state.token;
+  if (opts.json !== undefined) { headers["Content-Type"] = "application/json";
+    opts.body = JSON.stringify(opts.json); }
+  const r = await fetch(path, Object.assign({}, opts, { headers }));
+  const txt = await r.text();
+  let data = null; try { data = txt ? JSON.parse(txt) : null; } catch (e) { data = { raw: txt }; }
+  if (!r.ok) throw Object.assign(new Error((data && (data.detail || data.error)) || r.statusText), { data });
+  return data;
+}
+
+// ───────── вход
+$("#loginBtn").onclick = doLogin;
+$("#tokenInput").addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+async function doLogin() {
+  const t = $("#tokenInput").value.trim();
+  if (!t) return;
+  try {
+    const r = await api("/api/session", { method: "POST", json: { token: t } });
+    state.token = t; LS.setItem("expert_token", t);
+    setWho(r); $("#loginCard").classList.add("hide"); $("#uploadCard").classList.remove("hide");
+    $("#logout").classList.remove("hide");
+    await boot();
+  } catch (e) { $("#loginMsg").textContent = "Ошибка входа: " + e.message; }
+}
+$("#logout").onclick = () => { LS.removeItem("expert_token"); location.reload(); };
+function setWho(r) { $("#who").textContent = `${r.expert_id} · разметок: ${r.annotations}` + (r.role === "lead" ? " · ведущий" : ""); }
+
+// ───────── метаданные
+async function loadMeta() {
+  state.meta = await api("/api/meta");
+  $("#category").innerHTML = state.meta.categories.map(c => `<option value="${c.id}">${c.ru}</option>`).join("");
+  $("#severity").innerHTML = state.meta.severity.map(c => `<option value="${c.id}">${c.ru}</option>`).join("");
+  $("#confidence").innerHTML = state.meta.confidence.map(c => `<option value="${c.id}">${c.ru}</option>`).join("");
+  $("#mode").innerHTML = state.meta.modes.map(m => `<option value="${m}">${m}</option>`).join("");
+  if (!state.meta.emc) $("#upMsg").innerHTML = '<span class="pill warn">ETL-модуль клинера недоступен: ' +
+    'принимается только .inp</span>';
+}
+
+// ───────── загрузка модели
+const drop = $("#drop"), fileInput = $("#file");
+drop.onclick = () => fileInput.click();
+$("#pickBtn").onclick = () => fileInput.click();
+fileInput.onchange = e => { if (e.target.files[0]) upload(e.target.files[0]); };
+["dragover","dragenter"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("on"); }));
+["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("on"); }));
+drop.addEventListener("drop", e => { const f = e.dataTransfer.files[0]; if (f) upload(f); });
+
+async function upload(file) {
+  $("#upMsg").textContent = "Загрузка и расчёт… (для больших сетей до минуты)";
+  drop.textContent = "Обработка: " + file.name;
+  const fd = new FormData(); fd.append("file", file); fd.append("note", $("#upNote").value);
+  try {
+    const headers = { "X-Expert-Token": state.token };
+    const r = await fetch("/api/models", { method: "POST", body: fd, headers });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.detail || "ошибка загрузки");
+    $("#upMsg").textContent = data.duplicate ? "Эта модель уже загружалась — открываю её."
+      : `Готово: конвертация ${data.conversion ? data.conversion.engine : ""}, удалено строк: ` +
+        (data.conversion ? data.conversion.lines_removed : "—");
+    if (data.analysis_error) $("#upMsg").innerHTML += `<br><span class="pill crit">Расчёт не выполнен: ${data.analysis_error}</span>`;
+    await openModel(data.model_id, data.detail);
+    $("#resetBtn").classList.remove("hide");
+  } catch (e) {
+    $("#upMsg").textContent = "Ошибка: " + e.message;
+    drop.textContent = "Перетащите сюда файл модели EPANET";
+  }
+}
+$("#resetBtn").onclick = () => { location.reload(); };
+
+// ───────── отображение модели
+const fmt = v => (v === null || v === undefined) ? "—" : (typeof v === "number" ? (Math.round(v*100)/100) : v);
+async function openModel(id, detail) {
+  state.model = detail || await api("/api/models/" + id);
+  if (!detail) state.model = await api("/api/models/" + id);
+  const m = state.model;
+  $("#modelWrap").classList.remove("hide");
+  $("#mFile").textContent = "модель: " + (m.filename || m.model_id);
+  $("#mNet").textContent = `узлов ${m.network.nodes}, участков ${m.network.links}`;
+  const c = m.conversion || {};
+  $("#mConv").textContent = c.engine ? `${c.engine} · ${c.detected_format} · удалено строк ${c.lines_removed ?? "—"}` : "без конвертации";
+  renderKpis(m.kpi); renderWarnings(m.warnings); renderAlerts(m.alerts); renderObjects(m.objects);
+  state.evidence = await api(`/api/models/${m.model_id}/evidence`).catch(() => ({}));
+  renderEvidenceChips(state.evidence);
+  $("#myTable").dataset.model = m.model_id;
+  if (state.draftKey) LS.setItem(state.draftKey, JSON.stringify(collect()));
+}
+
+function renderKpis(k) {
+  if (!k) { $("#kpis").innerHTML = '<span class="pill warn">KPI недоступны (расчёт не выполнен)</span>'; return; }
+  const rows = [
+    ["Мин. давление", fmt(k.min_pressure_m) + " м", (k.min_pressure_node || "") + (k.min_pressure_time_h ? `, ${k.min_pressure_time_h} ч` : "")],
+    ["Макс. давление", fmt(k.max_pressure_m) + " м", k.max_pressure_node || ""],
+    ["Макс. скорость", fmt(k.max_velocity_mps) + " м/с", k.max_velocity_link || ""],
+    ["Недоподача", fmt(k.unserved_volume_m3) + " м³", k.supply_deficit_max_lps ? `до ${fmt(k.supply_deficit_max_lps)} л/с` : ""],
+  ];
+  $("#kpis").innerHTML = rows.map(([t, v, s]) =>
+    `<div class="kpi"><span>${t}</span><b>${v}</b><span>${s}</span></div>`).join("");
+}
+function renderWarnings(w) {
+  if (!w || !w.length) { $("#warnBox").innerHTML = ""; return; }
+  $("#warnBox").innerHTML = '<div class="issues bad" style="margin-top:10px"><b>Предупреждения расчёта:</b><br>' +
+    w.map(x => "• " + x).join("<br>") + "</div>";
+}
+function renderAlerts(alerts) {
+  const tb = $("#alertsT tbody"); tb.innerHTML = "";
+  (alerts || []).forEach((a, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${i + 1}</td><td>${a.rule}</td><td>${a.object}</td>
+      <td>${fmt(a.value)} ${a.unit || ""}${a.time_h !== undefined ? ` · ${a.time_h} ч` : ""}</td>
+      <td><span class="pill ${a.severity}">${a.evidence_id}</span></td>`;
+    tr.onclick = () => { $("#objectId").value = a.object; markSelected(a.object); addRef(a.evidence_id); };
+    tb.append(tr);
+  });
+  if (!(alerts || []).length) tb.innerHTML = '<tr><td colspan="5" class="note">Алертов нет — расчёт в норме</td></tr>';
+}
+function renderObjects(objs) {
+  const tb = $("#objT tbody"); tb.innerHTML = "";
+  (objs || []).forEach(o => {
+    const tr = document.createElement("tr");
+    const val = o.type === "junction" || o.type === "tank" || o.type === "reservoir"
+      ? `P ${fmt(o.p_min)} м` : `V ${fmt(o.v_max_mps)} м/с`;
+    tr.innerHTML = `<td>${o.id}</td><td>${o.type}</td><td>${val}</td>
+      <td>${o.evidence_id ? `<span class="pill">${o.evidence_id}</span>` : "—"}</td>`;
+    tr.onclick = () => { $("#objectId").value = o.id; markSelected(o.id); if (o.evidence_id) addRef(o.evidence_id); };
+    tb.append(tr);
+  });
+}
+function markSelected(id) {
+  [...document.querySelectorAll("#objT tbody tr")].forEach(tr =>
+    tr.classList.toggle("sel", tr.cells[0].textContent === id));
+  $("#annCard").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+function renderEvidenceChips(ev) {
+  const host = $("#evChips"); host.innerHTML = "";
+  const items = Object.values(ev || {}).slice(0, 80);
+  if (!items.length) { host.innerHTML = '<span class="note">Факты недоступны</span>'; return; }
+  items.forEach(e => {
+    const lab = document.createElement("label");
+    lab.className = "chip";
+    lab.innerHTML = `<input type="checkbox" value="${e.evidence_id}">
+      <span title="${(e.statement || "").replace(/"/g, "&quot;")}">${e.evidence_id} · ${e.object} · ${fmt(e.value)} ${e.unit || ""}</span>`;
+    host.append(lab);
+  });
+}
+function addRef(id) {
+  [...document.querySelectorAll("#evChips input")].forEach(i => { if (i.value === id) i.checked = true; });
+}
+function collectRefs() { return [...document.querySelectorAll("#evChips input:checked")].map(i => i.value); }
+
+// ───────── вкладки
+const KIND_HINT = {
+  element_problem: "Укажите элемент и опишите проблему: наблюдения с числами, вероятная причина с уверенностью, что проверить, рекомендации, ограничения. Это главный тип данных для обучения.",
+  report: "Напишите эталонный отчёт по расчёту целиком: Исходные условия → Результаты → Проблемы → Вероятные причины → Рекомендации → Ограничения. Числа — со ссылками (E-xxx).",
+  qa: "Задайте вопрос так, как его задал бы инженер, и напишите эталонный ответ. Подходит для любых тем: нормы, режимы, насосы, башни, аварийные ситуации.",
+};
+document.querySelectorAll(".tab").forEach(tab => tab.onclick = () => {
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", t === tab));
+  state.kind = tab.dataset.kind; applyKind();
+});
+function applyKind() {
+  const k = state.kind;
+  $("#kindHint").textContent = KIND_HINT[k];
+  $("#structBlock").classList.toggle("hide", k === "qa");
+  $("#qLabel").textContent = k === "qa" ? "Вопрос инженера (дословно)"
+    : "Вопрос, на который отвечает эталон (как спросит пользователь)";
+  $("#answerHint").textContent = k === "qa" ? "(эталонный ответ)" : "(80–320 слов)";
+  const modeSel = $("#mode");
+  modeSel.value = k === "element_problem" ? "explain_object" : (k === "report" ? "make_report" : "ask");
+}
+
+// ───────── самопроверка
+function checkNumbers(text) {
+  const ev = state.evidence || {};
+  const allowed = new Set();
+  Object.values(ev).forEach(e => { if (e.value !== undefined && e.value !== null)
+    allowed.add(String(Math.abs(Number(e.value))).replace(/\.?0+$/, "")); });
+  const ctx = $("#ctxBox").textContent || "";
+  (ctx.match(/[-−+]?\d+(?:[.,]\d+)?/g) || []).forEach(n => allowed.add(String(Math.abs(parseFloat(n.replace(",", ".")))).replace(/\.?0+$/, "")));
+  const clean = (text || "").replace(/[A-Za-zА-Яа-я]{1,4}-?\d+/g, " ");
+  const found = (clean.match(/[-−+]?\d+(?:[.,]\d+)?/g) || []).map(n => String(Math.abs(parseFloat(n.replace(",", ".")))).replace(/\.?0+$/, ""));
+  return [...new Set(found.filter(n => !allowed.has(n)))];
+}
+function localIssues() {
+  const text = collect().answer || "";
+  const issues = [];
+  const words = text.split(/\s+/).filter(Boolean).length;
+  const nums = checkNumbers(text);
+  if (nums.length) issues.push("числа, которых нет в данных расчёта: " + nums.slice(0, 8).join(", "));
+  const refs = collectRefs();
+  if (!refs.length && words > 20) issues.push("не отмечено ни одной ссылки на факты (E-xxx)");
+  if (words && words < 40) issues.push(`ответ короткий: ${words} слов`);
+  return issues;
+}
+function showIssues(issues, fromServer) {
+  const box = $("#issues");
+  if (!issues || !issues.length) {
+    box.className = "issues good"; box.innerHTML = "Проверка пройдена: " +
+      (fromServer ? "сервер принял ответ." : "числа подтверждены, ссылки есть.");
+  } else {
+    box.className = "issues bad";
+    box.innerHTML = "<b>Обратите внимание:</b><br>" + issues.map(i => "• " + i).join("<br>");
+  }
+  box.classList.remove("hide");
+}
+$("#checkBtn").onclick = () => { showIssues(localIssues(), false); };
+
+// ───────── сбор и сохранение
+function collect() {
+  const k = state.kind;
+  return {
+    model_id: state.model ? state.model.model_id : null, kind: k, mode: $("#mode").value,
+    object_id: $("#objectId").value.trim(), question: $("#question").value.trim(),
+    answer: $("#answer").value.trim(),
+    observations: $("#observations").value, causes: $("#causes").value, checks: $("#checks").value,
+    recommendations: $("#recommendations").value, limitations: $("#limitations").value,
+    report_markdown: k === "report" ? $("#answer").value : "",
+    category: $("#category").value, severity: $("#severity").value,
+    confidence: $("#confidence").value,
+    evidence_refs: collectRefs(), time_spent_min: Number($("#timeMin").value || 0),
+  };
+}
+$("#saveBtn").onclick = async () => {
+  const payload = collect();
+  if (!payload.answer) { showIssues(["пустой ответ — нечего сохранять"], true); return; }
+  if (state.kind !== "qa" && $("#hasProblem").value === "unknown") payload.severity = "info";
+  if (state.kind !== "qa" && $("#hasProblem").value === "no") payload.category = "no_problem";
+  $("#saveMsg").textContent = "Сохраняю…";
+  try {
+    const r = await api("/api/annotations", { method: "POST", json: payload });
+    showIssues(r.check.issues, true);
+    $("#saveMsg").textContent = `Сохранено. Ваших разметок: ${r.your_total}`;
+    LS.removeItem(draftKey());
+    await refreshMine();
+  } catch (e) { $("#saveMsg").textContent = "Ошибка: " + e.message; }
+};
+$("#clearBtn").onclick = () => {
+  ["#observations","#causes","#checks","#recommendations","#limitations","#answer","#question"].forEach(s => $(s).value = "");
+  document.querySelectorAll("#evChips input").forEach(i => i.checked = false);
+  $("#issues").classList.add("hide");
+};
+
+// черновики: чтобы ничего не потерялось при закрытии вкладки
+function draftKey() { return "draft_" + (state.model ? state.model.model_id : "none") + "_" + state.kind; }
+function saveDraft() { if (!state.model) return; LS.setItem(draftKey(), JSON.stringify(collect())); }
+["#answer","#observations","#causes","#checks","#recommendations","#limitations","#question","#objectId"]
+  .forEach(s => $(s).addEventListener("input", () => { saveDraft(); }));
+function restoreDraft() {
+  const raw = LS.getItem(draftKey());
+  if (!raw) return;
+  try {
+    const d = JSON.parse(raw);
+    $("#answer").value = d.answer || ""; $("#observations").value = d.observations || "";
+    $("#causes").value = d.causes || ""; $("#checks").value = d.checks || "";
+    $("#recommendations").value = d.recommendations || ""; $("#limitations").value = d.limitations || "";
+    $("#question").value = d.question || ""; $("#objectId").value = d.object_id || "";
+    (d.evidence_refs || []).forEach(addRef);
+    $("#saveMsg").textContent = "Восстановлен черновик из этого браузера";
+  } catch (e) {}
+}
+
+// ───────── мои разметки
+async function refreshMine() {
+  const mine = await api("/api/my");
+  setWho({ expert_id: mine.expert_id, role: "", annotations: mine.total });
+  $("#myStats").textContent = `Всего: ${mine.total} · проблемы в элементах: ${mine.by_kind.element_problem || 0} · ` +
+    `отчёты: ${mine.by_kind.report || 0} · вопросы-ответы: ${mine.by_kind.qa || 0}`;
+  const rows = (await api("/api/annotations?mine=1")).annotations;
+  const tb = $("#myT tbody"); tb.innerHTML = "";
+  rows.slice(0, 40).forEach(a => {
+    const tr = document.createElement("tr");
+    const ok = a.number_check && a.number_check.ok;
+    tr.innerHTML = `<td>${(a.created_at || "").slice(0, 16).replace("T", " ")}</td>
+      <td>${(a.model_filename || a.model_id || "").slice(0, 22)}</td><td>${a.kind}</td>
+      <td>${a.object_id || "—"}</td><td>${a.number_check ? a.number_check.words : "—"}</td>
+      <td>${ok ? '<span class="pill info">ок</span>' : '<span class="pill warn">есть замечания</span>'}</td>`;
+    tb.append(tr);
+  });
+  if (!rows.length) tb.innerHTML = '<tr><td colspan="6" class="note">Пока ничего не размечено</td></tr>';
+}
+
+// ───────── контекст модели
+$("#showCtx").onclick = async () => {
+  const box = $("#ctxBox");
+  if (!box.classList.contains("hide")) { box.classList.add("hide"); return; }
+  try {
+    const ctx = await api(`/api/models/${state.model.model_id}/context?mode=${$("#mode").value}`);
+    box.textContent = JSON.stringify(ctx, null, 1);
+    box.classList.remove("hide");
+  } catch (e) { box.textContent = "Контекст недоступен: " + e.message; box.classList.remove("hide"); }
+};
+$("#dlClean").onclick = () => {
+  fetch(`/api/models/${state.model.model_id}/file?kind=clean`,
+        { headers: { "X-Expert-Token": state.token } })
+    .then(r => r.blob()).then(b => {
+      const a = document.createElement("a"); a.href = URL.createObjectURL(b);
+      a.download = state.model.model_id + "_clean.inp"; a.click();
+    });
+};
+
+// ───────── старт
+async function boot() {
+  await loadMeta();
+  applyKind();
+  restoreDraft();
+  try { await refreshMine(); } catch (e) {}
+}
+// ───────── вход по персональной ссылке: …/?token=… или …/#token=…
+// Ссылка с токеном удобна для инженера. После входа токен убирается из адресной
+// строки (history.replaceState), чтобы не оставался в истории и закладках.
+function tokenFromUrl() {
+  const fromQuery = new URLSearchParams(location.search).get("token") || "";
+  const h = new URLSearchParams((location.hash || "").replace(/^#/, ""));
+  return (fromQuery || h.get("token") || h.get("t") || "").trim();
+}
+function cleanUrlToken() { try { history.replaceState(null, "", location.pathname); } catch (e) {} }
+
+(async () => {
+  const urlToken = tokenFromUrl();
+  if (urlToken) { $("#tokenInput").value = urlToken; cleanUrlToken(); }
+  const t = state.token || urlToken;
+  if (!t) return;
+  try {
+    const r = await api("/api/session", { method: "POST", json: { token: t } });
+    state.token = t; LS.setItem("expert_token", t);
+    setWho(r); $("#loginCard").classList.add("hide"); $("#uploadCard").classList.remove("hide");
+    $("#logout").classList.remove("hide"); await boot();
+  } catch (e) {
+    if (urlToken) { $("#loginMsg").textContent = "Ссылка не подошла (токен изменён или отозван) — введите токен вручную."; }
+    else { LS.removeItem("expert_token"); }
+  }
+})();
+</script>
+</body>
+</html>

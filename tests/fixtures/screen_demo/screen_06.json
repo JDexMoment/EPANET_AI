@@ -1,0 +1,28 @@
+{
+  "screen_id": "demo_06",
+  "file": "screenshots/map_ambiguous.png",
+  "labeler": "synthetic_demo",
+  "note": "СИНТЕТИЧЕСКИЙ демо-экран (OCR-блоки), не реальный скриншот. Для бенчмарка — разметка через tools/label_screen.html",
+  "golden": {
+    "screen_type": "map",
+    "selected_object": null,
+    "timestep": null,
+    "visible_objects": [
+      {
+        "id": "J-105"
+      },
+      {
+        "id": "J-106"
+      }
+    ],
+    "panels": [
+      "map"
+    ],
+    "actions": [],
+    "ambiguity": {
+      "level": "high",
+      "notes": []
+    },
+    "app": "epanet_ai"
+  }
+}

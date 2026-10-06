@@ -67,8 +67,8 @@ python -m src.dataset.make_expert_pack --all
 1. Положить `.inp` в `data/raw/` (проверить, что EPANET считает без ошибок).
 2. Зарегистрировать в `src/generate/run_scenarios.py`:
    ```python
-   NETWORKS = {"vn01": "data/raw/sample_net_01.inp",
-               "vn02": "data/raw/sample_net_02.inp"}
+   NETWORKS = {"vn02": "data/raw/vn02.inp",          # демо-сеть проекта лежит в tests/fixtures/
+               "vn02": "data/raw/vn02.inp"}
    ```
 3. Проверить нормы для этой сети (давление/скорости/уровни) и при необходимости
    завести отдельный `configs/thresholds_vn02.yaml` (передаётся параметром в `build_derived`).

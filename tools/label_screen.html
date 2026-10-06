@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Разметка экранов — понимание интерфейса (EPANET-AI)</title>
+<style>
+  :root { --ink:#12212e; --muted:#5b6b7b; --line:#d5dee7; --accent:#0b6e99; --bg:#f5f8fb; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.5 "Segoe UI",Roboto,Arial,sans-serif; color:var(--ink); background:var(--bg); }
+  header { background:#0d2b3e; color:#fff; padding:14px 20px; }
+  header h1 { margin:0; font-size:17px; font-weight:600; }
+  header p { margin:4px 0 0; font-size:12px; opacity:.85; }
+  .wrap { display:grid; grid-template-columns:minmax(360px,1fr) minmax(420px,1.1fr); gap:16px; padding:16px; align-items:start; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+  .card h2 { margin:0 0 10px; font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+  #drop { border:2px dashed var(--line); border-radius:10px; padding:22px; text-align:center; color:var(--muted); cursor:pointer; }
+  #drop.on { border-color:var(--accent); background:#eef7fc; }
+  #preview { max-width:100%; border:1px solid var(--line); border-radius:8px; margin-top:10px; display:none; }
+  label { display:block; font-size:12px; color:var(--muted); margin:10px 0 3px; }
+  input[type=text], input[type=number], select, textarea { width:100%; padding:7px 9px; border:1px solid var(--line); border-radius:7px; font:inherit; background:#fff; }
+  textarea { min-height:56px; resize:vertical; }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+  .chip { display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line); border-radius:20px; padding:4px 10px; font-size:12px; background:#fff; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th,td { border-bottom:1px solid var(--line); padding:5px 4px; text-align:left; }
+  th { font-size:11px; color:var(--muted); font-weight:600; }
+  button { font:inherit; border:0; border-radius:8px; padding:9px 14px; cursor:pointer; }
+  .primary { background:var(--accent); color:#fff; }
+  .ghost { background:#eef2f6; color:var(--ink); }
+  .bar { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+  .hint { font-size:12px; color:var(--muted); margin-top:8px; }
+  .pill { display:inline-block; font-size:11px; padding:2px 8px; border-radius:10px; background:#eef2f6; color:var(--muted); }
+  .ok { background:#e6f6ec; color:#1a6b39; }
+  .warn { background:#fdf1e3; color:#8a5a12; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Разметка экранов — «что находится на экране»</h1>
+  <p>Инструмент для создания бенчмарка понимания интерфейса: скриншот → эталонный JSON.
+     Ничего никуда не отправляется: файл картинки не покидает ваш компьютер.</p>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <h2>1. Скриншот</h2>
+    <div id="drop">Перетащите сюда PNG/JPG скриншот<br><span class="pill">или нажмите, чтобы выбрать файл</span></div>
+    <input type="file" id="file" accept="image/*" style="display:none">
+    <img id="preview" alt="предпросмотр">
+    <div class="row" style="margin-top:10px">
+      <div><label for="sid">ID экрана</label><input type="text" id="sid" placeholder="map_j105_01"></div>
+      <div><label for="labeler">Кто размечает</label><input type="text" id="labeler" placeholder="exp_01"></div>
+    </div>
+    <div class="hint">ID заполняется из имени файла — при необходимости поправьте.
+      Файл <b>не</b> встраивается в JSON (в JSON попадут только метаданные о нём).</div>
+  </div>
+
+  <div class="card">
+    <h2>2. Что на экране (эталон)</h2>
+    <div class="row">
+      <div><label for="stype">Тип экрана</label>
+        <select id="stype">
+          <option value="map">карта сети (map)</option>
+          <option value="results_table">таблица результатов (results_table)</option>
+          <option value="object_editor">панель свойств объекта (object_editor)</option>
+          <option value="time_series">график / временной ряд (time_series)</option>
+          <option value="report">текстовый отчёт (report)</option>
+          <option value="form">форма ввода (form)</option>
+          <option value="dialog">диалог (dialog)</option>
+          <option value="unknown">не определить (unknown)</option>
+        </select></div>
+      <div><label for="ts">Время расчёта на экране, ч (если видно)</label><input type="number" id="ts" step="1" min="0" max="24" placeholder="например 8"></div>
+    </div>
+
+    <div class="row">
+      <div><label for="obj">Выбранный объект (ID)</label><input type="text" id="obj" placeholder="J-105"></div>
+      <div><label for="otype">Тип объекта</label>
+        <select id="otype"><option value="">— нет —</option><option>junction</option><option>tank</option>
+        <option>reservoir</option><option>pipe</option><option>pump</option><option>valve</option></select></div>
+    </div>
+    <div class="hint">Если на экране нет явно выбранного объекта — оставьте поле пустым.
+      Это самый важный ответ: он определяет, должна ли модель уточнять у пользователя.</div>
+
+    <label>Видимые объекты и значения (только то, что действительно читается с экрана)</label>
+    <table id="vals"><thead><tr><th style="width:28%">ID</th><th style="width:22%">Значение</th><th style="width:22%">Ед.</th><th></th></tr></thead>
+      <tbody></tbody></table>
+    <button class="ghost" id="addRow" style="margin-top:8px">+ строка</button>
+
+    <label>Панели на экране</label>
+    <div class="chips" id="panels"></div>
+
+    <label>Неоднозначность</label>
+    <div class="row3">
+      <select id="amb"><option value="low">низкая</option><option value="medium">средняя</option>
+        <option value="high">высокая (объект не определить)</option></select>
+      <input type="text" id="cands" placeholder="кандидаты: J-105, J-106">
+      <input type="text" id="notes" placeholder="что помешало (тултип, мелкий шрифт...)">
+    </div>
+
+    <label>Действия, уместные на этом экране</label>
+    <div class="chips" id="actions"></div>
+
+    <div class="bar">
+      <button class="primary" id="export">Экспорт JSON разметки</button>
+      <button class="ghost" id="load">Загрузить существующую разметку</button>
+      <button class="ghost" id="reset">Очистить</button>
+    </div>
+    <div class="hint" id="status">Файл сохранится как screen_&lt;ID&gt;.json — положите его в
+      <b>data/screen_labels/</b>, скриншот — в <b>data/screen_labels/screenshots/</b>.</div>
+  </div>
+</div>
+
+<script>
+const PANELS = ["map","results_table","object_editor","time_series","report"];
+const ACTIONS = ["select_object","focus_entity","zoom_to_object","set_timestep",
+                 "explain_object","open_report","compare_with_baseline","export_report"];
+
+function chips(host, items, multi=true, type="checkbox") {
+  host.innerHTML = "";
+  items.forEach(name => {
+    const lab = document.createElement("label");
+    lab.className = "chip";
+    const inp = document.createElement("input");
+    inp.type = type; inp.value = name; inp.dataset.name = name;
+    lab.append(inp, document.createTextNode(name));
+    host.append(lab);
+  });
+}
+chips(document.getElementById("panels"), PANELS);
+chips(document.getElementById("actions"), ACTIONS);
+
+const tbody = document.querySelector("#vals tbody");
+function addRow(id="", value="", unit="") {
+  const tr = document.createElement("tr");
+  [["id",id,"J-105"],["value",value,"9.96"],["unit",unit,"м вод.ст."]].forEach(([f,v,ph])=>{
+    const td = document.createElement("td");
+    const inp = document.createElement("input");
+    if (f === "value") inp.type = "number"; else inp.type = "text";
+    inp.placeholder = ph; inp.value = v; inp.dataset.f = f;
+    td.append(inp); tr.append(td);
+  });
+  const td = document.createElement("td");
+  const b = document.createElement("button");
+  b.textContent = "✕"; b.className = "ghost"; b.onclick = () => tr.remove();
+  td.append(b); tr.append(td); tbody.append(tr);
+}
+addRow();
+document.getElementById("addRow").onclick = () => addRow();
+
+const fileInput = document.getElementById("file");
+const drop = document.getElementById("drop");
+const preview = document.getElementById("preview");
+let currentFile = null;
+
+function pickFile(f) {
+  if (!f) return;
+  currentFile = f;
+  const sid = document.getElementById("sid");
+  if (!sid.value) sid.value = f.name.replace(/\.[^.]+$/, "").replace(/[^A-Za-z0-9_.-]/g, "_");
+  const url = URL.createObjectURL(f);
+  preview.src = url; preview.style.display = "block";
+}
+drop.onclick = () => fileInput.click();
+fileInput.onchange = e => pickFile(e.target.files[0]);
+["dragover","dragenter"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("on"); }));
+["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("on"); }));
+drop.addEventListener("drop", e => pickFile(e.dataTransfer.files[0]));
+
+function selected(host) {
+  return [...host.querySelectorAll("input:checked")].map(i => i.dataset.name);
+}
+function valueLabel() {
+  const name = document.getElementById("labeler").value.trim();
+  if (name) localStorage.setItem("screen_labeler", name); 
+  return name || localStorage.getItem("screen_labeler") || "anonymous";
+}
+document.getElementById("labeler").value = localStorage.getItem("screen_labeler") || "";
+
+function collect() {
+  const obj = document.getElementById("obj").value.trim().toUpperCase();
+  const ts = document.getElementById("ts").value;
+  const ambNotes = document.getElementById("notes").value.trim();
+  const cands = document.getElementById("cands").value.split(",").map(s => s.trim()).filter(Boolean);
+  const vals = [...tbody.querySelectorAll("tr")].map(tr => {
+    const id = tr.querySelector('[data-f="id"]').value.trim().toUpperCase();
+    const v = tr.querySelector('[data-f="value"]').value;
+    const u = tr.querySelector('[data-f="unit"]').value.trim();
+    if (!id) return null;
+    const rec = { id };
+    if (v !== "") rec.value = Number(v);
+    if (u) rec.unit = u;
+    return rec;
+  }).filter(Boolean);
+  const file = currentFile ? "screenshots/" + currentFile.name : null;
+  return {
+    screen_id: document.getElementById("sid").value.trim() || "unnamed",
+    file, labeler: valueLabel(),
+    note: "Разметка экрана для бенчмарка screen understanding (tools/label_screen.html)",
+    golden: {
+      app: "epanet_ai",
+      screen_type: document.getElementById("stype").value,
+      selected_object: obj ? { id: obj, type: document.getElementById("otype").value || null } : null,
+      timestep: ts === "" ? null : { hour: Number(ts) },
+      visible_objects: vals,
+      panels: selected(document.getElementById("panels")),
+      actions: selected(document.getElementById("actions")),
+      ambiguity: { level: document.getElementById("amb").value, notes: ambNotes ? [ambNotes] : [], candidates: cands }
+    },
+    exported_at: new Date().toISOString()
+  };
+}
+
+document.getElementById("export").onclick = () => {
+  const data = collect();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "screen_" + data.screen_id + ".json";
+  a.click();
+  const st = document.getElementById("status");
+  st.textContent = "Сохранено: " + a.download + " — положите файл в data/screen_labels/";
+  st.className = "hint ok";
+};
+
+document.getElementById("load").onclick = () => {
+  const inp = document.createElement("input");
+  inp.type = "file"; inp.accept = ".json";
+  inp.onchange = async () => {
+    const rec = JSON.parse(await inp.files[0].text());
+    const g = rec.golden || {};
+    document.getElementById("sid").value = rec.screen_id || "";
+    document.getElementById("labeler").value = rec.labeler || "";
+    document.getElementById("stype").value = g.screen_type || "map";
+    document.getElementById("obj").value = (g.selected_object || {}).id || "";
+    document.getElementById("otype").value = (g.selected_object || {}).type || "";
+    document.getElementById("ts").value = g.timestep ? g.timestep.hour : "";
+    const amb = g.ambiguity || {};
+    document.getElementById("amb").value = amb.level || "low";
+    document.getElementById("notes").value = (amb.notes || []).join("; ");
+    document.getElementById("cands").value = (amb.candidates || []).join(", ");
+    tbody.innerHTML = "";
+    (g.visible_objects || []).forEach(v => addRow(v.id, v.value ?? "", v.unit ?? ""));
+    if (!(g.visible_objects || []).length) addRow();
+    [["panels", g.panels], ["actions", g.actions]].forEach(([host, list]) => {
+      const hostEl = document.getElementById(host);
+      hostEl.querySelectorAll("input").forEach(i => i.checked = (list || []).includes(i.dataset.name));
+    });
+  };
+  inp.click();
+};
+
+document.getElementById("reset").onclick = () => location.reload();
+</script>
+</body>
+</html>

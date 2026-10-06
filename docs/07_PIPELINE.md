@@ -3,8 +3,12 @@
 ## Быстрый цикл (всё одной командой)
 
 ```bash
-bash tools/run_pipeline.sh              # полный пересбор: сценарии → кейсы → партии → формы
+bash tools/run_pipeline.sh              # пересбор: сценарии → кейсы → партии → формы
 ```
+
+> В репозитории нет сгенерированных данных — `data/` пуста и наполняется реальной работой
+> (`data/README.md`). Команды ниже запускаются, когда у вас есть **свои** сети (в `data/raw/`,
+> прописаны в `NETWORKS`) — либо для проверки кода на демо-сети из `tests/fixtures/`.
 
 ## Пошагово и что получается на выходе
 
@@ -23,6 +27,18 @@ bash tools/run_pipeline.sh              # полный пересбор: сце�
 | 11. Оценка датасета | `python -m src.eval.metrics_offline` | консольный отчёт + вердикт по объёму |
 | 12. Бенчмарк модели | `python -m src.eval.metrics_model --pred data/eval/predictions.jsonl` | `data/eval/model_scores.json` |
 
+## Ветка «данные с сайта разметки»
+
+Если гидравлики размечают на сервисе (`docs/10_COLLECTION_SERVICE.md`):
+
+```bash
+python tools/pull_collected.py --url https://epanet.example.com --token <ADMIN_TOKEN> --pipeline
+# → data/collected/cases → data/splits_collected/{train,val,test,structured,eval_test}.jsonl
+```
+
+Эти кейсы помечены `annotation.source = "collection_service"` и попадают в датасет наравне
+с разметкой внутренних сценариев.
+
 ## Проверка конвейера без инженеров (автотест)
 
 ```bash
@@ -33,8 +49,14 @@ python -m src.dataset.export_instruct
 python -m src.eval.metrics_offline
 ```
 
-Эти данные помечены `expert_id = pipeline_test` — их **нельзя** использовать для обучения,
-они нужны только чтобы убедиться, что формат, импорт и экспорт работают.
+Эти данные помечены `expert_id = pipeline_test` — для обучения они **не годятся** и
+отсекаются автоматически (`export_instruct` пропускает источник `pipeline_test`).
+Нужны только чтобы убедиться, что формат, импорт и экспорт работают. После проверки удалите:
+
+```bash
+rm -rf data/cases/filled/* data/cases/inbox/* data/splits/*
+python tools/check_data_purity.py     # должно показать: синтетики нет
+```
 
 ## Работа с отдельным сценарием (отладка)
 
@@ -44,6 +66,13 @@ python -m src.context_builder data/scenarios/vn01__baseline --mode explain_objec
 
 # пересчитать аналитику только по одному сценарию
 python -m src.generate.build_derived_all --only vn01__baseline
+```
+
+## Контроль происхождения данных
+
+```bash
+python tools/check_data_purity.py                       # все рабочие каталоги
+python tools/check_data_purity.py --dir data/cases/filled
 ```
 
 ## Частые проблемы

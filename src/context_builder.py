@@ -164,19 +164,49 @@ def build_context(scenario_dir: Path | str, mode: str = "whats_happening",
         return len(json.dumps(o, ensure_ascii=False))
 
     limit = ctx_cfg["max_context_chars"]
-    for _ in range(12):
-        if size(ctx) <= limit:
+    # блок «что на экране» входит в тот же запрос — резервируем место под него
+    ui_size = size(ctx.get("request", {}).get("ui") or {})
+    target = max(2000, limit - ui_size)
+    for _ in range(24):
+        if size(ctx) <= target:
             break
         if len(ctx["objects_table"]) > 0:
             ctx["objects_table"] = ctx["objects_table"][: max(0, len(ctx["objects_table"]) // 2)]
         elif len(ctx["alerts"]) > 4:
             ctx["alerts"] = ctx["alerts"][:-1]
         elif ctx.get("baseline_delta", {}).get("items"):
-            ctx["baseline_delta"]["items"] = ctx["baseline_delta"]["items"][: max(0, len(ctx["baseline_delta"]["items"]) // 2)]
-        elif ctx.get("focus", {}).get("neighbors"):
-            ctx["focus"]["neighbors"] = ctx["focus"]["neighbors"][:5]
+            items = ctx["baseline_delta"]["items"]
+            ctx["baseline_delta"]["items"] = items[: max(0, len(items) // 2)]
+        elif len(ctx.get("focus", {}).get("neighbors") or []) > 5:
+            nb = ctx["focus"]["neighbors"]
+            ctx["focus"]["neighbors"] = nb[: max(2, len(nb) // 2)]
+        elif any(isinstance(ctx.get("focus", {}).get(k), dict)
+                 and len(ctx["focus"][k].get("values") or []) > 6
+                 for k in ("series_pressure", "series_demand", "series_flow")):
+            for k in ("series_pressure", "series_demand", "series_flow"):
+                s = ctx.get("focus", {}).get(k)
+                if isinstance(s, dict) and s.get("values") and len(s["values"]) > 6:
+                    keep = max(6, len(s["values"]) // 2)
+                    s["values"], s["time_h"], s["reduced"] = s["values"][:keep], s["time_h"][:keep], True
+        elif len(ctx.get("thresholds", [])) > 6:
+            ctx["thresholds"] = ctx["thresholds"][:6]
+        elif len(ctx.get("evidence", {})) > 10:
+            ctx["evidence"] = {k: ctx["evidence"][k] for k in sorted(ctx["evidence"])[:10]}
         else:
             break
+
+    # жёсткий резерв: если сокращать больше нечего, а бюджет всё ещё превышен,
+    # уменьшаем формулировки фактов и оставляем только самые важные из них
+    if size(ctx) > target:
+        for keep_n in (10, 8, 6, 4):
+            if size(ctx) <= target:
+                break
+            ev = ctx.get("evidence") or {}
+            if len(ev) > keep_n:
+                ctx["evidence"] = {k: ev[k] for k in sorted(ev)[:keep_n]}
+        for e in (ctx.get("evidence") or {}).values():
+            if isinstance(e.get("statement"), str) and len(e["statement"]) > 140:
+                e["statement"] = e["statement"][:137] + "..."
 
     ctx["_meta"] = {"chars": size(ctx), "evidence_count": len(ctx["evidence"]),
                     "truncated": size(ctx) > limit, "budget_chars": limit}

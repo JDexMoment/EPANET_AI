@@ -1,0 +1,368 @@
+{
+  "schema_version": "1.0",
+  "case_id": "c_vn01__pipe_roughness_drop__P106__055__why_happened__02",
+  "scenario_id": "vn01__pipe_roughness_drop__P106__055",
+  "network_id": "vn01",
+  "created": "2026-10-05T10:08:53Z",
+  "mode": "why_happened",
+  "question": "Почему возникли эти отклонения? Дайте наиболее вероятные причины и способ их проверки.",
+  "selection": {
+    "type": "whole_network",
+    "id": null
+  },
+  "facts": {
+    "context_digest": "e3b0c44298fc1c14",
+    "llm_context_ref": "data/scenarios/vn01__pipe_roughness_drop__P106__055/derived/llm_context_why_happened.json",
+    "evidence": [
+      {
+        "evidence_id": "E-004",
+        "object": "J-109",
+        "metric": "pressure",
+        "value": 20.69,
+        "unit": "м вод.ст.",
+        "time_h": null,
+        "threshold_rule": null,
+        "statement": "Сводный KPI min_pressure: J-109 = 20.69 м вод.ст."
+      },
+      {
+        "evidence_id": "E-005",
+        "object": "J-101",
+        "metric": "pressure",
+        "value": 56.08,
+        "unit": "м вод.ст.",
+        "time_h": null,
+        "threshold_rule": null,
+        "statement": "Сводный KPI max_pressure: J-101 = 56.08 м вод.ст."
+      },
+      {
+        "evidence_id": "E-006",
+        "object": "P-102",
+        "metric": "velocity",
+        "value": 1.3,
+        "unit": "м/с",
+        "time_h": null,
+        "threshold_rule": null,
+        "statement": "Сводный KPI max_velocity: P-102 = 1.3 м/с"
+      },
+      {
+        "evidence_id": "E-002",
+        "object": "P-108",
+        "metric": "flowrate",
+        "value": -1.73,
+        "unit": "л/с",
+        "time_h": 7.0,
+        "threshold_rule": "reverse_flow",
+        "statement": "P-108: направление потока меняется в течение суток, минимум -1.73 л/с (обратный поток) в 7 ч"
+      },
+      {
+        "evidence_id": "E-003",
+        "object": "P-111",
+        "metric": "flowrate",
+        "value": -9.48,
+        "unit": "л/с",
+        "time_h": 3.0,
+        "threshold_rule": "reverse_flow",
+        "statement": "P-111: направление потока меняется в течение суток, минимум -9.48 л/с (обратный поток) в 3 ч"
+      },
+      {
+        "evidence_id": "E-001",
+        "object": "P-104",
+        "metric": "flowrate",
+        "value": -0.89,
+        "unit": "л/с",
+        "time_h": 7.0,
+        "threshold_rule": "reverse_flow",
+        "statement": "P-104: направление потока меняется в течение суток, минимум -0.89 л/с (обратный поток) в 7 ч"
+      },
+      {
+        "evidence_id": "E-007",
+        "object": "J-106",
+        "metric": "delta_min_pressure",
+        "value": -4.05,
+        "unit": "м",
+        "time_h": null,
+        "threshold_rule": null,
+        "statement": "J-106: минимальное давление изменилось с 36.41 до 32.36 м (-4.05 м)"
+      },
+      {
+        "evidence_id": "E-008",
+        "object": "J-107",
+        "metric": "delta_min_pressure",
+        "value": -3.38,
+        "unit": "м",
+        "time_h": null,
+        "threshold_rule": null,
+        "statement": "J-107: минимальное давление изменилось с 30.82 до 27.44 м (-3.38 м)"
+      },
+      {
+        "evidence_id": "E-009",
+        "object": "J-109",
+        "metric": "delta_min_pressure",
+        "value": -2.56,
+        "unit": "м",
+        "time_h": null,
+        "threshold_rule": null,
+        "statement": "J-109: минимальное давление изменилось с 23.26 до 20.69 м (-2.56 м)"
+      },
+      {
+        "evidence_id": "E-010",
+        "object": "J-108",
+        "metric": "delta_min_pressure",
+        "value": -2.5,
+        "unit": "м",
+        "time_h": null,
+        "threshold_rule": null,
+        "statement": "J-108: минимальное давление изменилось с 26.38 до 23.88 м (-2.5 м)"
+      },
+      {
+        "evidence_id": "E-011",
+        "object": "J-103",
+        "metric": "delta_min_pressure",
+        "value": -0.73,
+        "unit": "м",
+        "time_h": null,
+        "threshold_rule": null,
+        "statement": "J-103: минимальное давление изменилось с 40.21 до 39.47 м (-0.73 м)"
+      },
+      {
+        "evidence_id": "E-012",
+        "object": "J-104",
+        "metric": "delta_min_pressure",
+        "value": -0.64,
+        "unit": "м",
+        "time_h": null,
+        "threshold_rule": null,
+        "statement": "J-104: минимальное давление изменилось с 26.62 до 25.98 м (-0.64 м)"
+      },
+      {
+        "evidence_id": "E-013",
+        "object": "J-105",
+        "metric": "delta_min_pressure",
+        "value": -0.55,
+        "unit": "м",
+        "time_h": null,
+        "threshold_rule": null,
+        "statement": "J-105: минимальное давление изменилось с 22.38 до 21.83 м (-0.55 м)"
+      },
+      {
+        "evidence_id": "E-014",
+        "object": "J-102",
+        "metric": "delta_min_pressure",
+        "value": -0.34,
+        "unit": "м",
+        "time_h": null,
+        "threshold_rule": null,
+        "statement": "J-102: минимальное давление изменилось с 44.86 до 44.52 м (-0.34 м)"
+      },
+      {
+        "evidence_id": "E-015",
+        "object": "J-101",
+        "metric": "delta_min_pressure",
+        "value": -0.24,
+        "unit": "м",
+        "time_h": null,
+        "threshold_rule": null,
+        "statement": "J-101: минимальное давление изменилось с 49.53 до 49.29 м (-0.24 м)"
+      },
+      {
+        "evidence_id": "E-016",
+        "object": "P-109",
+        "metric": "delta_flow",
+        "value": -3.3,
+        "unit": "л/с",
+        "time_h": null,
+        "threshold_rule": null,
+        "statement": "P-109: средний расход -10.1 → -13.3 л/с (-3.3 л/с), макс. скорость 0.76 → 1.0 м/с"
+      },
+      {
+        "evidence_id": "E-017",
+        "object": "P-103",
+        "metric": "delta_flow",
+        "value": 3.0,
+        "unit": "л/с",
+        "time_h": null,
+        "threshold_rule": null,
+        "statement": "P-103: средний расход 29.7 → 32.7 л/с (+3.0 л/с), макс. скорость 0.98 → 1.08 м/с"
+      },
+      {
+        "evidence_id": "E-018",
+        "object": "P-108",
+        "metric": "delta_flow",
+        "value": -2.6,
+        "unit": "л/с",
+        "time_h": null,
+        "threshold_rule": null,
+        "statement": "P-108: средний расход 2.1 → -0.5 л/с (-2.6 л/с), макс. скорость 0.3 → 0.22 м/с"
+      },
+      {
+        "evidence_id": "E-019",
+        "object": "P-107",
+        "metric": "delta_flow",
+        "value": -2.2,
+        "unit": "л/с",
+        "time_h": null,
+        "threshold_rule": null,
+        "statement": "P-107: средний расход 9.4 → 7.3 л/с (-2.2 л/с), макс. скорость 0.62 → 0.46 м/с"
+      },
+      {
+        "evidence_id": "E-020",
+        "object": "P-106",
+        "metric": "delta_flow",
+        "value": -1.7,
+        "unit": "л/с",
+        "time_h": null,
+        "threshold_rule": null,
+        "statement": "P-106: средний расход 22.2 → 20.5 л/с (-1.7 л/с), макс. скорость 0.86 → 0.79 м/с"
+      },
+      {
+        "evidence_id": "E-021",
+        "object": "P-102",
+        "metric": "delta_flow",
+        "value": 1.1,
+        "unit": "л/с",
+        "time_h": null,
+        "threshold_rule": null,
+        "statement": "P-102: средний расход 58.2 → 59.3 л/с (+1.1 л/с), макс. скорость 1.28 → 1.3 м/с"
+      },
+      {
+        "evidence_id": "E-022",
+        "object": "P-111",
+        "metric": "delta_flow",
+        "value": 0.9,
+        "unit": "л/с",
+        "time_h": null,
+        "threshold_rule": null,
+        "statement": "P-111: средний расход -0.2 → 0.6 л/с (+0.9 л/с), макс. скорость 0.56 → 0.66 м/с"
+      }
+    ]
+  },
+  "label": {
+    "has_problem": true,
+    "category": "pipe_incrustation",
+    "secondary_categories": [
+      "low_pressure_zone"
+    ],
+    "severity": "warning",
+    "primary_objects": [
+      "P-106",
+      "J-106",
+      "J-107"
+    ],
+    "evidence_refs": [
+      "E-007",
+      "E-008",
+      "E-009",
+      "E-010",
+      "E-017",
+      "E-018",
+      "E-019"
+    ],
+    "confidence": "medium",
+    "likely_cause": "Повышенное гидравлическое сопротивление головного участка ветви (P-106) — отложения/зарастание или прикрытая арматура; поток перераспределился на параллельные ветви."
+  },
+  "gold": {
+    "answer": "Главное изменение относительно базового расчёта — локальное падение давления вдоль ветви J-102–J-106–J-108: минимум давления в J-106 снизился на 4,05 м (с 36,41 до 32,36 м) (E-007), в J-107 — на 3,38 м (E-008), в J-109 — на 2,56 м (E-009), в J-108 — на 2,50 м (E-010). Остальные узлы изменились слабее, то есть эффект локализован именно на этой ветви.\n\nОдновременно перераспределились потоки: расход по P-107 снизился с 9,4 до 7,3 л/с (E-019), по P-106 — с 22,2 до 20,5 л/с; при этом по параллельному P-103 расход вырос с 29,7 до 32,7 л/с (E-017), а по P-109 расход изменился с −10,1 до −13,3 л/с (E-016). Поток по P-108 в утренний максимум меняет направление (E-018).\n\nНаиболее вероятная причина: рост гидравлического сопротивления участка P-106 (отложения на внутренней поверхности или прикрытая арматура) — уверенность средняя, поскольку расчёт не позволяет отделить зарастание от прикрытия арматуры. Альтернатива: заниженная пропускная способность тупиковой части P-107/P-108 (уверенность низкая).\n\nЧто проверить: фактическое сопротивление P-106 (C, шероховатость), состояние арматуры на участке; сверить расходы P-106/P-107 с измерениями; проконтролировать давление в J-106…J-109 в утренний максимум (минимум по сети 20,69 м в J-109 при нормативе 20 м — запас минимален, E-004). Ограничение: выводы сделаны по модели, требуется натурное подтверждение.",
+    "answer_structured": {
+      "observations": [
+        "Провал давления вдоль ветви J-106–J-108: J-106 −4,05 м (36,41→32,36 м) (E-007), J-107 −3,38 м (E-008), J-109 −2,56 м (E-009), J-108 −2,50 м (E-010).",
+        "Перераспределение потоков: P-103 +3,0 л/с (29,7→32,7 л/с) (E-017), P-109 −10,1→−13,3 л/с (E-016), P-107 9,4→7,3 л/с (E-019).",
+        "Поток по P-108 меняет направление в течение суток (E-018).",
+        "Минимальное давление по сети 20,69 м (J-109, 7 ч) — на границе норматива 20 м (E-004)."
+      ],
+      "probable_causes": [
+        {
+          "text": "Рост сопротивления участка P-106 (зарастание/отложения либо прикрытая арматура)",
+          "confidence": "medium",
+          "check": "check_roughness"
+        },
+        {
+          "text": "Снижение пропускной способности P-107/P-108 (тупиковая часть ветви)",
+          "confidence": "low",
+          "check": "check_calibration"
+        }
+      ],
+      "checks": [
+        "Проверить фактическое сопротивление и состояние арматуры на P-106.",
+        "Сверить расходы по P-106/P-107 с измерениями.",
+        "Контролировать давление в J-106…J-109 в утренний максимум (E-004, E-008)."
+      ],
+      "recommendations": [
+        "Локализовать участок с повышенным сопротивлением на ветви J-102–J-106–J-108.",
+        "До уточнения держать под контролем давление в J-109 (запас до норматива минимален)."
+      ],
+      "limitations": [
+        "По результатам расчёта нельзя отличить зарастание трубы от прикрытия арматуры.",
+        "Использованы модельные графики водопотребления и паспортная характеристика насоса."
+      ],
+      "evidence_refs": [
+        "E-007",
+        "E-008",
+        "E-009",
+        "E-010",
+        "E-016",
+        "E-017",
+        "E-018",
+        "E-019"
+      ]
+    },
+    "report_markdown": null,
+    "checklist": {
+      "must_not_claim": [
+        "авария на насосе",
+        "порыв на P-106 подтверждён"
+      ],
+      "needs_verification": []
+    }
+  },
+  "probe_questions": [
+    {
+      "id": "observations",
+      "text": "Перечислите главные наблюдаемые отклонения (с числами и ссылками E-xxx).",
+      "answer": "см. gold.answer_structured.observations"
+    },
+    {
+      "id": "causes",
+      "text": "Назовите наиболее вероятную причину и 1-2 альтернативы; чем их различить на сети.",
+      "answer": "Рост сопротивления участка P-106 (зарастание/отложения либо прикрытая арматура); Снижение пропускной способности P-107/P-108 (тупиковая часть ветви)"
+    },
+    {
+      "id": "limitations",
+      "text": "Что по этим данным утверждать НЕЛЬЗЯ (ограничения вывода)?",
+      "answer": "По результатам расчёта нельзя отличить зарастание трубы от прикрытия арматуры.; Использованы модельные графики водопотребления и паспортная характеристика насоса."
+    }
+  ],
+  "annotation": {
+    "annotator_id": "example",
+    "annotator_role": "эталонный пример",
+    "annotated_at": "2026-10-05T10:08:56Z",
+    "time_spent_min": 45,
+    "double_annotated": false,
+    "reviewer_id": "example",
+    "review_status": "accepted",
+    "review_comments": "Эталонный пример качества разметки.",
+    "source": "synthetic_example",
+    "note": "ОБРАЗЕЦ ФОРМАТА для инженеров. Синтетический пример, в обучение не попадает."
+  },
+  "eval": {
+    "required_facts": [
+      {
+        "text": "локализация по ветви J-106/J-107",
+        "must_contain": [
+          "J-106",
+          "4,05"
+        ]
+      },
+      {
+        "text": "перераспределение на P-103",
+        "must_contain": [
+          "P-103"
+        ]
+      }
+    ],
+    "forbidden_claims": [
+      "авария на насосе",
+      "порыв на P-106 подтверждён"
+    ],
+    "required_sections": []
+  }
+}

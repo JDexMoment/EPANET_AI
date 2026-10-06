@@ -27,8 +27,11 @@ REPORT_HEADER = ("# Отчёт (автотест конвейера)\n\n## Ис�
                  "## Рекомендации\n{rec}\n\n## Ограничения\n{lim}\n")
 
 
+SCENARIOS_DIR = "data/scenarios"          # переопределяется флагом --scenarios-dir
+
+
 def make_payload(sid: str, case_ids: list[str]) -> dict:
-    sdir = common.ROOT / "data" / "scenarios" / sid
+    sdir = common.ROOT / SCENARIOS_DIR / sid
     derived = common.read_json(sdir / "derived" / "derived_metrics.json")
     ev = common.read_json(sdir / "derived" / "evidence.json")
     scen = common.read_json(sdir / "scenario.json")
@@ -103,7 +106,11 @@ def main() -> None:
     ap.add_argument("--batch", default="data/batches/batch_exp_01_01.json")
     ap.add_argument("--expert", default="pipeline_test")
     ap.add_argument("--out", default=None)
+    ap.add_argument("--scenarios-dir", default="data/scenarios")
     args = ap.parse_args()
+
+    global SCENARIOS_DIR
+    SCENARIOS_DIR = args.scenarios_dir
 
     batch = common.read_json(common.ROOT / args.batch)
     cases_by_scen: dict[str, list[str]] = {sid: [] for sid in batch["scenario_ids"]}

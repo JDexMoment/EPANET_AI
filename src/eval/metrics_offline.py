@@ -21,7 +21,18 @@ TARGETS = {   # ориентиры (roadmap п.9)
 
 def main() -> None:
     cfg = common.load_yaml("configs/dataset.yaml")
-    manifest = common.read_jsonl("data/scenarios/manifest.jsonl")
+    manifest_path = common.ROOT / "data" / "scenarios" / "manifest.jsonl"
+    if not manifest_path.exists():
+        print("=" * 78)
+        print("ОЦЕНКА ДАННЫХ: пока нечего оценивать")
+        print("=" * 78)
+        print("  Расчётов в data/scenarios/ нет (репозиторий в чистом состоянии).")
+        print("  Наполнение:")
+        print("   • реальные модели и разметка — сервис сбора: docs/10_COLLECTION_SERVICE.md")
+        print("   • внутренняя разметка — data/cases/filled/ → export_instruct → data/splits/")
+        print("   • проверка кода на демо-сети — tests/fixtures/ (в обучение не попадает)")
+        return
+    manifest = common.read_jsonl(manifest_path)
     scenarios = [m for m in manifest if m.get("status") == "ok"]
 
     filled_dir = common.ROOT / "data" / "cases" / "filled"

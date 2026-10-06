@@ -1,0 +1,24 @@
+# Caddy сам получает сертификат Let's Encrypt, если в SITE_ADDRESS указан домен.
+# SITE_ADDRESS задаётся в deploy/service.env, например: epanet.example.com
+{$SITE_ADDRESS} {
+	encode zstd gzip
+	reverse_proxy app:8080
+
+	# ограничение размера загрузки (должно быть не меньше MAX_UPLOAD_MB)
+	request_body {
+		max_size 80MB
+	}
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy no-referrer
+		-Server
+	}
+
+	log {
+		output file /data/access.log {
+			roll_size 10mb
+			roll_keep 5
+		}
+	}
+}

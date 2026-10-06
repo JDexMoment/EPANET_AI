@@ -1,0 +1,31 @@
+{
+  "screen_id": "demo_04",
+  "file": "screenshots/timeseries_j105.png",
+  "labeler": "synthetic_demo",
+  "note": "СИНТЕТИЧЕСКИЙ демо-экран (OCR-блоки), не реальный скриншот. Для бенчмарка — разметка через tools/label_screen.html",
+  "golden": {
+    "screen_type": "time_series",
+    "selected_object": {
+      "id": "J-105",
+      "type": "junction"
+    },
+    "timestep": null,
+    "visible_objects": [
+      {
+        "id": "J-105"
+      }
+    ],
+    "panels": [
+      "time_series"
+    ],
+    "actions": [
+      "compare_with_baseline",
+      "explain_object"
+    ],
+    "ambiguity": {
+      "level": "medium",
+      "notes": []
+    },
+    "app": "epanet_ai"
+  }
+}

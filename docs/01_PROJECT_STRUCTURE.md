@@ -14,7 +14,8 @@ epanet-ai/
 │
 ├── schemas/                      # контракты данных (JSON Schema)
 │   ├── scenario.schema.json
-│   └── case.schema.json
+│   ├── case.schema.json
+│   └── screen.schema.json        # результат «что находится на экране»
 │
 ├── src/
 │   ├── common.py                 # пути, чтение/запись json/jsonl/yaml, хеши, seed
@@ -33,28 +34,45 @@ epanet-ai/
 │   │   ├── validate_cases.py     # схема + ссылки E-xxx + числа + длина
 │   │   ├── check_quality.py      # IQA (согласие экспертов), статистика датасета
 │   │   └── export_instruct.py    # filled → train/val/test.jsonl + eval_test.jsonl
+│   ├── vision/
+│   │   ├── detect_screen.py      # скриншот → JSON «что на экране» (OCR + правила, без CV-модели)
+│   │   ├── screen_to_context.py  # экран + расчёт → llm_context.request.ui или уточняющий вопрос
+│   │   └── schema.py             # валидатор результата
 │   ├── train/
 │   │   └── qlora_sft.py          # QLoRA-SFT (GPU): chat-формат, маскирование лосса, run.json
 │   └── eval/
 │       ├── metrics_offline.py    # состояние датасета до обучения
-│       └── metrics_model.py      # бенчмарк модели: fact accuracy, галлюцинации, latency, VRAM
+│       ├── metrics_model.py      # бенчмарк модели: fact accuracy, галлюцинации, latency, VRAM
+│       └── metrics_screen.py     # метрики понимания экрана (объект, значения, уточнения)
 │
-├── data/
-│   ├── raw/                      # исходные сети (.inp) — эталон, правится вручную
-│   ├── scenarios/                # сгенерированные расчёты (в git не нужны, воспроизводимы)
-│   ├── cases/                    # pending → inbox → filled (+ examples)
+├── data/                         # ТОЛЬКО реальные данные (см. data/README.md)
+│   ├── raw/                      # исходные реальные сети (.inp)
+│   ├── scenarios/                # расчёты по этим сетям
+│   ├── cases/                    # pending → inbox → filled
 │   ├── batches/                  # партии и назначения инженеров
-│   ├── engineer_forms/           # xlsx-форма (альтернатива HTML)
-│   ├── README.md                 # что где лежит и что удалить перед реальной разметкой
+│   ├── engineer_forms/           # xlsx-формы (генерируются tools/make_excel_form.py)
+│   ├── screen_labels/            # разметка реальных скриншотов + screenshots/
+│   ├── collected/                # забранное с сервиса разметки (cases/, models/)
 │   ├── splits/                   # датасеты обучения
-│   └── eval/                     # отчёты качества, predictions, бенчмарки
-│       └── pipeline_test/        # архив автотеста конвейера (НЕ для обучения)
+│   └── eval/                     # отчёты: валидация, качество, метрики
+├── tests/fixtures/               # синтетика ТОЛЬКО для автотестов (в обучение не идёт)
+│   ├── networks/vn01_demo.inp    # демо-сеть для проверки конвейера
+│   └── screen_demo/              # синтетические OCR-блоки для метрик зрения
+│
+├── service/                      # сервис сбора данных от инженеров (см. docs/10)
+│   ├── app.py · storage.py · conversion.py · modeling.py · quality.py · export.py
+│   ├── static/{index.html, admin.html}   # интерфейс инженера и админка
+│   └── vendor/emc/               # ETL-модули EPANET-Model-Cleaner (MIT, без GUI)
+├── deploy/                       # Dockerfile, compose, Caddyfile, install_vps.sh, backup.sh
+├── service_data/                 # данные сервиса: БД, загрузки, модели, экспорты (в git не нужны)
 │
 ├── tools/
 │   ├── ExpertCasePack_*.html     # готовые формы для инженеров (открыть в браузере)
 │   ├── make_examples.py          # 3 эталонных примера разметки
 │   ├── simulate_expert_export.py # автотест конвейера разметки (НЕ данные для обучения)
 │   ├── make_excel_form.py        # генерация xlsx-формы
+│   ├── label_screen.html         # офлайн-разметчик скриншотов для бенчмарка зрения
+│   ├── check_data_purity.py      # проверка: не попала ли синтетика в датасет
 │   └── run_pipeline.sh           # весь конвейер одной командой
 │
 └── docs/                         # 01 проект · 02 данные · 03 генерация · 04 обучение ·
@@ -66,6 +84,7 @@ epanet-ai/
 | Роль | Зона работ | Артефакты |
 |---|---|---|
 | Разработчик AI-модуля | генерация, аналитика, контекст, обучение, бенчмарк | `src/`, `configs/`, `data/splits` |
+| Инженер (внешняя сеть) | загружает свою модель и размечает её на сайте | `service/` → `data/collected/` |
 | Инженер-гидравлик | разметка сценариев, золотые ответы | `data/cases/inbox/*.json` |
 | Ведущий инженер | ревью, согласованность, сложные кейсы | `review_status`, `check_quality` |
 | Продукт/эксплуатация | приёмочные критерии, SLA | `docs/05_EVAL_BENCHMARK.md` |
@@ -77,3 +96,8 @@ epanet-ai/
 3. **Разбиение по сценариям.** Один расчёт целиком попадает в один из сплитов.
 4. **Разметка слепая.** Инженер заполняет ответ до того, как увидит внесённую неисправность.
 5. **Воспроизводимость.** Все сценарии пересоздаются из `.inp` + `configs` + `seed`.
+6. **Зрение — детерминированное.** Пиксели в LLM не уходят: только структурированные факты
+   об экране (`ui`-блок), и если объект определён ненадёжно — ассистент спрашивает, а не угадывает.
+7. **Только реальные данные.** В `data/` нет синтетики; генератор и демо-сеть используются
+   как тестовый стенд (`tests/fixtures/`), а `export_instruct` по умолчанию отсекает синтетические
+   кейсы. Аугментация — отдельный осознанный шаг с явным флагом.

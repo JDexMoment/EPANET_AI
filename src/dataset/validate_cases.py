@@ -10,7 +10,7 @@
 
 Запуск:
     python -m src.dataset.validate_cases --dir data/cases/filled
-    python -m src.dataset.validate_cases --dir data/cases/examples
+    python -m src.dataset.validate_cases --dir data/cases/filled
 """
 from __future__ import annotations
 

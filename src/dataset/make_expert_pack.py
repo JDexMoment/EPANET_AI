@@ -39,7 +39,7 @@ def build_pack(batch_fp: Path) -> Path:
 
     scenarios = []
     for idx, sid in enumerate(batch["scenario_ids"], 1):
-        sdir = common.ROOT / "data" / "scenarios" / sid
+        sdir = common.ROOT / PATHS["scenarios"] / sid
         scen = common.read_json(sdir / "scenario.json")
         derived = common.read_json(sdir / "derived" / "derived_metrics.json")
         evidence_all = common.read_json(sdir / "derived" / "evidence.json")
@@ -47,7 +47,7 @@ def build_pack(batch_fp: Path) -> Path:
         # кейсы этого сценария из партии
         cases = []
         for cid in batch["case_ids"]:
-            fp = common.ROOT / "data" / "cases" / "pending" / f"{cid}.json"
+            fp = common.ROOT / PATHS["pending"] / f"{cid}.json"
             if fp.exists():
                 c = common.read_json(fp)
                 if c["scenario_id"] == sid:
@@ -91,19 +91,32 @@ def build_pack(batch_fp: Path) -> Path:
     }
     payload = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")   # безопасная вставка в <script>
     html = TEMPLATE.read_text(encoding="utf-8").replace("__DATA__", payload)
-    out = common.ROOT / "tools" / f"ExpertCasePack_{batch['batch_id']}.html"
+    out_dir = common.ensure_dir(common.ROOT / PATHS["out"])
+    out = out_dir / f"ExpertCasePack_{batch['batch_id']}.html"
     out.write_text(html, encoding="utf-8")
     return out
+
+
+# пути по умолчанию (переопределяются флагами — удобно для проверок во временном каталоге)
+PATHS = {"scenarios": "data/scenarios", "pending": "data/cases/pending",
+         "batches": "data/batches", "out": "tools"}
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="HTML-форма для эксперта")
     ap.add_argument("--batch", default=None, help="путь к batch_*.json")
     ap.add_argument("--all", action="store_true", help="собрать формы для всех партий")
+    ap.add_argument("--batches-dir", default="data/batches")
+    ap.add_argument("--cases-dir", default="data/cases/pending")
+    ap.add_argument("--scenarios-dir", default="data/scenarios")
+    ap.add_argument("--out-dir", default="tools")
     args = ap.parse_args()
 
+    PATHS.update(scenarios=args.scenarios_dir, pending=args.cases_dir,
+                 batches=args.batches_dir, out=args.out_dir)
+
     if args.all or not args.batch:
-        for fp in sorted((common.ROOT / "data" / "batches").glob("batch_*.json")):
+        for fp in sorted((common.ROOT / args.batches_dir).glob("batch_*.json")):
             out = build_pack(fp)
             print(f"{fp.name} → {out.name} ({common.human_size(out.stat().st_size)})")
     else:

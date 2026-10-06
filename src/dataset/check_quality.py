@@ -36,6 +36,10 @@ def main() -> None:
     args = ap.parse_args()
 
     cdir = common.ROOT / args.dir
+    if not list(cdir.glob("c_*.json")):
+        print(f"Нет размеченных кейсов в {cdir} — отчёт по качеству пока нечего строить.")
+        print("Наполнение: сервис сбора (docs/10_COLLECTION_SERVICE.md) или data/cases/filled/.")
+        return
     by_scenario: dict[str, list[dict]] = defaultdict(list)
     for fp in sorted(cdir.glob("c_*.json")):
         c = common.read_json(fp)

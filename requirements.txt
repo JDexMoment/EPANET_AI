@@ -4,8 +4,12 @@ pandas>=2.0
 numpy>=1.26
 pyyaml>=6.0
 jsonschema>=4.20
-pydantic>=2.5
 openpyxl>=3.1
+
+# сервис сбора данных от инженеров (service/)
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9
 
 # обучение (устанавливается на машине с GPU)
 # torch>=2.3

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EPANET-AI · админ сбора данных</title>
+<style>
+  :root{--ink:#0f2231;--muted:#5d7186;--line:#dbe4ec;--accent:#0b6e99;--bg:#f4f7fa}
+  *{box-sizing:border-box}
+  body{margin:0;font:14px/1.5 "Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+  header{background:#0c2436;color:#fff;padding:12px 20px;display:flex;gap:12px;align-items:center}
+  header h1{margin:0;font-size:16px}
+  .wrap{max-width:1150px;margin:0 auto;padding:16px;display:grid;gap:14px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
+  .card h2{margin:0 0 10px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .btn{font:inherit;border:0;border-radius:8px;padding:9px 14px;cursor:pointer;background:#e8eef4;color:var(--ink)}
+  .btn.primary{background:var(--accent);color:#fff}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+  .kpi{border:1px solid var(--line);border-radius:10px;padding:10px}
+  .kpi b{display:block;font-size:20px} .kpi span{font-size:11px;color:var(--muted)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{border-bottom:1px solid var(--line);padding:6px 5px;text-align:left}
+  th{font-size:11px;color:var(--muted);text-transform:uppercase}
+  input,select{padding:8px 10px;border:1px solid var(--line);border-radius:8px;font:inherit}
+  .flex{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;background:#eef2f6;color:var(--muted)}
+  .note{font-size:12px;color:var(--muted)}
+  .list{max-height:300px;overflow:auto}
+  .hide{display:none}
+  code{background:#eef2f6;padding:1px 5px;border-radius:5px;font-size:12px}
+</style>
+</head>
+<body>
+<header><h1>EPANET-AI · админ сбора данных</h1><span class="pill" id="ver"></span></header>
+
+<div class="wrap">
+  <div class="card" id="loginCard">
+    <h2>Вход администратора</h2>
+    <div class="flex">
+      <input type="password" id="tok" placeholder="ADMIN_TOKEN" style="min-width:320px">
+      <button class="btn primary" id="go">Войти</button>
+      <span class="note" id="msg"></span>
+    </div>
+    <div class="note" style="margin-top:8px">Токен задаётся переменной окружения <code>ADMIN_TOKEN</code>
+      на сервере (см. deploy/service.env).</div>
+  </div>
+
+  <div id="panel" class="hide">
+    <div class="card">
+      <h2>Сводка</h2>
+      <div class="kpis" id="kpis"></div>
+    </div>
+
+    <div class="card">
+      <h2>Выгрузка данных для обучения</h2>
+      <div class="flex">
+        <button class="btn primary" id="expNew">Собрать архив (только новые)</button>
+        <button class="btn" id="expAll">Собрать архив (всё)</button>
+        <a class="btn" id="dlLatest" href="#">Скачать latest.zip</a>
+        <button class="btn" id="backup">Скачать полный бэкап (БД + модели)</button>
+        <span class="note" id="expMsg"></span>
+      </div>
+      <div class="note" style="margin-top:8px">Автоэкспорт работает сам по расписанию на сервере —
+        архив лежит в <code>service_data/exports/</code>; при заданном <code>BACKUP_CMD</code>
+        автоматически копируется наружу. Забрать собранное к себе: <code>python tools/pull_collected.py</code>.</div>
+      <div class="list" style="margin-top:10px"><table id="expT"><thead><tr><th>Файл</th><th>Размер</th><th>Создан</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="card">
+      <h2>Эксперты</h2>
+      <div class="flex">
+        <input id="newName" placeholder="Иван Петров">
+        <select id="newRole"><option value="expert">эксперт</option><option value="lead">ведущий</option></select>
+        <button class="btn primary" id="addExpert">Создать доступ</button>
+        <span class="note" id="newMsg"></span>
+      </div>
+      <div class="list" style="margin-top:10px"><table id="expT2"><thead><tr><th>Эксперт</th><th>Роль</th>
+        <th>Разметок</th><th>Токен (передайте лично)</th><th>Персональная ссылка</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="card">
+      <h2>Модели</h2>
+      <div class="list"><table id="modT"><thead><tr><th>Когда</th><th>Кто</th><th>Файл</th>
+        <th>Объекты</th><th>Статус</th><th>Разметок</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="card">
+      <h2>Последние разметки</h2>
+      <div class="list"><table id="annT"><thead><tr><th>Когда</th><th>Эксперт</th><th>Модель</th>
+        <th>Тип</th><th>Объект</th><th>Слов</th><th>Проверка</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="card">
+      <h2>Журнал событий</h2>
+      <div class="list"><table id="evT"><thead><tr><th>Время</th><th>Событие</th><th>Кто</th><th>Детали</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Безопасное локальное хранилище: в песочнице предпросмотра localStorage может быть
+// недоступен — тогда работаем в памяти и интерфейс не падает.
+const LS = (() => {
+  try { LS.setItem("__t", "1"); LS.removeItem("__t"); return localStorage; }
+  catch (e) {
+    const mem = {};
+    return { getItem: k => (k in mem ? mem[k] : null),
+             setItem: (k, v) => { mem[k] = String(v); },
+             removeItem: k => { delete mem[k]; } };
+  }
+})();
+
+const $ = s => document.querySelector(s);
+const token = () => LS.getItem("admin_token") || "";
+async function api(path, opts = {}) {
+  const headers = Object.assign({ "X-Admin-Token": token() }, opts.headers || {});
+  if (opts.json !== undefined) { headers["Content-Type"] = "application/json"; opts.body = JSON.stringify(opts.json); }
+  const r = await fetch(path, Object.assign({}, opts, { headers }));
+  const t = await r.text(); let d = null; try { d = t ? JSON.parse(t) : null; } catch (e) { d = { raw: t }; }
+  if (!r.ok) throw new Error((d && (d.detail || d.error)) || r.statusText);
+  return d;
+}
+
+async function enterAdmin(t) {
+  LS.setItem("admin_token", t);
+  try { await load(); $("#loginCard").classList.add("hide"); $("#panel").classList.remove("hide"); return true; }
+  catch (e) { $("#msg").textContent = "Неверный токен"; return false; }
+}
+
+$("#go").onclick = () => enterAdmin($("#tok").value.trim());
+
+// вход по ссылке …/admin?token=… (удобно для себя/ведущего инженера)
+(async () => {
+  const fromQuery = new URLSearchParams(location.search).get("token") || "";
+  const h = new URLSearchParams((location.hash || "").replace(/^#/, ""));
+  const t = (fromQuery || h.get("token") || h.get("t") || "").trim();
+  if (t) { $("#tok").value = t; try { history.replaceState(null, "", location.pathname); } catch (e) {} }
+  const saved = token();
+  if (t || saved) await enterAdmin(t || saved);
+})();
+
+function copyLink(i) {
+  const e = (window.__experts || [])[i];
+  if (!e) return;
+  const url = new URL(e.link, location.origin).href;
+  navigator.clipboard?.writeText(url).then(
+    () => alert("Ссылка скопирована:\n" + url),
+    () => prompt("Скопируйте ссылку вручную:", url));
+}
+
+async function load() {
+  const o = await api("/api/admin/overview");
+  const s = o.stats;
+  $("#kpis").innerHTML = [
+    ["Моделей", s.models, `${s.models_ok} с расчётом`],
+    ["Разметок", s.annotations, `новых: ${s.annotations_unexported}`],
+    ["Проблем в элементах", s.element_problems, ""], ["Отчётов", s.reports, ""], ["Вопрос-ответ", s.qa, ""],
+    ["Экспертов", s.experts, ""],
+  ].map(([t, v, sub]) => `<div class="kpi"><span>${t}</span><b>${v}</b><span>${sub}</span></div>`).join("");
+
+  $("#expT tbody").innerHTML = (o.exports || []).map(e =>
+    `<tr><td>${e.file}</td><td>${(e.bytes / 1024 / 1024).toFixed(2)} МБ</td><td>${e.created.replace("T", " ")}</td></tr>`).join("")
+    || '<tr><td colspan="3" class="note">Пока экспортов нет (первый появится автоматически)</td></tr>';
+
+  $("#expT2 tbody").innerHTML = (o.experts || []).map((e, i) =>
+    `<tr><td>${e.expert_id}</td><td>${e.role}</td><td>${e.n_annotations}</td>
+      <td><code>${e.token}</code></td>
+      <td><a href="${e.link}" target="_blank">открыть</a>
+          <button class="btn" style="padding:2px 8px;margin-left:6px"
+                  onclick="copyLink(${i})">копировать ссылку</button></td></tr>`).join("");
+  window.__experts = o.experts || [];
+
+  $("#modT tbody").innerHTML = (o.models || []).map(m =>
+    `<tr><td>${(m.created_at || "").slice(0, 16).replace("T", " ")}</td><td>${m.uploaded_by || ""}</td>
+     <td>${(m.filename || "").slice(0, 28)}</td><td>${m.n_nodes || "—"} / ${m.n_links || "—"}</td>
+     <td><span class="pill">${m.status}</span></td><td>${m.n_annotations}</td></tr>`).join("");
+
+  const anns = await api("/api/admin/annotations.jsonl");
+  $("#annT tbody").innerHTML = anns.slice(0, 60).map(a => {
+    const ch = a.number_check_json ? JSON.parse(a.number_check_json) : null;
+    return `<tr><td>${(a.created_at || "").slice(0, 16).replace("T", " ")}</td><td>${a.expert_id}</td>
+      <td>${(a.model_id || "").slice(0, 10)}</td><td>${a.kind}</td><td>${a.object_id || "—"}</td>
+      <td>${ch ? ch.words : "—"}</td><td>${ch && ch.ok ? "ок" : "замечания"}</td></tr>`; }).join("")
+    || '<tr><td colspan="7" class="note">Разметок пока нет</td></tr>';
+
+  $("#evT tbody").innerHTML = (o.events || []).map(e =>
+    `<tr><td>${(e.ts || "").replace("T", " ")}</td><td>${e.kind}</td><td>${e.actor || ""}</td>
+     <td class="note">${(e.payload_json || "").slice(0, 90)}</td></tr>`).join("");
+}
+
+$("#expNew").onclick = async () => {
+  $("#expMsg").textContent = "Собираю…";
+  try { const r = await api("/api/admin/export?only_unexported=true", { method: "POST" });
+    $("#expMsg").textContent = `Готово: ${r.file} — ${r.cases} кейсов (${(r.bytes / 1024).toFixed(0)} КБ)`;
+    $("#dlLatest").href = "/api/admin/export?name=" + r.file + "&token=" + encodeURIComponent(token());
+    await load();
+  } catch (e) { $("#expMsg").textContent = "Ошибка: " + e.message; }
+};
+$("#expAll").onclick = async () => {
+  $("#expMsg").textContent = "Собираю…";
+  try { const r = await api("/api/admin/export?only_unexported=false", { method: "POST" });
+    $("#expMsg").textContent = `Готово: ${r.file} — ${r.cases} кейсов`;
+  } catch (e) { $("#expMsg").textContent = "Ошибка: " + e.message; }
+};
+$("#addExpert").onclick = async () => {
+  try {
+    const r = await api("/api/admin/experts", { method: "POST",
+      json: { expert_id: $("#newName").value.trim(), role: $("#newRole").value } });
+    $("#newMsg").innerHTML = `Создан: <code>${r.expert_id}</code>, токен <code>${r.token}</code> — передайте лично`;
+    await load();
+  } catch (e) { $("#newMsg").textContent = "Ошибка: " + e.message; }
+};
+$("#backup").onclick = () => {
+  window.location.href = "/api/admin/backup.zip?token=" + encodeURIComponent(token());
+};
+
+(async () => {
+  $("#dlLatest").href = "/api/admin/export?token=" + encodeURIComponent(token());
+  try { const h = await fetch("/health").then(r => r.json()); $("#ver").textContent = "v" + h.version; } catch (e) {}
+  if (token()) { try { await load(); $("#loginCard").classList.add("hide"); $("#panel").classList.remove("hide"); } catch (e) {} }
+})();
+</script>
+</body>
+</html>

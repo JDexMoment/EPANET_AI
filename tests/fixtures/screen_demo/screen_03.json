@@ -1,0 +1,34 @@
+{
+  "screen_id": "demo_03",
+  "file": "screenshots/editor_j105.png",
+  "labeler": "synthetic_demo",
+  "note": "СИНТЕТИЧЕСКИЙ демо-экран (OCR-блоки), не реальный скриншот. Для бенчмарка — разметка через tools/label_screen.html",
+  "golden": {
+    "screen_type": "object_editor",
+    "selected_object": {
+      "id": "J-105",
+      "type": "junction"
+    },
+    "timestep": {
+      "hour": 8
+    },
+    "visible_objects": [
+      {
+        "id": "J-105",
+        "value": 9.96
+      }
+    ],
+    "panels": [
+      "object_editor"
+    ],
+    "actions": [
+      "explain_object",
+      "open_report"
+    ],
+    "ambiguity": {
+      "level": "low",
+      "notes": []
+    },
+    "app": "epanet_ai"
+  }
+}

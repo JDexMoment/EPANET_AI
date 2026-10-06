@@ -1,0 +1,31 @@
+{
+  "screen_id": "demo_05",
+  "file": "screenshots/report_vn01.png",
+  "labeler": "synthetic_demo",
+  "note": "СИНТЕТИЧЕСКИЙ демо-экран (OCR-блоки), не реальный скриншот. Для бенчмарка — разметка через tools/label_screen.html",
+  "golden": {
+    "screen_type": "report",
+    "selected_object": {
+      "id": "J-105",
+      "type": "junction"
+    },
+    "timestep": null,
+    "visible_objects": [
+      {
+        "id": "J-105",
+        "value": 9.96
+      }
+    ],
+    "panels": [
+      "report"
+    ],
+    "actions": [
+      "export_report"
+    ],
+    "ambiguity": {
+      "level": "low",
+      "notes": []
+    },
+    "app": "epanet_ai"
+  }
+}

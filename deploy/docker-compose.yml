@@ -1,0 +1,40 @@
+# Автономная работа: контейнеры перезапускаются сами (restart: always),
+# данные лежат на диске сервера, TLS делает Caddy.
+# Запуск:  docker compose --env-file service.env up -d
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: epanet-ai-collect:1.0
+    restart: always
+    env_file: [./service.env]
+    environment:
+      SERVICE_DATA: /data
+    volumes:
+      - ./data:/data
+    expose: ["8080"]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/health"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: json-file
+      options: { max-size: "20m", max-file: "5" }
+
+  caddy:
+    image: caddy:2-alpine
+    restart: always
+    depends_on: [app]
+    ports: ["80:80", "443:443"]
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-:80}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:

@@ -14,6 +14,8 @@ from .. import analytics, common, context_builder
 def main() -> None:
     ap = argparse.ArgumentParser(description="Аналитический слой по всем сценариям")
     ap.add_argument("--manifest", default="data/scenarios/manifest.jsonl")
+    ap.add_argument("--scenarios-dir", default="data/scenarios",
+                    help="где лежат каталоги расчётов (удобно указать временный каталог для проверок)")
     ap.add_argument("--only", default=None, help="scenario_id — обработать только один")
     ap.add_argument("--skip-context", action="store_true")
     ap.add_argument("--modes", default="whats_happening,make_report",
@@ -28,7 +30,7 @@ def main() -> None:
         sid = rec["scenario_id"]
         if args.only and sid != args.only:
             continue
-        sdir = common.ROOT / "data" / "scenarios" / sid
+        sdir = common.ROOT / args.scenarios_dir / sid
         scen = common.read_json(sdir / "scenario.json")
         baseline = common.ROOT / scen["baseline_ref"] if scen.get("baseline_ref") else None
         try:
