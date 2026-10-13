@@ -1,0 +1,22 @@
+# рабочие каталоги и кеши
+__pycache__/
+*.pyc
+.venv/
+outputs/
+.env
+.verify/
+
+# временные файлы расчётов EPANET/WNTR
+temp.inp
+temp.rpt
+temp.bin
+
+# ── данные заказчика: в репозиторий не коммитим (только структура и шаблон)
+data/screens/raw/
+data/screens/images/
+data/screens/ocr/
+data/screens/*.jsonl
+data/screens/*.json
+
+# ── архив отменённых треков: при желании можно вообще не хранить историю
+# archive/

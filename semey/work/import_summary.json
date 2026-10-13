@@ -1,0 +1,12 @@
+{
+  "src": "/home/user/semey/dataset",
+  "records": 24,
+  "with_answer": 24,
+  "with_visible_text": 0,
+  "sessions": 1,
+  "layouts": {
+    "index": 24
+  },
+  "notes": [],
+  "out": "/home/user/semey/work/manifest.jsonl"
+}

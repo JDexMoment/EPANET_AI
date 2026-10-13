@@ -1,0 +1,125 @@
+# ─────────────────────────────────────────────────────────────
+# vision.yaml — ТРЕК «скриншоты → ответ» (обучение на данных заказчика).
+#
+# Задача: локальная модель должна отвечать на вопрос по скриншоту программы
+# так же, как отвечал Gemini на такой же вопрос в присланном датасете.
+# Модель одна — VLM (vision-language): внутри неё и «CV», и языковая часть.
+# Отдельной CV-модели НЕТ (см. docs/12_SCREENSHOT_FINETUNE.md).
+# ─────────────────────────────────────────────────────────────
+version: 1
+
+question:
+  # Вопрос, который задавали Gemini при сборе датасета. Если в датасете
+  # вопросы разные — они берутся из метаданных и заменяют этот дефолт.
+  default: "Что здесь происходит?"
+  # Варианты формулировки, которые считаются тем же вопросом (для отчётов)
+  aliases:
+    - "Что здесь происходит?"
+    - "Что происходит на экране?"
+    - "Опиши, что здесь происходит"
+
+model:
+  # Решение: одна VLM вместо связки «CV + текстовая LLM».
+  # Основная — 4B: на слабых ПК клиента (без GPU) это единственный реальный вариант.
+  primary: "Qwen/Qwen3-VL-4B-Instruct"
+  # Если у заказчика есть GPU 8-12 ГБ — 8B заметно лучше читает мелкий текст
+  if_gpu_8gb: "Qwen/Qwen3-VL-8B-Instruct"
+  # Совсем слабые машины (2–4 ГБ RAM на модель): 2B, качество чтения чисел ниже
+  if_very_weak: "Qwen/Qwen3-VL-2B-Instruct"
+  # «Thinking»-варианты НЕ берём: медленнее в 3-10 раз, для чтения экрана не нужны
+  avoid: ["*Thinking*"]
+  notes:
+    - "llama.cpp умеет Qwen3-VL (mmproj) с 30.10.2025 — локальный запуск без Python и torch"
+    - "не обучаем vision-энкодер: замораживаем ViT и проекцию, учим только LoRA в языковой части"
+
+images:
+  # Qwen3-VL обучен на ~1M пикселей; больше — только вредит и жрёт токены
+  max_pixels: 1280000          # ≈ 1280×1000
+  min_side: 640                # меньше — модель не прочитает мелкий текст
+  max_side: 1600
+  keep_original: true          # оригиналы не трогаем, храним ссылку на них
+  # Подготовка для мелкого текста: если на экране таблица/панель данных —
+  # дополнительно подаём увеличенный фрагмент как второе изображение
+  crops:
+    enabled: true
+    top_k: 2                   # максимум 2 фрагмента на скриншот
+    min_text_height: 12        # px: мельче — увеличиваем ×2
+
+training:
+  backend: "swift"             # swift (ms-swift) | transformers (TRL+peft)
+  method: "lora"               # QLoRA при нехватке VRAM (--load_in_4bit)
+  lora_rank: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules: "all-linear" # языковая часть; ViT и aligner заморожены
+  freeze_vit: true
+  freeze_aligner: true
+  learning_rate: 1.0e-4
+  num_train_epochs: 2
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 8
+  max_length: 3072             # изображение ≈ 1000-1300 токенов + ответ
+  image_max_token_num: 1280
+  bf16: true
+  gradient_checkpointing: true
+  warmup_ratio: 0.03
+  save_steps: 50
+  logging_steps: 5
+  output_dir: "outputs/qwen3vl-epanet-screens-v1"
+
+splits:
+  # Делим ПО ГРУППАМ, а не по картинкам: скриншоты одной сессии/сети почти
+  # одинаковые, иначе val/test «протекают» в train и метрики врут
+  ratios: { train: 0.8, val: 0.1, test: 0.1 }
+  group_by: "session"          # session | cluster | folder
+  near_duplicate_hamming: 8    # dHash: ≤8 бит различий → одна группа
+
+quality:
+  min_answer_words: 20         # короче — скорее отписка, чем «золотой» ответ
+  max_answer_words: 700
+  min_side_px: 640
+  max_aspect_ratio: 4.0
+  # Фразы-отказы Gemini: такие примеры в обучение не идут
+  refusal_markers:
+    - "не могу"
+    - "не удалось"
+    - "невозможно определить"
+    - "не вижу"
+    - "недостаточно информации"
+    - "as an ai"
+    - "i cannot"
+    - "i'm unable"
+  # Ответы с этими признаками помечаем, но не выбрасываем (решает человек)
+  warn_markers:
+    - "возможно"
+    - "вероятно"
+
+eval:
+  # Пороговые значения для приёмки локальной модели на отложенной выборке
+  thresholds:
+    numbers_f1: 0.75           # совпадение чисел с эталоном Gemini
+    ids_f1: 0.80               # совпадение ID объектов (J105, P-106)
+    grounding_rate: 0.95       # числа ответа подтверждаются текстом экрана (OCR)
+    hallucinated_number_rate: 0.05
+    refusal_rate: 0.05         # доля отказов отвечать
+    meaning_f1: 0.55           # пересечение значимых слов с эталоном
+  # Эталонное сравнение: те же картинки, ответы Gemini (в датасете) — это gold.
+  # Отдельно считаем baseline нетронутой модели, чтобы видеть эффект обучения.
+
+deployment:
+  # Локальный запуск на машине клиента (без GPU тоже работает, но медленнее)
+  runtime: "llama.cpp"
+  quant_primary: "Q4_K_M"      # ≈ 2.5 ГБ для 4B + mmproj F16 ≈ 0.8 ГБ
+  quant_if_gpu: "Q6_K"         # ≈ 3.7 ГБ
+  mmproj: "F16"
+  llama_server_args:
+    - "--jinja"
+    - "--ctx-size 8192"
+    - "--n-predict 1024"
+    - "--temp 0.2"
+    - "--top-p 0.8"
+    - "--top-k 20"
+  # Ограничения железа клиента (жёсткое требование проекта)
+  min_ram_gb: 8
+  min_free_disk_gb: 6
+  cpu_only_latency_note: "4B Q4 на CPU ≈ 20-60 с на ответ; при GPU ≈ 2-5 с"

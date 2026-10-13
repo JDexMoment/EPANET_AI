@@ -1,0 +1,54 @@
+; учебная сеть «как экспортирует AquaBit» — только для тестов конвертера
+[TITLE]
+AquaBit demo export (synthetic, for tests)
+
+[JUNCTIONS]
+;ID            Elev    Demand  Pattern
+ A-1           100.0   12.5    PAT1
+ A-2           102.0   8.0     PAT1
+ A-3           98.5    20.0
+
+[RESERVOIRS]
+;ID            Head
+ SRC           130.0
+
+[TANKS]
+;ID            Elev    InitLvl MinLvl MaxLvl Diam   MinVol  VolCurve
+ T-1           96.0    2.0     0.5    4.0    12.0   0
+
+[PIPES]
+;ID      N1    N2    Length  Diam  Rough  [Status]   ; комментарий
+ P-1     SRC   A-1   218.96  500   75                 ; магистраль (аналог реальной трубы)
+ P-2     A-1   A-2   130.00  200   75     Closed      ; недействующая ветка
+ P-3     A-2   A-3   85.50   150   90     Closed;Недействующая
+ P-4     A-3   T-1   60.00   150   90     CV
+
+[PUMPS]
+;ID      N1    N2    Head Curve
+ PU-1    A-1   T-1   HEAD PC-1
+
+[STATUS]
+ PU-1  Closed
+
+[CURVES]
+ PC-1  0.0   45.0
+ PC-1  0.35  60.0
+
+[PATTERNS]
+ PAT1  1.0  1.1  0.9
+
+[PRESS]
+ A-1  A-2  0  PAT1
+
+[OPTIONS]
+ Units              CMH
+ Headloss           H-W
+ SmoothPattern      No
+ Overdemand
+ MinStepFreq        0.001
+ PrecPress          0.1
+ ALLOWPUMPREV       No
+ PumpMinInp         -10
+ Trials             111
+
+[END]

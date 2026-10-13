@@ -1,0 +1,33 @@
+{
+  "manifest": "/home/user/semey/work/manifest.jsonl",
+  "screens": 24,
+  "ok": 24,
+  "warnings": 3,
+  "blocking": 0,
+  "clusters": 18,
+  "in_clusters": 10,
+  "groups": 18,
+  "group_basis": "похожие кадры (метаданных о сессиях нет или они не различают данные)",
+  "with_unverified_numbers": 0,
+  "blocking_examples": [],
+  "flagged_examples": [
+    {
+      "id": "slide_12",
+      "flags": [
+        "ответ содержит markdown-разметку/списки — стоит нормализовать"
+      ]
+    },
+    {
+      "id": "slide_17",
+      "flags": [
+        "ответ содержит markdown-разметку/списки — стоит нормализовать"
+      ]
+    },
+    {
+      "id": "slide_22",
+      "flags": [
+        "ответ содержит markdown-разметку/списки — стоит нормализовать"
+      ]
+    }
+  ]
+}
