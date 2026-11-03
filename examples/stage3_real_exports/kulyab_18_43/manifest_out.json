@@ -1,0 +1,211 @@
+{
+  "run_id": "run-kulyab-18-43",
+  "pipeline_version": "0.2.0",
+  "processed_at": "2026-10-30T14:49:06.619159Z",
+  "source_archive": "куляб анализ 18_43.csv",
+  "source_archive_sha256": "e27bd9f16c1ec0871c8b94ed4db6ea8810acb1af5370c0e9c12cae8462775612",
+  "source_archive_size_bytes": 256848,
+  "requested_mode": "results",
+  "effective_mode": "results",
+  "mode_switched": false,
+  "stage_completed": "stage2_validate",
+  "validation_status": "fatal",
+  "manifest": {
+    "schema_version": "1.0-legacy-csv",
+    "export_id": "legacy-e27bd9f16c1e",
+    "created_at": "2022-11-28T18:43:00+05:00",
+    "aquabit_version": "legacy-single-csv",
+    "model": {
+      "id": "M-куляб_анализ_18_43",
+      "name": "куляб анализ 18_43",
+      "revision": "legacy"
+    },
+    "scenario": {
+      "id": "S-28.11.2022_18-43-00",
+      "name": "Срез 28.11.2022 18:43:00",
+      "revision": "legacy"
+    },
+    "calculation": {
+      "id": "CALC-e27bd9f1",
+      "status": "performed",
+      "method_headloss": "hazen_williams",
+      "solver": null,
+      "tolerance": null,
+      "max_iterations": null,
+      "converged": true,
+      "convergence_iterations": null
+    },
+    "period": {
+      "start": "2022-11-28T18:43:00+05:00",
+      "end": "2022-11-28T18:43:00+05:00",
+      "step_seconds": 3600,
+      "n_steps": 1,
+      "timezone": "Asia/Tashkent"
+    },
+    "units": {
+      "head": "m",
+      "flow": "m3_h",
+      "pressure": "bar",
+      "velocity": "m_s",
+      "length": "m",
+      "diameter": "mm"
+    },
+    "counts": {
+      "nodes": 1218,
+      "pipes": 1270,
+      "pumps": 49,
+      "reservoirs": 0,
+      "valves": 7,
+      "sources": 31
+    },
+    "missing_data_summary": {}
+  },
+  "raw_snapshot": [
+    {
+      "relative_path": "demands.csv",
+      "sha256": "626d907b8437773cd3d9bc89f4a08a8ed739c2c44b80ce276ece3ce7f79b7eb7",
+      "size_bytes": 134978,
+      "is_csv": true,
+      "detected_encoding": "cp1251",
+      "has_bom": false,
+      "detected_delimiter": "\t",
+      "rows": 5509,
+      "columns": 3,
+      "raw_headers": [
+        "Название узла",
+        "Объем в кубических метрах",
+        "Идентификатор суточной неравномерности"
+      ],
+      "read_error": "Позиция байта 0..1: invalid continuation byte"
+    },
+    {
+      "relative_path": "irregularity_curves.csv",
+      "sha256": "ed24e2bda53655fd7e76c05f066e38916297343d22ca954e1c6fd6f97d815d1a",
+      "size_bytes": 2450,
+      "is_csv": true,
+      "detected_encoding": "cp1251",
+      "has_bom": false,
+      "detected_delimiter": "\t",
+      "rows": 169,
+      "columns": 3,
+      "raw_headers": [
+        "Идентификатор",
+        "Шаг",
+        "Коэффициент"
+      ],
+      "read_error": "Позиция байта 0..1: invalid continuation byte"
+    },
+    {
+      "relative_path": "nodes.csv",
+      "sha256": "e11e4752d8ef4ab88a6c0c6f3614a49b46624b2b0d9bde0fdf7aa926b28f8ccb",
+      "size_bytes": 34566,
+      "is_csv": true,
+      "detected_encoding": "cp1251",
+      "has_bom": false,
+      "detected_delimiter": "\t",
+      "rows": 1218,
+      "columns": 5,
+      "raw_headers": [
+        "Название",
+        "Высота в метрах",
+        "Требуемое давление в метрах",
+        "Рассчитанный Напор в метрах",
+        "Рассчитанное Потребление в кубических метрах"
+      ],
+      "read_error": "Позиция байта 0..1: invalid continuation byte"
+    },
+    {
+      "relative_path": "pipes.csv",
+      "sha256": "d9f85f678a3862160c1436e1e51cb9f289772deb8648b330309d47d65f3017d6",
+      "size_bytes": 73778,
+      "is_csv": true,
+      "detected_encoding": "cp1251",
+      "has_bom": false,
+      "detected_delimiter": "\t",
+      "rows": 1270,
+      "columns": 8,
+      "raw_headers": [
+        "Название",
+        "Начальный узел",
+        "Конечный узел",
+        "Диаметр в миллиметрах",
+        "Длину в метрах",
+        "Поток в кубических метрах в час",
+        "Шероховатость",
+        "Местное сопротивление"
+      ],
+      "read_error": "Позиция байта 0..1: invalid continuation byte"
+    },
+    {
+      "relative_path": "pump_curves.csv",
+      "sha256": "e80ae039b05f3d94e9241db174ee90962df6f858fde6ae457cc39ef8a7da1788",
+      "size_bytes": 1091,
+      "is_csv": true,
+      "detected_encoding": "cp1251",
+      "has_bom": false,
+      "detected_delimiter": "\t",
+      "rows": 49,
+      "columns": 3,
+      "raw_headers": [
+        "Название",
+        "Поток в кубических метрах в час",
+        "Напор в метрах"
+      ],
+      "read_error": "Позиция байта 0..1: invalid continuation byte"
+    },
+    {
+      "relative_path": "pumps.csv",
+      "sha256": "67b74a41c14f1579847d82d4862a6b0936bdeac6864a39d48a1081d511a3eb84",
+      "size_bytes": 1907,
+      "is_csv": true,
+      "detected_encoding": "cp1251",
+      "has_bom": false,
+      "detected_delimiter": "\t",
+      "rows": 49,
+      "columns": 4,
+      "raw_headers": [
+        "Название",
+        "Начальный узел",
+        "Конечный узел",
+        "Поток в кубических метрах в час"
+      ],
+      "read_error": "Позиция байта 0..1: invalid continuation byte"
+    },
+    {
+      "relative_path": "sources.csv",
+      "sha256": "1c297852716361b3840552879aab46a7c64ee46965a767bc2e7225751d5b463e",
+      "size_bytes": 782,
+      "is_csv": true,
+      "detected_encoding": "cp1251",
+      "has_bom": false,
+      "detected_delimiter": "\t",
+      "rows": 31,
+      "columns": 2,
+      "raw_headers": [
+        "Название",
+        "Напор в метрах"
+      ],
+      "read_error": "Позиция байта 0..1: invalid continuation byte"
+    },
+    {
+      "relative_path": "valves.csv",
+      "sha256": "74455cbd7461844ad9caafc1fa48d5d1b2d12ba40359602fea37c4ea07312f77",
+      "size_bytes": 427,
+      "is_csv": true,
+      "detected_encoding": "cp1251",
+      "has_bom": false,
+      "detected_delimiter": "\t",
+      "rows": 7,
+      "columns": 6,
+      "raw_headers": [
+        "Название",
+        "Начальный узел",
+        "Конечный узел",
+        "Тип",
+        "Настройка",
+        "Поток в кубических метрах в час"
+      ],
+      "read_error": "Позиция байта 0..1: invalid continuation byte"
+    }
+  ]
+}

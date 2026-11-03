@@ -1,0 +1,229 @@
+{
+  "run_id": "run-2026-10-30-demo-warn",
+  "pipeline_version": "0.2.0",
+  "processed_at": "2026-10-30T13:46:54.726003Z",
+  "source_archive": "tenino_no_calc_demo.zip",
+  "source_archive_sha256": "b1fcd7e52870dcc703d19d13761cebe89b0105475ffced30102fce9ab6baacef",
+  "source_archive_size_bytes": 2134,
+  "requested_mode": "results",
+  "effective_mode": "no_results",
+  "mode_switched": true,
+  "stage_completed": "stage2_validate",
+  "validation_status": "warning",
+  "manifest": {
+    "schema_version": "1.0",
+    "export_id": "exp-2026-10-30-0001",
+    "created_at": "2026-10-30T10:00:00+05:00",
+    "aquabit_version": "4.2.1",
+    "model": {
+      "id": "M-Tenino",
+      "name": "Тенино",
+      "revision": "r12"
+    },
+    "scenario": {
+      "id": "S-01",
+      "name": "Суточный максимум",
+      "revision": "r03"
+    },
+    "calculation": {
+      "id": "CALC-001",
+      "status": "not_performed",
+      "method_headloss": "hazen_williams",
+      "solver": "epanet_aquabit",
+      "tolerance": 1e-06,
+      "max_iterations": 100,
+      "converged": null,
+      "convergence_iterations": null
+    },
+    "period": {
+      "start": "2026-10-30T00:00:00+05:00",
+      "end": "2026-10-31T00:00:00+05:00",
+      "step_seconds": 3600,
+      "n_steps": 24,
+      "timezone": "Asia/Tashkent"
+    },
+    "units": {
+      "head": "m",
+      "flow": "m3_h",
+      "pressure": "bar",
+      "velocity": "m_s",
+      "length": "m",
+      "diameter": "mm"
+    },
+    "counts": {
+      "nodes": 3,
+      "pipes": 2,
+      "pumps": 1,
+      "reservoirs": 1,
+      "valves": 0,
+      "sources": 1
+    },
+    "missing_data_summary": {
+      "nodes_without_demand_pct": 33.3,
+      "pumps_without_curve": 0
+    }
+  },
+  "raw_snapshot": [
+    {
+      "relative_path": "demands.csv",
+      "sha256": "ceb6fcad7539e035246c87041ce06682f441093aaf29b731534d2d1271b62853",
+      "size_bytes": 84,
+      "is_csv": true,
+      "detected_encoding": "utf-8",
+      "has_bom": false,
+      "detected_delimiter": ",",
+      "rows": 2,
+      "columns": 3,
+      "raw_headers": [
+        "node_id",
+        "base_demand_m3_h",
+        "curve_id"
+      ],
+      "read_error": null
+    },
+    {
+      "relative_path": "irregularity_curves.csv",
+      "sha256": "545c7e66c57083d7300d450fbdfdfeedbc0c1cedafc5aa294bb2c7a79464ec7c",
+      "size_bytes": 100,
+      "is_csv": true,
+      "detected_encoding": "utf-8",
+      "has_bom": false,
+      "detected_delimiter": ",",
+      "rows": 3,
+      "columns": 3,
+      "raw_headers": [
+        "curve_id",
+        "step_index",
+        "multiplier"
+      ],
+      "read_error": null
+    },
+    {
+      "relative_path": "manifest.json",
+      "sha256": "af2e42b791508e9f8789be3df0cec7bca2e4c1bcb75625156b210166c65969c1",
+      "size_bytes": 1142,
+      "is_csv": false,
+      "detected_encoding": "utf-8",
+      "has_bom": false,
+      "detected_delimiter": null,
+      "rows": null,
+      "columns": null,
+      "raw_headers": null,
+      "read_error": null
+    },
+    {
+      "relative_path": "nodes.csv",
+      "sha256": "d8f25a8bbe2e236b777acf34c2c44cb0c5ff6a207059046e17f407146e583e65",
+      "size_bytes": 154,
+      "is_csv": true,
+      "detected_encoding": "utf-8",
+      "has_bom": false,
+      "detected_delimiter": ",",
+      "rows": 3,
+      "columns": 5,
+      "raw_headers": [
+        "id",
+        "name",
+        "elevation_m",
+        "required_pressure_m",
+        "calculated_head_m"
+      ],
+      "read_error": null
+    },
+    {
+      "relative_path": "pipes.csv",
+      "sha256": "0bd5fea51f4c11829e92ea1b28fd762135c1ab048be4eff47830db377cc4e078",
+      "size_bytes": 158,
+      "is_csv": true,
+      "detected_encoding": "utf-8",
+      "has_bom": false,
+      "detected_delimiter": ",",
+      "rows": 2,
+      "columns": 7,
+      "raw_headers": [
+        "id",
+        "name",
+        "start_node_id",
+        "end_node_id",
+        "length_m",
+        "diameter_mm",
+        "roughness"
+      ],
+      "read_error": null
+    },
+    {
+      "relative_path": "pump_curves.csv",
+      "sha256": "b44d0147ddbd71c4807e0808d73cc026a0c1aaa79363c47e260f509347874c23",
+      "size_bytes": 61,
+      "is_csv": true,
+      "detected_encoding": "utf-8",
+      "has_bom": false,
+      "detected_delimiter": ",",
+      "rows": 2,
+      "columns": 3,
+      "raw_headers": [
+        "pump_id",
+        "flow_m3_h",
+        "head_m"
+      ],
+      "read_error": null
+    },
+    {
+      "relative_path": "pumps.csv",
+      "sha256": "990233014f0d822a47ad9d9b066af9b945be46dc249bf5b744f4795410ee92d2",
+      "size_bytes": 74,
+      "is_csv": true,
+      "detected_encoding": "utf-8",
+      "has_bom": false,
+      "detected_delimiter": ",",
+      "rows": 1,
+      "columns": 5,
+      "raw_headers": [
+        "id",
+        "name",
+        "start_node_id",
+        "end_node_id",
+        "curve_id"
+      ],
+      "read_error": null
+    },
+    {
+      "relative_path": "reservoirs.csv",
+      "sha256": "9f547cb627c4813651b03ee4c7074906148530a88507044c5c85defbc87911df",
+      "size_bytes": 85,
+      "is_csv": true,
+      "detected_encoding": "utf-8",
+      "has_bom": false,
+      "detected_delimiter": ",",
+      "rows": 1,
+      "columns": 6,
+      "raw_headers": [
+        "id",
+        "name",
+        "elevation_m",
+        "level_m",
+        "min_level_m",
+        "max_level_m"
+      ],
+      "read_error": null
+    },
+    {
+      "relative_path": "sources.csv",
+      "sha256": "a17f1d1ffd3e359d56c0f9b020f4f6392a9c427a63339405d69d4cf84701de82",
+      "size_bytes": 48,
+      "is_csv": true,
+      "detected_encoding": "utf-8",
+      "has_bom": false,
+      "detected_delimiter": ",",
+      "rows": 1,
+      "columns": 4,
+      "raw_headers": [
+        "id",
+        "name",
+        "head_m",
+        "flow_m3_h"
+      ],
+      "read_error": null
+    }
+  ]
+}

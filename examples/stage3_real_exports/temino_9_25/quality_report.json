@@ -1,0 +1,172 @@
+{
+  "demands.csv": {
+    "rows": 210,
+    "nulls_by_field": {
+      "node_id": 0,
+      "base_demand_m3_h": 0,
+      "curve_id": 0
+    },
+    "zeros_by_field": {},
+    "nans_by_field": {},
+    "out_of_range": {},
+    "outliers": {
+      "base_demand_m3_h": 16
+    },
+    "unit_converted_fields": [],
+    "timestamp_gaps": 0
+  },
+  "irregularity_curves.csv": {
+    "rows": 168,
+    "nulls_by_field": {
+      "curve_id": 0,
+      "step_index": 0,
+      "multiplier": 0
+    },
+    "zeros_by_field": {
+      "step_index": 7
+    },
+    "nans_by_field": {},
+    "out_of_range": {},
+    "outliers": {
+      "multiplier": 10
+    },
+    "unit_converted_fields": [],
+    "timestamp_gaps": 0
+  },
+  "nodes.csv": {
+    "rows": 530,
+    "nulls_by_field": {
+      "id": 0,
+      "name": 0,
+      "elevation_m": 0,
+      "required_pressure_m": 316,
+      "calculated_head_m": 0,
+      "calculated_demand_m3_h": 0
+    },
+    "zeros_by_field": {
+      "calculated_demand_m3_h": 321
+    },
+    "nans_by_field": {},
+    "out_of_range": {},
+    "outliers": {
+      "required_pressure_m": 104,
+      "calculated_head_m": 127
+    },
+    "unit_converted_fields": [],
+    "timestamp_gaps": 0
+  },
+  "pipes.csv": {
+    "rows": 561,
+    "nulls_by_field": {
+      "id": 0,
+      "name": 0,
+      "start_node_id": 0,
+      "end_node_id": 0,
+      "diameter_mm": 0,
+      "length_m": 0,
+      "flow_m3_h": 0,
+      "roughness": 0,
+      "minor_loss_coeff": 0
+    },
+    "zeros_by_field": {
+      "flow_m3_h": 27,
+      "minor_loss_coeff": 561
+    },
+    "nans_by_field": {},
+    "out_of_range": {},
+    "outliers": {
+      "diameter_mm": 66,
+      "length_m": 59,
+      "flow_m3_h": 125
+    },
+    "unit_converted_fields": [],
+    "timestamp_gaps": 0
+  },
+  "pump_curves.csv": {
+    "rows": 21,
+    "nulls_by_field": {
+      "pump_id": 0,
+      "flow_m3_h": 0,
+      "head_m": 0
+    },
+    "zeros_by_field": {},
+    "nans_by_field": {},
+    "out_of_range": {},
+    "outliers": {
+      "flow_m3_h": 6
+    },
+    "unit_converted_fields": [],
+    "timestamp_gaps": 0
+  },
+  "pumps.csv": {
+    "rows": 21,
+    "nulls_by_field": {
+      "id": 0,
+      "name": 0,
+      "start_node_id": 0,
+      "end_node_id": 0,
+      "flow_m3_h": 0
+    },
+    "zeros_by_field": {
+      "flow_m3_h": 15
+    },
+    "nans_by_field": {},
+    "out_of_range": {},
+    "outliers": {},
+    "unit_converted_fields": [],
+    "timestamp_gaps": 0
+  },
+  "sources.csv": {
+    "rows": 1,
+    "nulls_by_field": {
+      "id": 0,
+      "name": 0,
+      "head_m": 0
+    },
+    "zeros_by_field": {},
+    "nans_by_field": {},
+    "out_of_range": {},
+    "outliers": {},
+    "unit_converted_fields": [],
+    "timestamp_gaps": 0
+  },
+  "valves.csv": {
+    "rows": 3,
+    "nulls_by_field": {
+      "id": 0,
+      "name": 0,
+      "start_node_id": 0,
+      "end_node_id": 0,
+      "valve_type": 0,
+      "setting": 0,
+      "flow_m3_h": 0
+    },
+    "zeros_by_field": {},
+    "nans_by_field": {},
+    "out_of_range": {},
+    "outliers": {},
+    "unit_converted_fields": [],
+    "timestamp_gaps": 0
+  },
+  "overall": {
+    "status": "warning",
+    "reasons": [
+      "detect_encoding_and_delimiter in demands.csv",
+      "detect_encoding_and_delimiter in irregularity_curves.csv",
+      "detect_encoding_and_delimiter in nodes.csv",
+      "detect_encoding_and_delimiter in pipes.csv",
+      "detect_encoding_and_delimiter in pump_curves.csv",
+      "detect_encoding_and_delimiter in pumps.csv",
+      "detect_encoding_and_delimiter in sources.csv",
+      "detect_encoding_and_delimiter in valves.csv",
+      "derive_id_from_legacy_name_column in nodes.csv",
+      "derive_id_from_legacy_name_column in pipes.csv",
+      "derive_id_from_legacy_name_column in pumps.csv",
+      "derive_id_from_legacy_name_column in sources.csv",
+      "derive_id_from_legacy_name_column in valves.csv",
+      "strip_legacy_endpoint_prefix in pipes.csv",
+      "strip_legacy_endpoint_prefix in pumps.csv",
+      "strip_legacy_endpoint_prefix in valves.csv"
+    ]
+  }
+}

@@ -1,0 +1,313 @@
+{
+  "status": "warning",
+  "requested_mode": "results",
+  "effective_mode": "results",
+  "mode_switched": false,
+  "strict_profile": false,
+  "blocked_pump_analysis_ids": [
+    "N36",
+    "N37",
+    "N38",
+    "N39",
+    "N40",
+    "N41",
+    "N156",
+    "N157",
+    "N158",
+    "N159",
+    "N160",
+    "N161",
+    "N162",
+    "N163",
+    "N164",
+    "N165",
+    "N166",
+    "N167",
+    "N188",
+    "N189",
+    "N190"
+  ],
+  "checks": [
+    {
+      "code": "ENCODING_ERROR",
+      "severity": "warning",
+      "count": 8,
+      "message": "Обнаружены CSV-файлы не в кодировке UTF-8 (8 шт.) — будет выполнена перекодировка на Этапе 3.1",
+      "developer_hint": "Все CSV в export.zip обязаны выгружаться в кодировке UTF-8 (допустим UTF-8 BOM) — §2.",
+      "examples": [
+        {
+          "file": "demands.csv",
+          "detected_encoding": "cp1251",
+          "detail": "Позиция байта 0..1: invalid continuation byte"
+        },
+        {
+          "file": "irregularity_curves.csv",
+          "detected_encoding": "cp1251",
+          "detail": "Позиция байта 0..1: invalid continuation byte"
+        },
+        {
+          "file": "nodes.csv",
+          "detected_encoding": "cp1251",
+          "detail": "Позиция байта 0..1: invalid continuation byte"
+        },
+        {
+          "file": "pipes.csv",
+          "detected_encoding": "cp1251",
+          "detail": "Позиция байта 0..1: invalid continuation byte"
+        },
+        {
+          "file": "pump_curves.csv",
+          "detected_encoding": "cp1251",
+          "detail": "Позиция байта 0..1: invalid continuation byte"
+        },
+        {
+          "file": "pumps.csv",
+          "detected_encoding": "cp1251",
+          "detail": "Позиция байта 0..1: invalid continuation byte"
+        },
+        {
+          "file": "sources.csv",
+          "detected_encoding": "cp1251",
+          "detail": "Позиция байта 0..1: invalid continuation byte"
+        },
+        {
+          "file": "valves.csv",
+          "detected_encoding": "cp1251",
+          "detail": "Позиция байта 0..1: invalid continuation byte"
+        }
+      ]
+    },
+    {
+      "code": "DELIMITER_MISMATCH",
+      "severity": "warning",
+      "count": 8,
+      "message": "Разделитель полей в 8 CSV-файлах отличается от запятой ','",
+      "developer_hint": "Разработчику AquaBit: замените разделитель '\\t'/';' на запятую ',' (RFC 4180), а дробную часть чисел выводите через точку '.' (§2).",
+      "examples": [
+        {
+          "file": "demands.csv",
+          "expected_delimiter": ",",
+          "detected_delimiter": "'\\t'"
+        },
+        {
+          "file": "irregularity_curves.csv",
+          "expected_delimiter": ",",
+          "detected_delimiter": "'\\t'"
+        },
+        {
+          "file": "nodes.csv",
+          "expected_delimiter": ",",
+          "detected_delimiter": "'\\t'"
+        },
+        {
+          "file": "pipes.csv",
+          "expected_delimiter": ",",
+          "detected_delimiter": "'\\t'"
+        },
+        {
+          "file": "pump_curves.csv",
+          "expected_delimiter": ",",
+          "detected_delimiter": "'\\t'"
+        },
+        {
+          "file": "pumps.csv",
+          "expected_delimiter": ",",
+          "detected_delimiter": "'\\t'"
+        },
+        {
+          "file": "sources.csv",
+          "expected_delimiter": ",",
+          "detected_delimiter": "'\\t'"
+        },
+        {
+          "file": "valves.csv",
+          "expected_delimiter": ",",
+          "detected_delimiter": "'\\t'"
+        }
+      ]
+    },
+    {
+      "code": "UNIT_SUFFIX_MISSING",
+      "severity": "warning",
+      "count": 13,
+      "message": "В 13 колонках отсутствует канонический суффикс единицы измерения (_m, _m3_h, _mm, _bar, _m_s, _iso8601)",
+      "developer_hint": "Рекомендуется передавать единицы измерения в суффиксе имени колонки (§1.8, §2); известные алиасы будут приведены к канону на Этапе 3.3.",
+      "examples": [
+        {
+          "file": "demands.csv",
+          "raw_header": "Объем в кубических метрах",
+          "canonical_target": "base_demand_m3_h"
+        },
+        {
+          "file": "nodes.csv",
+          "raw_header": "Высота в метрах",
+          "canonical_target": "elevation_m"
+        },
+        {
+          "file": "nodes.csv",
+          "raw_header": "Требуемое давление в метрах",
+          "canonical_target": "required_pressure_m"
+        },
+        {
+          "file": "nodes.csv",
+          "raw_header": "Рассчитанный Напор в метрах",
+          "canonical_target": "calculated_head_m"
+        },
+        {
+          "file": "nodes.csv",
+          "raw_header": "Рассчитанное Потребление в кубических метрах",
+          "canonical_target": "calculated_demand_m3_h"
+        },
+        {
+          "file": "pipes.csv",
+          "raw_header": "Диаметр в миллиметрах",
+          "canonical_target": "diameter_mm"
+        },
+        {
+          "file": "pipes.csv",
+          "raw_header": "Длину в метрах",
+          "canonical_target": "length_m"
+        },
+        {
+          "file": "pipes.csv",
+          "raw_header": "Поток в кубических метрах в час",
+          "canonical_target": "flow_m3_h"
+        },
+        {
+          "file": "pump_curves.csv",
+          "raw_header": "Поток в кубических метрах в час",
+          "canonical_target": "flow_m3_h"
+        },
+        {
+          "file": "pump_curves.csv",
+          "raw_header": "Напор в метрах",
+          "canonical_target": "head_m"
+        },
+        {
+          "file": "pumps.csv",
+          "raw_header": "Поток в кубических метрах в час",
+          "canonical_target": "flow_m3_h"
+        },
+        {
+          "file": "sources.csv",
+          "raw_header": "Напор в метрах",
+          "canonical_target": "head_m"
+        },
+        {
+          "file": "valves.csv",
+          "raw_header": "Поток в кубических метрах в час",
+          "canonical_target": "flow_m3_h"
+        }
+      ]
+    },
+    {
+      "code": "PUMP_CURVE_INCOMPLETE",
+      "severity": "warning",
+      "count": 21,
+      "message": "Для 21 насосов паспортная Q-H кривая содержит менее 3 точек — анализ принадлежности рабочей точки кривой для них заблокирован",
+      "developer_hint": "Выгружайте полную Q-H кривую (минимум 3 точки на каждый насос) в pump_curves.csv (§2).",
+      "examples": [
+        {
+          "pump_id": "N36",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "N37",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "N38",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "N39",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "N40",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "N41",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "N156",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "N157",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "N158",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "N159",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "N160",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "N161",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "N162",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "N163",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "N164",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "N165",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "N166",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "N167",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "N188",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "N189",
+          "points_found": 1,
+          "minimum_required": 3
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+# Паспортные и инженерные диапазоны для выставления флага is_out_of_range (Этап 3.9)
+# ВАЖНО: значения не изменяются и не отсекаются — только выставляется булев флаг качества!
+
+schema_version: "1.0"
+robust_zscore_threshold: 3.5
+
+# Правила диапазонов по таблицам и каноническим полям:
+# min_inclusive / min_exclusive / max_inclusive / use_abs (для знаковых потоков и скоростей)
+ranges:
+  nodes.csv:
+    elevation_m:
+      min_inclusive: -500.0
+      max_inclusive: 6000.0
+    required_pressure_m:
+      min_inclusive: 0.0
+      max_inclusive: 250.0
+    calculated_head_m:
+      min_inclusive: -500.0
+      max_inclusive: 6500.0
+
+  pipes.csv:
+    length_m:
+      min_exclusive: 0.0
+      max_inclusive: 100000.0
+    diameter_mm:
+      min_exclusive: 0.0
+      max_inclusive: 5000.0
+    velocity_m_s:
+      use_abs: true
+      min_inclusive: 0.0
+      max_inclusive: 5.0
+    roughness:
+      min_exclusive: 0.0
+      max_inclusive: 1000.0
+
+  sources.csv:
+    head_m:
+      min_inclusive: -500.0
+      max_inclusive: 6500.0
+
+  reservoirs.csv:
+    level_m:
+      min_inclusive: 0.0
+      max_inclusive: 200.0
+
+  pump_curves.csv:
+    flow_m3_h:
+      min_inclusive: 0.0
+      max_inclusive: 100000.0
+    head_m:
+      min_inclusive: 0.0
+      max_inclusive: 2000.0
+
+  irregularity_curves.csv:
+    multiplier:
+      min_inclusive: 0.0
+      max_inclusive: 10.0
+
+  timeseries/pipe_velocity.csv:
+    velocity_m_s:
+      use_abs: true
+      min_inclusive: 0.0
+      max_inclusive: 5.0

@@ -1,0 +1,211 @@
+{
+  "run_id": "run-temino-9-25",
+  "pipeline_version": "0.2.0",
+  "processed_at": "2026-10-30T14:49:05.959448Z",
+  "source_archive": "темино анализ 9_25.csv",
+  "source_archive_sha256": "b5bf63b13260ca95f43c87d02b751c73381fb9a7cd186382c9f0cbef55441cbf",
+  "source_archive_size_bytes": 51185,
+  "requested_mode": "results",
+  "effective_mode": "results",
+  "mode_switched": false,
+  "stage_completed": "stage3_preprocess",
+  "validation_status": "warning",
+  "manifest": {
+    "schema_version": "1.0-legacy-csv",
+    "export_id": "legacy-b5bf63b13260",
+    "created_at": "2026-10-30T09:25:00+05:00",
+    "aquabit_version": "legacy-single-csv",
+    "model": {
+      "id": "M-темино_анализ_9_25",
+      "name": "темино анализ 9_25",
+      "revision": "legacy"
+    },
+    "scenario": {
+      "id": "S-9-25-00",
+      "name": "Срез 9:25:00",
+      "revision": "legacy"
+    },
+    "calculation": {
+      "id": "CALC-b5bf63b1",
+      "status": "performed",
+      "method_headloss": "hazen_williams",
+      "solver": null,
+      "tolerance": null,
+      "max_iterations": null,
+      "converged": true,
+      "convergence_iterations": null
+    },
+    "period": {
+      "start": "2026-10-30T09:25:00+05:00",
+      "end": "2026-10-30T09:25:00+05:00",
+      "step_seconds": 3600,
+      "n_steps": 1,
+      "timezone": "Asia/Tashkent"
+    },
+    "units": {
+      "head": "m",
+      "flow": "m3_h",
+      "pressure": "bar",
+      "velocity": "m_s",
+      "length": "m",
+      "diameter": "mm"
+    },
+    "counts": {
+      "nodes": 530,
+      "pipes": 561,
+      "pumps": 21,
+      "reservoirs": 0,
+      "valves": 3,
+      "sources": 1
+    },
+    "missing_data_summary": {}
+  },
+  "raw_snapshot": [
+    {
+      "relative_path": "demands.csv",
+      "sha256": "d8d5870062d246d8b4b243d9ccb41af5a7b21f3c0cecdd650db12fac89bcc28a",
+      "size_bytes": 3593,
+      "is_csv": true,
+      "detected_encoding": "cp1251",
+      "has_bom": false,
+      "detected_delimiter": "\t",
+      "rows": 210,
+      "columns": 3,
+      "raw_headers": [
+        "Название узла",
+        "Объем в кубических метрах",
+        "Идентификатор суточной неравномерности"
+      ],
+      "read_error": "Позиция байта 0..1: invalid continuation byte"
+    },
+    {
+      "relative_path": "irregularity_curves.csv",
+      "sha256": "ca9ea7fd32fdea4d5411a64d446a13faa5d26565381ed674bf81562cad2beb32",
+      "size_bytes": 2163,
+      "is_csv": true,
+      "detected_encoding": "cp1251",
+      "has_bom": false,
+      "detected_delimiter": "\t",
+      "rows": 168,
+      "columns": 3,
+      "raw_headers": [
+        "Идентификатор",
+        "Шаг",
+        "Коэффициент"
+      ],
+      "read_error": "Позиция байта 0..1: invalid continuation byte"
+    },
+    {
+      "relative_path": "nodes.csv",
+      "sha256": "16f173b845eccc5c5131dda9e6d3aed391b364e482a018264f72fd759fed2f80",
+      "size_bytes": 14222,
+      "is_csv": true,
+      "detected_encoding": "cp1251",
+      "has_bom": false,
+      "detected_delimiter": "\t",
+      "rows": 530,
+      "columns": 5,
+      "raw_headers": [
+        "Название",
+        "Высота в метрах",
+        "Требуемое давление в метрах",
+        "Рассчитанный Напор в метрах",
+        "Рассчитанное Потребление в кубических метрах"
+      ],
+      "read_error": "Позиция байта 0..1: invalid continuation byte"
+    },
+    {
+      "relative_path": "pipes.csv",
+      "sha256": "2aab38ca278b29138fdc4eb9b150928f26b69c3f6788f43a158feb7ed6bba4d5",
+      "size_bytes": 29432,
+      "is_csv": true,
+      "detected_encoding": "cp1251",
+      "has_bom": false,
+      "detected_delimiter": "\t",
+      "rows": 561,
+      "columns": 8,
+      "raw_headers": [
+        "Название",
+        "Начальный узел",
+        "Конечный узел",
+        "Диаметр в миллиметрах",
+        "Длину в метрах",
+        "Поток в кубических метрах в час",
+        "Шероховатость",
+        "Местное сопротивление"
+      ],
+      "read_error": "Позиция байта 0..1: invalid continuation byte"
+    },
+    {
+      "relative_path": "pump_curves.csv",
+      "sha256": "5e31154a01b99a83cf71efb9cc8bc061a1b92e53bf961912cb62333d8a39bcf6",
+      "size_bytes": 286,
+      "is_csv": true,
+      "detected_encoding": "cp1251",
+      "has_bom": false,
+      "detected_delimiter": "\t",
+      "rows": 21,
+      "columns": 3,
+      "raw_headers": [
+        "Название",
+        "Поток в кубических метрах в час",
+        "Напор в метрах"
+      ],
+      "read_error": "Позиция байта 0..1: invalid continuation byte"
+    },
+    {
+      "relative_path": "pumps.csv",
+      "sha256": "4547bc9a5518f0b17b9af4632451cde69004ab544068ccef0837a64e76f926fe",
+      "size_bytes": 677,
+      "is_csv": true,
+      "detected_encoding": "cp1251",
+      "has_bom": false,
+      "detected_delimiter": "\t",
+      "rows": 21,
+      "columns": 4,
+      "raw_headers": [
+        "Название",
+        "Начальный узел",
+        "Конечный узел",
+        "Поток в кубических метрах в час"
+      ],
+      "read_error": "Позиция байта 0..1: invalid continuation byte"
+    },
+    {
+      "relative_path": "sources.csv",
+      "sha256": "a43bcbb66f2db06c84ae44352e65e27d8608a4e76081bf57e5d6308299977913",
+      "size_bytes": 32,
+      "is_csv": true,
+      "detected_encoding": "cp1251",
+      "has_bom": false,
+      "detected_delimiter": "\t",
+      "rows": 1,
+      "columns": 2,
+      "raw_headers": [
+        "Название",
+        "Напор в метрах"
+      ],
+      "read_error": "Позиция байта 0..1: invalid continuation byte"
+    },
+    {
+      "relative_path": "valves.csv",
+      "sha256": "71af2515aa39c0fabaf34b5ad4a6e8ddd8fb7120dc70d6fcc0ccab4d037469e5",
+      "size_bytes": 225,
+      "is_csv": true,
+      "detected_encoding": "cp1251",
+      "has_bom": false,
+      "detected_delimiter": "\t",
+      "rows": 3,
+      "columns": 6,
+      "raw_headers": [
+        "Название",
+        "Начальный узел",
+        "Конечный узел",
+        "Тип",
+        "Настройка",
+        "Поток в кубических метрах в час"
+      ],
+      "read_error": "Позиция байта 0..1: invalid continuation byte"
+    }
+  ]
+}

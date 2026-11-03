@@ -1,0 +1,49 @@
+{
+  "status": "fatal",
+  "requested_mode": "no_results",
+  "effective_mode": "no_results",
+  "mode_switched": false,
+  "strict_profile": true,
+  "blocked_pump_analysis_ids": [],
+  "checks": [
+    {
+      "code": "DUPLICATE_CURVE_ID",
+      "severity": "fatal",
+      "count": 2,
+      "message": "Нарушена уникальность или формат ID кривых неравномерности (2 проблем)",
+      "developer_hint": "Каждая суточная кривая в irregularity_curves.csv должна иметь уникальный ID (без технических префиксов вида '1:') и уникальные шаги (§2).",
+      "examples": [
+        {
+          "file": "irregularity_curves.csv",
+          "row_number": 2,
+          "curve_id": "1:",
+          "reason": "malformed_placeholder_curve_id_colon"
+        },
+        {
+          "file": "irregularity_curves.csv",
+          "row_number": 3,
+          "first_row_number": 2,
+          "curve_id": "1:",
+          "step": "0",
+          "reason": "duplicate_curve_step_entry"
+        }
+      ]
+    },
+    {
+      "code": "ORPHAN_REFERENCE",
+      "severity": "fatal",
+      "count": 1,
+      "message": "Обнаружены осиротевшие ссылки между таблицами (1 шт.)",
+      "developer_hint": "Все ссылки start_node_id, end_node_id, node_id, pump_id и ID во временных рядах должны точно совпадать со строковыми ID объектов в базовых таблицах (§1.7, §3.7).",
+      "examples": [
+        {
+          "file": "pipes.csv",
+          "row_number": 3,
+          "column": "end_node_id",
+          "orphan_id": "N_MISSING_404",
+          "expected_in": "nodes/sources/reservoirs"
+        }
+      ]
+    }
+  ]
+}

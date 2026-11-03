@@ -1,0 +1,654 @@
+{
+  "status": "fatal",
+  "requested_mode": "results",
+  "effective_mode": "results",
+  "mode_switched": false,
+  "strict_profile": false,
+  "blocked_pump_analysis_ids": [
+    "2 машзал 2 подъем №1",
+    "2 машзал 2 подъем №2",
+    "2 подъем 1 машзал №1",
+    "2 подъем 1 машзал №2",
+    "2 подъем 1 машзал №3",
+    "2 подъем 1 машзал №4",
+    "2 подъем 1 машзал №5",
+    "2 подъем 1 машзал №6",
+    "2 подъем 1 машзал №8",
+    "3 подъем №3",
+    "3 подъем №2",
+    "3 подъем №1",
+    "Файзобод Боло №3",
+    "Файзобод Боло №2",
+    "Файзобод Боло №1",
+    "Шамсов №1",
+    "Шамсов №3",
+    "Шамсов №2",
+    "Назаров № 2",
+    "Назаров № 1",
+    "Назаров № 3",
+    "Назаров № 4",
+    "Назаров № 5",
+    "Сино № 2",
+    "Сино № 1",
+    "Сино № 3",
+    "Тудакафш №1",
+    "Панджсола № 2",
+    "Панджсола № 1",
+    "Панджсола № 3",
+    "Панджсола скважина № 1",
+    "Панджсола скважина № 2",
+    "Скв 8 Э",
+    "Чангалак скв № 6",
+    "Чангалак скв № 5",
+    "Чангалак скв № 11",
+    "Чангалак скв № 2",
+    "скв №1",
+    "Скв город",
+    "N641192",
+    "НС Мархаём",
+    "НС Черасул",
+    "2 подъем 1 машзал №7",
+    "N643007",
+    "Джоми",
+    "Вдз Теболай",
+    "Туто №2",
+    "Туто №1",
+    "Туто №3"
+  ],
+  "checks": [
+    {
+      "code": "ENCODING_ERROR",
+      "severity": "warning",
+      "count": 8,
+      "message": "Обнаружены CSV-файлы не в кодировке UTF-8 (8 шт.) — будет выполнена перекодировка на Этапе 3.1",
+      "developer_hint": "Все CSV в export.zip обязаны выгружаться в кодировке UTF-8 (допустим UTF-8 BOM) — §2.",
+      "examples": [
+        {
+          "file": "demands.csv",
+          "detected_encoding": "cp1251",
+          "detail": "Позиция байта 0..1: invalid continuation byte"
+        },
+        {
+          "file": "irregularity_curves.csv",
+          "detected_encoding": "cp1251",
+          "detail": "Позиция байта 0..1: invalid continuation byte"
+        },
+        {
+          "file": "nodes.csv",
+          "detected_encoding": "cp1251",
+          "detail": "Позиция байта 0..1: invalid continuation byte"
+        },
+        {
+          "file": "pipes.csv",
+          "detected_encoding": "cp1251",
+          "detail": "Позиция байта 0..1: invalid continuation byte"
+        },
+        {
+          "file": "pump_curves.csv",
+          "detected_encoding": "cp1251",
+          "detail": "Позиция байта 0..1: invalid continuation byte"
+        },
+        {
+          "file": "pumps.csv",
+          "detected_encoding": "cp1251",
+          "detail": "Позиция байта 0..1: invalid continuation byte"
+        },
+        {
+          "file": "sources.csv",
+          "detected_encoding": "cp1251",
+          "detail": "Позиция байта 0..1: invalid continuation byte"
+        },
+        {
+          "file": "valves.csv",
+          "detected_encoding": "cp1251",
+          "detail": "Позиция байта 0..1: invalid continuation byte"
+        }
+      ]
+    },
+    {
+      "code": "DELIMITER_MISMATCH",
+      "severity": "warning",
+      "count": 8,
+      "message": "Разделитель полей в 8 CSV-файлах отличается от запятой ','",
+      "developer_hint": "Разработчику AquaBit: замените разделитель '\\t'/';' на запятую ',' (RFC 4180), а дробную часть чисел выводите через точку '.' (§2).",
+      "examples": [
+        {
+          "file": "demands.csv",
+          "expected_delimiter": ",",
+          "detected_delimiter": "'\\t'"
+        },
+        {
+          "file": "irregularity_curves.csv",
+          "expected_delimiter": ",",
+          "detected_delimiter": "'\\t'"
+        },
+        {
+          "file": "nodes.csv",
+          "expected_delimiter": ",",
+          "detected_delimiter": "'\\t'"
+        },
+        {
+          "file": "pipes.csv",
+          "expected_delimiter": ",",
+          "detected_delimiter": "'\\t'"
+        },
+        {
+          "file": "pump_curves.csv",
+          "expected_delimiter": ",",
+          "detected_delimiter": "'\\t'"
+        },
+        {
+          "file": "pumps.csv",
+          "expected_delimiter": ",",
+          "detected_delimiter": "'\\t'"
+        },
+        {
+          "file": "sources.csv",
+          "expected_delimiter": ",",
+          "detected_delimiter": "'\\t'"
+        },
+        {
+          "file": "valves.csv",
+          "expected_delimiter": ",",
+          "detected_delimiter": "'\\t'"
+        }
+      ]
+    },
+    {
+      "code": "UNIT_SUFFIX_MISSING",
+      "severity": "warning",
+      "count": 13,
+      "message": "В 13 колонках отсутствует канонический суффикс единицы измерения (_m, _m3_h, _mm, _bar, _m_s, _iso8601)",
+      "developer_hint": "Рекомендуется передавать единицы измерения в суффиксе имени колонки (§1.8, §2); известные алиасы будут приведены к канону на Этапе 3.3.",
+      "examples": [
+        {
+          "file": "demands.csv",
+          "raw_header": "Объем в кубических метрах",
+          "canonical_target": "base_demand_m3_h"
+        },
+        {
+          "file": "nodes.csv",
+          "raw_header": "Высота в метрах",
+          "canonical_target": "elevation_m"
+        },
+        {
+          "file": "nodes.csv",
+          "raw_header": "Требуемое давление в метрах",
+          "canonical_target": "required_pressure_m"
+        },
+        {
+          "file": "nodes.csv",
+          "raw_header": "Рассчитанный Напор в метрах",
+          "canonical_target": "calculated_head_m"
+        },
+        {
+          "file": "nodes.csv",
+          "raw_header": "Рассчитанное Потребление в кубических метрах",
+          "canonical_target": "calculated_demand_m3_h"
+        },
+        {
+          "file": "pipes.csv",
+          "raw_header": "Диаметр в миллиметрах",
+          "canonical_target": "diameter_mm"
+        },
+        {
+          "file": "pipes.csv",
+          "raw_header": "Длину в метрах",
+          "canonical_target": "length_m"
+        },
+        {
+          "file": "pipes.csv",
+          "raw_header": "Поток в кубических метрах в час",
+          "canonical_target": "flow_m3_h"
+        },
+        {
+          "file": "pump_curves.csv",
+          "raw_header": "Поток в кубических метрах в час",
+          "canonical_target": "flow_m3_h"
+        },
+        {
+          "file": "pump_curves.csv",
+          "raw_header": "Напор в метрах",
+          "canonical_target": "head_m"
+        },
+        {
+          "file": "pumps.csv",
+          "raw_header": "Поток в кубических метрах в час",
+          "canonical_target": "flow_m3_h"
+        },
+        {
+          "file": "sources.csv",
+          "raw_header": "Напор в метрах",
+          "canonical_target": "head_m"
+        },
+        {
+          "file": "valves.csv",
+          "raw_header": "Поток в кубических метрах в час",
+          "canonical_target": "flow_m3_h"
+        }
+      ]
+    },
+    {
+      "code": "DUPLICATE_ID",
+      "severity": "fatal",
+      "count": 130,
+      "message": "Обнаружены дублирующиеся или пустые строковые ID объектов (130 шт.)",
+      "developer_hint": "Каждый узел, участок трубы, источник, насос, клапан и резервуар обязан иметь уникальный строковый идентификатор (§1.7, §2).",
+      "examples": [
+        {
+          "file": "nodes.csv",
+          "row_number": 10,
+          "id": "",
+          "reason": "empty_or_null_id"
+        },
+        {
+          "file": "nodes.csv",
+          "row_number": 146,
+          "id": "",
+          "reason": "empty_or_null_id"
+        },
+        {
+          "file": "nodes.csv",
+          "row_number": 354,
+          "id": "",
+          "reason": "empty_or_null_id"
+        },
+        {
+          "file": "nodes.csv",
+          "row_number": 356,
+          "id": "",
+          "reason": "empty_or_null_id"
+        },
+        {
+          "file": "nodes.csv",
+          "row_number": 358,
+          "id": "",
+          "reason": "empty_or_null_id"
+        },
+        {
+          "file": "nodes.csv",
+          "row_number": 361,
+          "id": "",
+          "reason": "empty_or_null_id"
+        },
+        {
+          "file": "nodes.csv",
+          "row_number": 395,
+          "id": "",
+          "reason": "empty_or_null_id"
+        },
+        {
+          "file": "nodes.csv",
+          "row_number": 411,
+          "id": "",
+          "reason": "empty_or_null_id"
+        },
+        {
+          "file": "nodes.csv",
+          "row_number": 513,
+          "id": "",
+          "reason": "empty_or_null_id"
+        },
+        {
+          "file": "nodes.csv",
+          "row_number": 555,
+          "id": "",
+          "reason": "empty_or_null_id"
+        },
+        {
+          "file": "nodes.csv",
+          "row_number": 557,
+          "id": "",
+          "reason": "empty_or_null_id"
+        },
+        {
+          "file": "nodes.csv",
+          "row_number": 560,
+          "id": "",
+          "reason": "empty_or_null_id"
+        },
+        {
+          "file": "nodes.csv",
+          "row_number": 561,
+          "id": "",
+          "reason": "empty_or_null_id"
+        },
+        {
+          "file": "nodes.csv",
+          "row_number": 562,
+          "id": "",
+          "reason": "empty_or_null_id"
+        },
+        {
+          "file": "nodes.csv",
+          "row_number": 584,
+          "id": "",
+          "reason": "empty_or_null_id"
+        },
+        {
+          "file": "nodes.csv",
+          "row_number": 610,
+          "id": "",
+          "reason": "empty_or_null_id"
+        },
+        {
+          "file": "nodes.csv",
+          "row_number": 615,
+          "id": "",
+          "reason": "empty_or_null_id"
+        },
+        {
+          "file": "nodes.csv",
+          "row_number": 712,
+          "id": "",
+          "reason": "empty_or_null_id"
+        },
+        {
+          "file": "nodes.csv",
+          "row_number": 715,
+          "id": "",
+          "reason": "empty_or_null_id"
+        },
+        {
+          "file": "nodes.csv",
+          "row_number": 834,
+          "id": "",
+          "reason": "empty_or_null_id"
+        }
+      ]
+    },
+    {
+      "code": "ORPHAN_REFERENCE",
+      "severity": "fatal",
+      "count": 457,
+      "message": "Обнаружены осиротевшие ссылки между таблицами (457 шт.)",
+      "developer_hint": "Все ссылки start_node_id, end_node_id, node_id, pump_id и ID во временных рядах должны точно совпадать со строковыми ID объектов в базовых таблицах (§1.7, §3.7).",
+      "examples": [
+        {
+          "file": "pipes.csv",
+          "row_number": 4,
+          "column": "Начальный узел",
+          "orphan_id": "Узел ",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 5,
+          "column": "Начальный узел",
+          "orphan_id": "Узел ",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 323,
+          "column": "Начальный узел",
+          "orphan_id": "Узел ",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 324,
+          "column": "Начальный узел",
+          "orphan_id": "Узел ",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 325,
+          "column": "Начальный узел",
+          "orphan_id": "Узел ",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 326,
+          "column": "Начальный узел",
+          "orphan_id": "Узел ",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 340,
+          "column": "Начальный узел",
+          "orphan_id": "Узел ",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 353,
+          "column": "Начальный узел",
+          "orphan_id": "Узел ",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 358,
+          "column": "Начальный узел",
+          "orphan_id": "Узел ",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 417,
+          "column": "Начальный узел",
+          "orphan_id": "Узел ",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 418,
+          "column": "Начальный узел",
+          "orphan_id": "Узел ",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 523,
+          "column": "Начальный узел",
+          "orphan_id": "Резервуар РЧВ Черасул №1",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 582,
+          "column": "Начальный узел",
+          "orphan_id": "Узел ",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 588,
+          "column": "Начальный узел",
+          "orphan_id": "Резервуар Файзобод Боло №2",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 645,
+          "column": "Начальный узел",
+          "orphan_id": "Резервуар Верхний РЧВ (Расулов) №2",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 912,
+          "column": "Начальный узел",
+          "orphan_id": "Узел ",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 936,
+          "column": "Начальный узел",
+          "orphan_id": "Узел ",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 939,
+          "column": "Начальный узел",
+          "orphan_id": "Резервуар Файзобод Боло №2",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 963,
+          "column": "Начальный узел",
+          "orphan_id": "Узел ",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 983,
+          "column": "Начальный узел",
+          "orphan_id": "Узел ",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 1041,
+          "column": "Начальный узел",
+          "orphan_id": "Узел ",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 1060,
+          "column": "Начальный узел",
+          "orphan_id": "Узел ",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 1064,
+          "column": "Начальный узел",
+          "orphan_id": "Узел ",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 1065,
+          "column": "Начальный узел",
+          "orphan_id": "Узел ",
+          "expected_in": "nodes/sources/reservoirs"
+        },
+        {
+          "file": "pipes.csv",
+          "row_number": 1068,
+          "column": "Начальный узел",
+          "orphan_id": "Узел ",
+          "expected_in": "nodes/sources/reservoirs"
+        }
+      ]
+    },
+    {
+      "code": "PUMP_CURVE_INCOMPLETE",
+      "severity": "warning",
+      "count": 49,
+      "message": "Для 49 насосов паспортная Q-H кривая содержит менее 3 точек — анализ принадлежности рабочей точки кривой для них заблокирован",
+      "developer_hint": "Выгружайте полную Q-H кривую (минимум 3 точки на каждый насос) в pump_curves.csv (§2).",
+      "examples": [
+        {
+          "pump_id": "2 машзал 2 подъем №1",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "2 машзал 2 подъем №2",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "2 подъем 1 машзал №1",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "2 подъем 1 машзал №2",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "2 подъем 1 машзал №3",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "2 подъем 1 машзал №4",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "2 подъем 1 машзал №5",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "2 подъем 1 машзал №6",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "2 подъем 1 машзал №8",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "3 подъем №3",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "3 подъем №2",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "3 подъем №1",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "Файзобод Боло №3",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "Файзобод Боло №2",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "Файзобод Боло №1",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "Шамсов №1",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "Шамсов №3",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "Шамсов №2",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "Назаров № 2",
+          "points_found": 1,
+          "minimum_required": 3
+        },
+        {
+          "pump_id": "Назаров № 1",
+          "points_found": 1,
+          "minimum_required": 3
+        }
+      ]
+    }
+  ]
+}

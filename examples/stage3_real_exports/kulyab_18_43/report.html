@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Диагностика валидации экспорта AquaBit — run-kulyab-18-43</title>
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --surface: #ffffff;
+      --border: #d8e0ea;
+      --text: #182230;
+      --muted: #526071;
+      --fatal-bg: #fef2f2;
+      --fatal-border: #dc2626;
+      --fatal-text: #991b1b;
+      --warn-bg: #fffbeb;
+      --warn-border: #d97706;
+      --warn-text: #92400e;
+      --info-bg: #eff6ff;
+      --info-border: #2563eb;
+      --info-text: #1e40af;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 32px 24px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+    .header-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 6px solid var(--fatal-border);
+      border-radius: 10px;
+      padding: 24px 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+    }
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .badge-fatal {
+      background: var(--fatal-bg);
+      color: var(--fatal-text);
+      border: 1px solid #fecaca;
+    }
+    .badge-warn {
+      background: var(--warn-bg);
+      color: var(--warn-text);
+      border: 1px solid #fde68a;
+    }
+    .badge-source {
+      background: var(--info-bg);
+      color: var(--info-text);
+      border: 1px solid #bfdbfe;
+    }
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 22px;
+    }
+    h2 {
+      margin: 0 0 14px 0;
+      font-size: 17px;
+    }
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .meta-item strong {
+      display: block;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .section-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 22px 26px;
+      margin-bottom: 20px;
+    }
+    .check-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+    }
+    .check-card.fatal {
+      border-left: 5px solid var(--fatal-border);
+      background: #fffafa;
+    }
+    .check-card.error, .check-card.warning {
+      border-left: 5px solid var(--warn-border);
+      background: #fffdf7;
+    }
+    .check-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .code-pill {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .hint-box {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: var(--info-bg);
+      border-left: 3px solid var(--info-border);
+      border-radius: 4px;
+      font-size: 13px;
+      color: var(--info-text);
+    }
+    pre.examples {
+      margin: 10px 0 0 0;
+      padding: 10px 12px;
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 6px;
+      font-size: 12px;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      text-align: left;
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    th {
+      background: #f8fafc;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      background: #f1f5f9;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="header-card">
+      <div class="badge-row">
+        <span class="badge badge-fatal">СТАТУС ПАЙПЛАЙНА: ОСТАНОВЛЕН НА ВАЛИДАЦИИ (FATAL)</span>
+        <span class="badge badge-source">[Сводка по результатам AquaBit / Валидатор входа]</span>
+        <span class="badge badge-warn">Интерпретация ИИ отключена до устранения ошибок данных</span>
+      </div>
+      <h1>Отчёт диагностики входного архива AquaBit</h1>
+      <p class="subtitle">
+        Входной архив не прошёл обязательные проверки целостности или контракта данных (§2, Этап 1–2).
+        Ниже приведён полный перечень причин и рекомендации по исправлению выгрузки.
+      </p>
+
+      <div class="meta-grid">
+        <div class="meta-item">
+          <strong>Идентификатор запуска</strong>
+          <code>run-kulyab-18-43</code>
+        </div>
+        <div class="meta-item">
+          <strong>Входной архив</strong>
+          <code>куляб анализ 18_43.csv</code>
+        </div>
+        <div class="meta-item">
+          <strong>Время проверки (UTC)</strong>
+          <span>2026-10-30T14:49:06.619159Z</span>
+        </div>
+        <div class="meta-item">
+          <strong>Модель / Сценарий</strong>
+          
+            <span>куляб анализ 18_43 (M-куляб_анализ_18_43) / Срез 28.11.2022 18:43:00</span>
+          
+        </div>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <h2>Результаты проверок валидации (6)</h2>
+      
+        <div class="check-card warning">
+          <div class="check-header">
+            <span class="code-pill">ENCODING_ERROR</span>
+            <span class="badge badge-warn">
+              WARNING · затронуто: 8
+            </span>
+          </div>
+          <div>Обнаружены CSV-файлы не в кодировке UTF-8 (8 шт.) — будет выполнена перекодировка на Этапе 3.1</div>
+          
+            <div class="hint-box"><strong>Рекомендация:</strong> Все CSV в export.zip обязаны выгружаться в кодировке UTF-8 (допустим UTF-8 BOM) — §2.</div>
+          
+          
+            <pre class="examples">[
+  {
+    "file": "demands.csv",
+    "detected_encoding": "cp1251",
+    "detail": "Позиция байта 0..1: invalid continuation byte"
+  },
+  {
+    "file": "irregularity_curves.csv",
+    "detected_encoding": "cp1251",
+    "detail": "Позиция байта 0..1: invalid continuation byte"
+  },
+  {
+    "file": "nodes.csv",
+    "detected_encoding": "cp1251",
+    "detail": "Позиция байта 0..1: invalid continuation byte"
+  },
+  {
+    "file": "pipes.csv",
+    "detected_encoding": "cp1251",
+    "detail": "Позиция байта 0..1: invalid continuation byte"
+  },
+  {
+    "file": "pump_curves.csv",
+    "detected_encoding": "cp1251",
+    "detail": "Позиция байта 0..1: invalid continuation byte"
+  },
+  {
+    "file": "pumps.csv",
+    "detected_encoding": "cp1251",
+    "detail": "Позиция байта 0..1: invalid continuation byte"
+  },
+  {
+    "file": "sources.csv",
+    "detected_encoding": "cp1251",
+    "detail": "Позиция байта 0..1: invalid continuation byte"
+  },
+  {
+    "file": "valves.csv",
+    "detected_encoding": "cp1251",
+    "detail": "Позиция байта 0..1: invalid continuation byte"
+  }
+]</pre>
+          
+        </div>
+      
+        <div class="check-card warning">
+          <div class="check-header">
+            <span class="code-pill">DELIMITER_MISMATCH</span>
+            <span class="badge badge-warn">
+              WARNING · затронуто: 8
+            </span>
+          </div>
+          <div>Разделитель полей в 8 CSV-файлах отличается от запятой ','</div>
+          
+            <div class="hint-box"><strong>Рекомендация:</strong> Разработчику AquaBit: замените разделитель '\t'/';' на запятую ',' (RFC 4180), а дробную часть чисел выводите через точку '.' (§2).</div>
+          
+          
+            <pre class="examples">[
+  {
+    "file": "demands.csv",
+    "expected_delimiter": ",",
+    "detected_delimiter": "\u0027\\t\u0027"
+  },
+  {
+    "file": "irregularity_curves.csv",
+    "expected_delimiter": ",",
+    "detected_delimiter": "\u0027\\t\u0027"
+  },
+  {
+    "file": "nodes.csv",
+    "expected_delimiter": ",",
+    "detected_delimiter": "\u0027\\t\u0027"
+  },
+  {
+    "file": "pipes.csv",
+    "expected_delimiter": ",",
+    "detected_delimiter": "\u0027\\t\u0027"
+  },
+  {
+    "file": "pump_curves.csv",
+    "expected_delimiter": ",",
+    "detected_delimiter": "\u0027\\t\u0027"
+  },
+  {
+    "file": "pumps.csv",
+    "expected_delimiter": ",",
+    "detected_delimiter": "\u0027\\t\u0027"
+  },
+  {
+    "file": "sources.csv",
+    "expected_delimiter": ",",
+    "detected_delimiter": "\u0027\\t\u0027"
+  },
+  {
+    "file": "valves.csv",
+    "expected_delimiter": ",",
+    "detected_delimiter": "\u0027\\t\u0027"
+  }
+]</pre>
+          
+        </div>
+      
+        <div class="check-card warning">
+          <div class="check-header">
+            <span class="code-pill">UNIT_SUFFIX_MISSING</span>
+            <span class="badge badge-warn">
+              WARNING · затронуто: 13
+            </span>
+          </div>
+          <div>В 13 колонках отсутствует канонический суффикс единицы измерения (_m, _m3_h, _mm, _bar, _m_s, _iso8601)</div>
+          
+            <div class="hint-box"><strong>Рекомендация:</strong> Рекомендуется передавать единицы измерения в суффиксе имени колонки (§1.8, §2); известные алиасы будут приведены к канону на Этапе 3.3.</div>
+          
+          
+            <pre class="examples">[
+  {
+    "file": "demands.csv",
+    "raw_header": "Объем в кубических метрах",
+    "canonical_target": "base_demand_m3_h"
+  },
+  {
+    "file": "nodes.csv",
+    "raw_header": "Высота в метрах",
+    "canonical_target": "elevation_m"
+  },
+  {
+    "file": "nodes.csv",
+    "raw_header": "Требуемое давление в метрах",
+    "canonical_target": "required_pressure_m"
+  },
+  {
+    "file": "nodes.csv",
+    "raw_header": "Рассчитанный Напор в метрах",
+    "canonical_target": "calculated_head_m"
+  },
+  {
+    "file": "nodes.csv",
+    "raw_header": "Рассчитанное Потребление в кубических метрах",
+    "canonical_target": "calculated_demand_m3_h"
+  },
+  {
+    "file": "pipes.csv",
+    "raw_header": "Диаметр в миллиметрах",
+    "canonical_target": "diameter_mm"
+  },
+  {
+    "file": "pipes.csv",
+    "raw_header": "Длину в метрах",
+    "canonical_target": "length_m"
+  },
+  {
+    "file": "pipes.csv",
+    "raw_header": "Поток в кубических метрах в час",
+    "canonical_target": "flow_m3_h"
+  },
+  {
+    "file": "pump_curves.csv",
+    "raw_header": "Поток в кубических метрах в час",
+    "canonical_target": "flow_m3_h"
+  },
+  {
+    "file": "pump_curves.csv",
+    "raw_header": "Напор в метрах",
+    "canonical_target": "head_m"
+  },
+  {
+    "file": "pumps.csv",
+    "raw_header": "Поток в кубических метрах в час",
+    "canonical_target": "flow_m3_h"
+  },
+  {
+    "file": "sources.csv",
+    "raw_header": "Напор в метрах",
+    "canonical_target": "head_m"
+  },
+  {
+    "file": "valves.csv",
+    "raw_header": "Поток в кубических метрах в час",
+    "canonical_target": "flow_m3_h"
+  }
+]</pre>
+          
+        </div>
+      
+        <div class="check-card fatal">
+          <div class="check-header">
+            <span class="code-pill">DUPLICATE_ID</span>
+            <span class="badge badge-fatal">
+              FATAL · затронуто: 130
+            </span>
+          </div>
+          <div>Обнаружены дублирующиеся или пустые строковые ID объектов (130 шт.)</div>
+          
+            <div class="hint-box"><strong>Рекомендация:</strong> Каждый узел, участок трубы, источник, насос, клапан и резервуар обязан иметь уникальный строковый идентификатор (§1.7, §2).</div>
+          
+          
+            <pre class="examples">[
+  {
+    "file": "nodes.csv",
+    "row_number": 10,
+    "id": "",
+    "reason": "empty_or_null_id"
+  },
+  {
+    "file": "nodes.csv",
+    "row_number": 146,
+    "id": "",
+    "reason": "empty_or_null_id"
+  },
+  {
+    "file": "nodes.csv",
+    "row_number": 354,
+    "id": "",
+    "reason": "empty_or_null_id"
+  },
+  {
+    "file": "nodes.csv",
+    "row_number": 356,
+    "id": "",
+    "reason": "empty_or_null_id"
+  },
+  {
+    "file": "nodes.csv",
+    "row_number": 358,
+    "id": "",
+    "reason": "empty_or_null_id"
+  },
+  {
+    "file": "nodes.csv",
+    "row_number": 361,
+    "id": "",
+    "reason": "empty_or_null_id"
+  },
+  {
+    "file": "nodes.csv",
+    "row_number": 395,
+    "id": "",
+    "reason": "empty_or_null_id"
+  },
+  {
+    "file": "nodes.csv",
+    "row_number": 411,
+    "id": "",
+    "reason": "empty_or_null_id"
+  },
+  {
+    "file": "nodes.csv",
+    "row_number": 513,
+    "id": "",
+    "reason": "empty_or_null_id"
+  },
+  {
+    "file": "nodes.csv",
+    "row_number": 555,
+    "id": "",
+    "reason": "empty_or_null_id"
+  },
+  {
+    "file": "nodes.csv",
+    "row_number": 557,
+    "id": "",
+    "reason": "empty_or_null_id"
+  },
+  {
+    "file": "nodes.csv",
+    "row_number": 560,
+    "id": "",
+    "reason": "empty_or_null_id"
+  },
+  {
+    "file": "nodes.csv",
+    "row_number": 561,
+    "id": "",
+    "reason": "empty_or_null_id"
+  },
+  {
+    "file": "nodes.csv",
+    "row_number": 562,
+    "id": "",
+    "reason": "empty_or_null_id"
+  },
+  {
+    "file": "nodes.csv",
+    "row_number": 584,
+    "id": "",
+    "reason": "empty_or_null_id"
+  },
+  {
+    "file": "nodes.csv",
+    "row_number": 610,
+    "id": "",
+    "reason": "empty_or_null_id"
+  },
+  {
+    "file": "nodes.csv",
+    "row_number": 615,
+    "id": "",
+    "reason": "empty_or_null_id"
+  },
+  {
+    "file": "nodes.csv",
+    "row_number": 712,
+    "id": "",
+    "reason": "empty_or_null_id"
+  },
+  {
+    "file": "nodes.csv",
+    "row_number": 715,
+    "id": "",
+    "reason": "empty_or_null_id"
+  },
+  {
+    "file": "nodes.csv",
+    "row_number": 834,
+    "id": "",
+    "reason": "empty_or_null_id"
+  }
+]</pre>
+          
+        </div>
+      
+        <div class="check-card fatal">
+          <div class="check-header">
+            <span class="code-pill">ORPHAN_REFERENCE</span>
+            <span class="badge badge-fatal">
+              FATAL · затронуто: 457
+            </span>
+          </div>
+          <div>Обнаружены осиротевшие ссылки между таблицами (457 шт.)</div>
+          
+            <div class="hint-box"><strong>Рекомендация:</strong> Все ссылки start_node_id, end_node_id, node_id, pump_id и ID во временных рядах должны точно совпадать со строковыми ID объектов в базовых таблицах (§1.7, §3.7).</div>
+          
+          
+            <pre class="examples">[
+  {
+    "file": "pipes.csv",
+    "row_number": 4,
+    "column": "Начальный узел",
+    "orphan_id": "Узел ",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 5,
+    "column": "Начальный узел",
+    "orphan_id": "Узел ",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 323,
+    "column": "Начальный узел",
+    "orphan_id": "Узел ",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 324,
+    "column": "Начальный узел",
+    "orphan_id": "Узел ",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 325,
+    "column": "Начальный узел",
+    "orphan_id": "Узел ",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 326,
+    "column": "Начальный узел",
+    "orphan_id": "Узел ",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 340,
+    "column": "Начальный узел",
+    "orphan_id": "Узел ",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 353,
+    "column": "Начальный узел",
+    "orphan_id": "Узел ",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 358,
+    "column": "Начальный узел",
+    "orphan_id": "Узел ",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 417,
+    "column": "Начальный узел",
+    "orphan_id": "Узел ",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 418,
+    "column": "Начальный узел",
+    "orphan_id": "Узел ",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 523,
+    "column": "Начальный узел",
+    "orphan_id": "Резервуар РЧВ Черасул №1",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 582,
+    "column": "Начальный узел",
+    "orphan_id": "Узел ",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 588,
+    "column": "Начальный узел",
+    "orphan_id": "Резервуар Файзобод Боло №2",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 645,
+    "column": "Начальный узел",
+    "orphan_id": "Резервуар Верхний РЧВ (Расулов) №2",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 912,
+    "column": "Начальный узел",
+    "orphan_id": "Узел ",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 936,
+    "column": "Начальный узел",
+    "orphan_id": "Узел ",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 939,
+    "column": "Начальный узел",
+    "orphan_id": "Резервуар Файзобод Боло №2",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 963,
+    "column": "Начальный узел",
+    "orphan_id": "Узел ",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 983,
+    "column": "Начальный узел",
+    "orphan_id": "Узел ",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 1041,
+    "column": "Начальный узел",
+    "orphan_id": "Узел ",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 1060,
+    "column": "Начальный узел",
+    "orphan_id": "Узел ",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 1064,
+    "column": "Начальный узел",
+    "orphan_id": "Узел ",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 1065,
+    "column": "Начальный узел",
+    "orphan_id": "Узел ",
+    "expected_in": "nodes/sources/reservoirs"
+  },
+  {
+    "file": "pipes.csv",
+    "row_number": 1068,
+    "column": "Начальный узел",
+    "orphan_id": "Узел ",
+    "expected_in": "nodes/sources/reservoirs"
+  }
+]</pre>
+          
+        </div>
+      
+        <div class="check-card warning">
+          <div class="check-header">
+            <span class="code-pill">PUMP_CURVE_INCOMPLETE</span>
+            <span class="badge badge-warn">
+              WARNING · затронуто: 49
+            </span>
+          </div>
+          <div>Для 49 насосов паспортная Q-H кривая содержит менее 3 точек — анализ принадлежности рабочей точки кривой для них заблокирован</div>
+          
+            <div class="hint-box"><strong>Рекомендация:</strong> Выгружайте полную Q-H кривую (минимум 3 точки на каждый насос) в pump_curves.csv (§2).</div>
+          
+          
+            <pre class="examples">[
+  {
+    "pump_id": "2 машзал 2 подъем №1",
+    "points_found": 1,
+    "minimum_required": 3
+  },
+  {
+    "pump_id": "2 машзал 2 подъем №2",
+    "points_found": 1,
+    "minimum_required": 3
+  },
+  {
+    "pump_id": "2 подъем 1 машзал №1",
+    "points_found": 1,
+    "minimum_required": 3
+  },
+  {
+    "pump_id": "2 подъем 1 машзал №2",
+    "points_found": 1,
+    "minimum_required": 3
+  },
+  {
+    "pump_id": "2 подъем 1 машзал №3",
+    "points_found": 1,
+    "minimum_required": 3
+  },
+  {
+    "pump_id": "2 подъем 1 машзал №4",
+    "points_found": 1,
+    "minimum_required": 3
+  },
+  {
+    "pump_id": "2 подъем 1 машзал №5",
+    "points_found": 1,
+    "minimum_required": 3
+  },
+  {
+    "pump_id": "2 подъем 1 машзал №6",
+    "points_found": 1,
+    "minimum_required": 3
+  },
+  {
+    "pump_id": "2 подъем 1 машзал №8",
+    "points_found": 1,
+    "minimum_required": 3
+  },
+  {
+    "pump_id": "3 подъем №3",
+    "points_found": 1,
+    "minimum_required": 3
+  },
+  {
+    "pump_id": "3 подъем №2",
+    "points_found": 1,
+    "minimum_required": 3
+  },
+  {
+    "pump_id": "3 подъем №1",
+    "points_found": 1,
+    "minimum_required": 3
+  },
+  {
+    "pump_id": "Файзобод Боло №3",
+    "points_found": 1,
+    "minimum_required": 3
+  },
+  {
+    "pump_id": "Файзобод Боло №2",
+    "points_found": 1,
+    "minimum_required": 3
+  },
+  {
+    "pump_id": "Файзобод Боло №1",
+    "points_found": 1,
+    "minimum_required": 3
+  },
+  {
+    "pump_id": "Шамсов №1",
+    "points_found": 1,
+    "minimum_required": 3
+  },
+  {
+    "pump_id": "Шамсов №3",
+    "points_found": 1,
+    "minimum_required": 3
+  },
+  {
+    "pump_id": "Шамсов №2",
+    "points_found": 1,
+    "minimum_required": 3
+  },
+  {
+    "pump_id": "Назаров № 2",
+    "points_found": 1,
+    "minimum_required": 3
+  },
+  {
+    "pump_id": "Назаров № 1",
+    "points_found": 1,
+    "minimum_required": 3
+  }
+]</pre>
+          
+        </div>
+      
+    </section>
+
+    <section class="section-card">
+      <h2>Снимок обнаруженных файлов архива [AquaBit Raw Snapshot]</h2>
+      
+        <table>
+          <thead>
+            <tr>
+              <th>Файл</th>
+              <th>Размер (байт)</th>
+              <th>Кодировка</th>
+              <th>Разделитель</th>
+              <th>Строк × Колонок</th>
+              <th>SHA-256 (префикс)</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td><code>demands.csv</code></td>
+                <td>134978</td>
+                <td>cp1251</td>
+                <td><code>	</code></td>
+                <td>
+                  
+                    5509 × 3
+                  
+                </td>
+                <td><code>626d907b8437773c…</code></td>
+              </tr>
+            
+              <tr>
+                <td><code>irregularity_curves.csv</code></td>
+                <td>2450</td>
+                <td>cp1251</td>
+                <td><code>	</code></td>
+                <td>
+                  
+                    169 × 3
+                  
+                </td>
+                <td><code>ed24e2bda53655fd…</code></td>
+              </tr>
+            
+              <tr>
+                <td><code>nodes.csv</code></td>
+                <td>34566</td>
+                <td>cp1251</td>
+                <td><code>	</code></td>
+                <td>
+                  
+                    1218 × 5
+                  
+                </td>
+                <td><code>e11e4752d8ef4ab8…</code></td>
+              </tr>
+            
+              <tr>
+                <td><code>pipes.csv</code></td>
+                <td>73778</td>
+                <td>cp1251</td>
+                <td><code>	</code></td>
+                <td>
+                  
+                    1270 × 8
+                  
+                </td>
+                <td><code>d9f85f678a386216…</code></td>
+              </tr>
+            
+              <tr>
+                <td><code>pump_curves.csv</code></td>
+                <td>1091</td>
+                <td>cp1251</td>
+                <td><code>	</code></td>
+                <td>
+                  
+                    49 × 3
+                  
+                </td>
+                <td><code>e80ae039b05f3d94…</code></td>
+              </tr>
+            
+              <tr>
+                <td><code>pumps.csv</code></td>
+                <td>1907</td>
+                <td>cp1251</td>
+                <td><code>	</code></td>
+                <td>
+                  
+                    49 × 4
+                  
+                </td>
+                <td><code>67b74a41c14f1579…</code></td>
+              </tr>
+            
+              <tr>
+                <td><code>sources.csv</code></td>
+                <td>782</td>
+                <td>cp1251</td>
+                <td><code>	</code></td>
+                <td>
+                  
+                    31 × 2
+                  
+                </td>
+                <td><code>1c297852716361b3…</code></td>
+              </tr>
+            
+              <tr>
+                <td><code>valves.csv</code></td>
+                <td>427</td>
+                <td>cp1251</td>
+                <td><code>	</code></td>
+                <td>
+                  
+                    7 × 6
+                  
+                </td>
+                <td><code>74455cbd7461844a…</code></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+    </section>
+  </div>
+</body>
+</html>

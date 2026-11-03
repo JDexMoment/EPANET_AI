@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Диагностика валидации экспорта AquaBit — {{ manifest_out.run_id }}</title>
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --surface: #ffffff;
+      --border: #d8e0ea;
+      --text: #182230;
+      --muted: #526071;
+      --fatal-bg: #fef2f2;
+      --fatal-border: #dc2626;
+      --fatal-text: #991b1b;
+      --warn-bg: #fffbeb;
+      --warn-border: #d97706;
+      --warn-text: #92400e;
+      --info-bg: #eff6ff;
+      --info-border: #2563eb;
+      --info-text: #1e40af;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 32px 24px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+    .header-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 6px solid var(--fatal-border);
+      border-radius: 10px;
+      padding: 24px 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+    }
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .badge-fatal {
+      background: var(--fatal-bg);
+      color: var(--fatal-text);
+      border: 1px solid #fecaca;
+    }
+    .badge-warn {
+      background: var(--warn-bg);
+      color: var(--warn-text);
+      border: 1px solid #fde68a;
+    }
+    .badge-source {
+      background: var(--info-bg);
+      color: var(--info-text);
+      border: 1px solid #bfdbfe;
+    }
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 22px;
+    }
+    h2 {
+      margin: 0 0 14px 0;
+      font-size: 17px;
+    }
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .meta-item strong {
+      display: block;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .section-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 22px 26px;
+      margin-bottom: 20px;
+    }
+    .check-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+    }
+    .check-card.fatal {
+      border-left: 5px solid var(--fatal-border);
+      background: #fffafa;
+    }
+    .check-card.error, .check-card.warning {
+      border-left: 5px solid var(--warn-border);
+      background: #fffdf7;
+    }
+    .check-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .code-pill {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .hint-box {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: var(--info-bg);
+      border-left: 3px solid var(--info-border);
+      border-radius: 4px;
+      font-size: 13px;
+      color: var(--info-text);
+    }
+    pre.examples {
+      margin: 10px 0 0 0;
+      padding: 10px 12px;
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 6px;
+      font-size: 12px;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      text-align: left;
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    th {
+      background: #f8fafc;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      background: #f1f5f9;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="header-card">
+      <div class="badge-row">
+        <span class="badge badge-fatal">СТАТУС ПАЙПЛАЙНА: ОСТАНОВЛЕН НА ВАЛИДАЦИИ (FATAL)</span>
+        <span class="badge badge-source">[Сводка по результатам AquaBit / Валидатор входа]</span>
+        <span class="badge badge-warn">Интерпретация ИИ отключена до устранения ошибок данных</span>
+      </div>
+      <h1>Отчёт диагностики входного архива AquaBit</h1>
+      <p class="subtitle">
+        Входной архив не прошёл обязательные проверки целостности или контракта данных (§2, Этап 1–2).
+        Ниже приведён полный перечень причин и рекомендации по исправлению выгрузки.
+      </p>
+
+      <div class="meta-grid">
+        <div class="meta-item">
+          <strong>Идентификатор запуска</strong>
+          <code>{{ manifest_out.run_id }}</code>
+        </div>
+        <div class="meta-item">
+          <strong>Входной архив</strong>
+          <code>{{ manifest_out.source_archive }}</code>
+        </div>
+        <div class="meta-item">
+          <strong>Время проверки (UTC)</strong>
+          <span>{{ manifest_out.processed_at }}</span>
+        </div>
+        <div class="meta-item">
+          <strong>Модель / Сценарий</strong>
+          {% if manifest_out.manifest %}
+            <span>{{ manifest_out.manifest.model.name }} ({{ manifest_out.manifest.model.id }}) / {{ manifest_out.manifest.scenario.name }}</span>
+          {% else %}
+            <span>Недоступно (manifest.json отсутствует или повреждён)</span>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <h2>Результаты проверок валидации ({{ validation_report.checks | length }})</h2>
+      {% for check in validation_report.checks %}
+        <div class="check-card {{ check.severity }}">
+          <div class="check-header">
+            <span class="code-pill">{{ check.code }}</span>
+            <span class="badge {% if check.severity == 'fatal' %}badge-fatal{% else %}badge-warn{% endif %}">
+              {{ check.severity | upper }} · затронуто: {{ check.count }}
+            </span>
+          </div>
+          <div>{{ check.message }}</div>
+          {% if check.developer_hint %}
+            <div class="hint-box"><strong>Рекомендация:</strong> {{ check.developer_hint }}</div>
+          {% endif %}
+          {% if check.examples %}
+            <pre class="examples">{{ check.examples | tojson(indent=2) }}</pre>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </section>
+
+    <section class="section-card">
+      <h2>Снимок обнаруженных файлов архива [AquaBit Raw Snapshot]</h2>
+      {% if manifest_out.raw_snapshot %}
+        <table>
+          <thead>
+            <tr>
+              <th>Файл</th>
+              <th>Размер (байт)</th>
+              <th>Кодировка</th>
+              <th>Разделитель</th>
+              <th>Строк × Колонок</th>
+              <th>SHA-256 (префикс)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for snap in manifest_out.raw_snapshot %}
+              <tr>
+                <td><code>{{ snap.relative_path }}</code></td>
+                <td>{{ snap.size_bytes }}</td>
+                <td>{{ snap.detected_encoding or "—" }}{% if snap.has_bom %} (BOM){% endif %}</td>
+                <td><code>{{ snap.detected_delimiter or "—" }}</code></td>
+                <td>
+                  {% if snap.is_csv %}
+                    {{ snap.rows if snap.rows is not none else "?" }} × {{ snap.columns if snap.columns is not none else "?" }}
+                  {% else %}
+                    JSON / прочее
+                  {% endif %}
+                </td>
+                <td><code>{{ snap.sha256[:16] }}…</code></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="subtitle">Файлы внутри архива недоступны (ошибка чтения контейнера ZIP).</p>
+      {% endif %}
+    </section>
+  </div>
+</body>
+</html>

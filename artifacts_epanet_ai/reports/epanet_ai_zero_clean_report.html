@@ -1,0 +1,86 @@
+<!DOCTYPE html><html lang='ru'><head><meta charset='utf-8'><title>EPANET-AI Report</title></head><body style='background:#f1f5f9;padding:24px;'>
+    <div style="font-family:'Segoe UI',Roboto,sans-serif;background:#ffffff;border:1px solid #cbd5e1;border-radius:12px;padding:20px;margin-top:8px;">
+      <div style="background:linear-gradient(135deg,#0f172a,#1e3a8a);color:#fff;padding:18px 22px;border-radius:10px;margin-bottom:16px;">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#93c5fd;font-weight:700;">EPANET-AI &bull; Итоги обработки без консоли</div>
+        <h3 style="margin:6px 0 4px 0;font-size:20px;color:#ffffff;">Очистка 4 целевых таблиц и создание новых файлов завершены</h3>
+        <div style="font-size:13px;color:#cbd5e1;">
+          Обработано городов: <b>6</b> &bull;
+          Удалено нулевых строк: <b>279799</b> &bull;
+          Объём CSV: <b>2684855.1 КБ &rarr; 2294254.8 КБ (&minus;14.55%)</b>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;color:#0f172a;">
+        <thead>
+          <tr style="background:#f8fafc;border-bottom:2px solid #cbd5e1;text-align:left;">
+            <th style="padding:8px;">Город</th>
+            <th style="padding:8px;text-align:right;">Узел (без Hтреб)</th>
+            <th style="padding:8px;text-align:right;">Поток Насос (все 0)</th>
+            <th style="padding:8px;text-align:right;">Потребители (Q=0)</th>
+            <th style="padding:8px;text-align:right;">Потребление (все 0)</th>
+            <th style="padding:8px;text-align:right;">Всего удалено</th>
+            <th style="padding:8px;text-align:right;">Размер До &rarr; После</th>
+            <th style="padding:8px;">Папка новых файлов</th>
+          </tr>
+        </thead>
+        <tbody><tr>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;"><b>Алматы</b></td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">98006</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">0</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">47536</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">48226</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;color:#15803d;">193768</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">1673233.0 &rarr; 1331191.7 КБ (&minus;20.44%)</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;font-size:12px;"><code>D:\Zhenechka\code\EPANET_AI\data_cleaned\Алматы</code></td>
+        </tr><tr>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;"><b>куляб</b></td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">1218</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">16</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">1212</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">120</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;color:#15803d;">2566</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">31757.2 &rarr; 30760.2 КБ (&minus;3.14%)</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;font-size:12px;"><code>D:\Zhenechka\code\EPANET_AI\data_cleaned\куляб</code></td>
+        </tr><tr>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;"><b>модель семей</b></td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">21004</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">35</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">20927</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">292</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;color:#15803d;">42258</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">515728.8 &rarr; 512768.6 КБ (&minus;0.57%)</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;font-size:12px;"><code>D:\Zhenechka\code\EPANET_AI\data_cleaned\модель семей</code></td>
+        </tr><tr>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;"><b>Орша</b></td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">8451</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">44</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">2435</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">7983</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;color:#15803d;">18913</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">201477.9 &rarr; 175381.6 КБ (&minus;12.95%)</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;font-size:12px;"><code>D:\Zhenechka\code\EPANET_AI\data_cleaned\Орша</code></td>
+        </tr><tr>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;"><b>тенино</b></td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">316</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">15</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">320</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">320</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;color:#15803d;">971</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">13699.8 &rarr; 11335.0 КБ (&minus;17.26%)</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;font-size:12px;"><code>D:\Zhenechka\code\EPANET_AI\data_cleaned\тенино</code></td>
+        </tr><tr>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;"><b>хорезмская</b></td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">9878</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">365</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">9209</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">1871</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;color:#15803d;">21323</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;">248958.4 &rarr; 232817.7 КБ (&minus;6.48%)</td>
+            <td style="padding:8px;border-bottom:1px solid #e2e8f0;font-size:12px;"><code>D:\Zhenechka\code\EPANET_AI\data_cleaned\хорезмская</code></td>
+        </tr></tbody>
+      </table>
+      <p style="margin:14px 0 0 0;font-size:12.5px;color:#475569;">
+        Справочная формула скорости (Walski et al., <i>Advanced Water Distribution Modeling and Management</i>, p. 40, Eq. 2.9):
+        <code>V = Q / A = 4Q / (&pi;D&sup2;)</code> (для <code>Q</code> в м&sup3;/ч и <code>D</code> в мм: <code>V [м/с] &approx; 353.67765 &middot; |Q| / D&sup2;</code>).
+      </p>
+    </div>
+    </body></html>

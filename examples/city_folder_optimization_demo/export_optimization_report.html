@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>AquaBit AI — Аудит информативности 13 таблиц и оптимизация экспорта</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+      margin: 0;
+      padding: 24px;
+      line-height: 1.5;
+    }
+    .container { max-width: 1280px; margin: 0 auto; }
+    h1 { font-size: 24px; margin: 0 0 8px 0; color: #0f172a; }
+    h2 { font-size: 18px; margin: 0 0 12px 0; color: #1e293b; }
+    .subtitle { color: #475569; margin-bottom: 20px; font-size: 14px; }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .kpi {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+    .kpi-label { font-size: 12px; text-transform: uppercase; color: #64748b; letter-spacing: 0.04em; }
+    .kpi-val { font-size: 26px; font-weight: 700; margin-top: 4px; color: #0f172a; }
+    .kpi-val.good { color: #15803d; }
+    .kpi-val.warn { color: #b91c1c; }
+    .card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border-bottom: 1px solid #e2e8f0; padding: 10px 8px; text-align: left; vertical-align: top; }
+    th { background: #f1f5f9; font-weight: 600; color: #334155; }
+    .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .muted { color: #64748b; font-size: 12px; font-weight: 400; }
+    .bar-track { background: #e2e8f0; height: 7px; border-radius: 4px; margin-top: 5px; overflow: hidden; }
+    .bar-fill { background: #2563eb; height: 100%; }
+    .tier-badge {
+      display: inline-block;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 4px;
+    }
+    .score-pill {
+      display: inline-block;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+    .verdict-text { color: #334155; font-size: 12.5px; margin-top: 3px; }
+    .alert-bug {
+      background: #fef2f2;
+      border-left: 4px solid #dc2626;
+      color: #991b1b;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+    .missing-box {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-top: 14px;
+      font-size: 13px;
+    }
+    .missing-box ul { margin: 6px 0 0 0; padding-left: 20px; }
+    .compact-table th, .compact-table td { padding: 6px 8px; font-size: 12.5px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Аудит информативности 13 таблиц AquaBit и план оптимизации выгрузки</h1>
+    <div class="subtitle">Автоматический инженерный профиль объёма, разреженности, 60-кратной передискретизации R0..R1439 и целостности топологии</div>
+
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">Городов в выборке</div>
+        <div class="kpi-val">1</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Доля широких матриц R0..R1439</div>
+        <div class="kpi-val warn">99.8%</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Избыточный объём (нули + линейн. шаг 1 мин)</div>
+        <div class="kpi-val warn">98.3%</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Сжатие: часовой CSV без дубля спроса</div>
+        <div class="kpi-val good">&minus;98.4%</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Сжатие: целевой экспорт v2</div>
+        <div class="kpi-val good">&minus;99.5%</div>
+      </div>
+    </div>
+
+    <section class="card">
+      <h2>Ключевые выводы для разработчика AquaBit</h2>
+      <ul><li>КРИТИЧЕСКИЙ БАГ ТОПОЛОГИИ в 1/1 городах (тенино): в Труба.csv, Насос.csv и Клапан.csv поля Начало == Конец содержат &#x27;c&#x27; + ID самого участка (e702 -&gt; c702,c702) вместо ID начального и конечного узлов.</li><li>5 широких динамических файлов R0..R1439 занимают 99.76% всего дискового объёма, тогда как 8 статических таблиц топологии, нагрузок и кривых — всего 0.24%.</li><li>Таблица Потребление Узел.csv (~25–35% объёма папки города) на 60–85% состоит из нулей транзитных узлов и алгебраически дублирует произведение Потребители Узел.csv × График потребления.csv — её исключение сразу экономит треть объёма без потери информации.</li><li>Минутная сетка R0..R1439 (1 440 шагов) представляет собой 60-кратную линейную интерполяцию суточного графика с шагом 1 час: переход на часовые срезы H0..H23 + колонки min/max и отказ от Потребление Узел.csv сокращает объём выгрузки на 98.4%, а компактный формат v2 — на 99.5%.</li></ul>
+    </section>
+
+    <section class="card">
+      <h2>Рейтинг информативности и решения по всем таблицам</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Таблица выгрузки</th>
+            <th>Доля объёма</th>
+            <th>Строки из 0.00</th>
+            <th>Погр. 60-мин интерп. (P99)</th>
+            <th>Информ. ценность</th>
+            <th>Рекомендуемое действие</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+            <tr>
+              <td><strong>Напор Узел.csv</strong><br><span class="muted">wide/node_head.csv</span></td>
+              <td>
+                <div><strong>38.18%</strong> (5.10 МБ)</div>
+                <div class="bar-track"><div class="bar-fill" style="width:38.2%;"></div></div>
+              </td>
+              <td class="num">0.0%</td>
+              <td class="num">0.0082</td>
+              <td class="num"><span class="score-pill" style="background:#15803d;">85/100</span></td>
+              <td>
+                <span class="tier-badge" style="background:#1d4ed8;">СЖАТЬ В 50–60× (ЧАСОВОЙ ШАГ + MIN/MAX)</span>
+                <div class="verdict-text">ВЫСОКАЯ ЦЕННОСТЬ ПРИЗНАКА, НО 60× ПЕРЕДИСКРЕТИЗАЦИЯ: заменить 1 440 минутных колонок R0..R1439 (погрешность часовой интерполяции P99=0.0082 м) на сводку (min_head_m, max_head_m, min_pressure_m, max_pressure_m, hours_below_required) + 24 часовых среза H0..H23. Обязательно добавить свободный напор (pressure_m) из расчётного ядра AquaBit!</div>
+              </td>
+            </tr>
+            
+            <tr>
+              <td><strong>Поток Труба.csv</strong><br><span class="muted">wide/pipe_flow.csv</span></td>
+              <td>
+                <div><strong>32.83%</strong> (4.39 МБ)</div>
+                <div class="bar-track"><div class="bar-fill" style="width:32.8%;"></div></div>
+              </td>
+              <td class="num">4.8%</td>
+              <td class="num">0.0098</td>
+              <td class="num"><span class="score-pill" style="background:#15803d;">85/100</span></td>
+              <td>
+                <span class="tier-badge" style="background:#1d4ed8;">СЖАТЬ В 50–60× (ЧАСОВОЙ ШАГ + MIN/MAX)</span>
+                <div class="verdict-text">ВЫСОКАЯ ЦЕННОСТЬ ПРИЗНАКА, НО 60× ПЕРЕДИСКРЕТИЗАЦИЯ: заменить 1 440 минутных колонок R0..R1439 (погрешность часовой интерполяции P99=0.0098 м³/ч) на сводку (min_flow_m3_h, max_flow_m3_h, max_velocity_m_s, flow_reversals_count) + 24 часовых среза H0..H23. Обязательно добавить скорость потока (velocity_m_s) из ядра AquaBit!</div>
+              </td>
+            </tr>
+            
+            <tr>
+              <td><strong>Потребление Узел.csv</strong><br><span class="muted">wide/node_demand.csv</span></td>
+              <td>
+                <div><strong>27.33%</strong> (3.65 МБ)</div>
+                <div class="bar-track"><div class="bar-fill" style="width:27.3%;"></div></div>
+              </td>
+              <td class="num">60.4%</td>
+              <td class="num">0.0097</td>
+              <td class="num"><span class="score-pill" style="background:#b91c1c;">5/100</span></td>
+              <td>
+                <span class="tier-badge" style="background:#b91c1c;">ИСКЛЮЧИТЬ ИЗ ВЫГРУЗКИ (100% ДУБЛЬ)</span>
+                <div class="verdict-text">ИСКЛЮЧИТЬ ИЗ ВЫГРУЗКИ: 60–85% строк состоят из одних нулей (транзитные узлы), а остальные алгебраически заданы связкой Потребители Узел.csv × График потребления.csv. Оставить выгрузку только для узлов с фактической PDD-редукцией отбора (если режим PDD активен).</div>
+              </td>
+            </tr>
+            
+            <tr>
+              <td><strong>Поток Насос.csv</strong><br><span class="muted">wide/pump_flow.csv</span></td>
+              <td>
+                <div><strong>1.18%</strong> (161.7 КБ)</div>
+                <div class="bar-track"><div class="bar-fill" style="width:2.0%;"></div></div>
+              </td>
+              <td class="num">71.4%</td>
+              <td class="num">0.0093</td>
+              <td class="num"><span class="score-pill" style="background:#b45309;">65/100</span></td>
+              <td>
+                <span class="tier-badge" style="background:#b45309;">ОБЪЕДИНИТЬ В РЕЖИМЫ ОБОРУДОВАНИЯ</span>
+                <div class="verdict-text">ОБЪЕДИНИТЬ И ОБОГАТИТЬ: сейчас 71.4% строк — нули закрытых/резервных агрегатов. Объединить Поток Насос и Поток Клапан в единую компактную таблицу режимов оборудования с полями (id, state, min/max/mean flow_m3_h, dynamic head_m для насосов + часовые срезы H0..H23 / точки переключений).</div>
+              </td>
+            </tr>
+            
+            <tr>
+              <td><strong>Поток Клапан.csv</strong><br><span class="muted">wide/valve_flow.csv</span></td>
+              <td>
+                <div><strong>0.25%</strong> (33.8 КБ)</div>
+                <div class="bar-track"><div class="bar-fill" style="width:2.0%;"></div></div>
+              </td>
+              <td class="num">0.0%</td>
+              <td class="num">0.0093</td>
+              <td class="num"><span class="score-pill" style="background:#b45309;">65/100</span></td>
+              <td>
+                <span class="tier-badge" style="background:#b45309;">ОБЪЕДИНИТЬ В РЕЖИМЫ ОБОРУДОВАНИЯ</span>
+                <div class="verdict-text">ОБЪЕДИНИТЬ И ОБОГАТИТЬ: сейчас 0.0% строк — нули закрытых/резервных агрегатов. Объединить Поток Насос и Поток Клапан в единую компактную таблицу режимов оборудования с полями (id, state, min/max/mean flow_m3_h, dynamic head_m для насосов + часовые срезы H0..H23 / точки переключений).</div>
+              </td>
+            </tr>
+            
+            <tr>
+              <td><strong>Труба.csv</strong><br><span class="muted">pipes.csv</span></td>
+              <td>
+                <div><strong>0.14%</strong> (18.8 КБ)</div>
+                <div class="bar-track"><div class="bar-fill" style="width:2.0%;"></div></div>
+              </td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num"><span class="score-pill" style="background:#15803d;">98/100</span></td>
+              <td>
+                <span class="tier-badge" style="background:#15803d;">ЯДРО: ОСТАВИТЬ И ОБОГАТИТЬ</span>
+                <div class="verdict-text">ЯДРО МОДЕЛИ (&lt;0.4% объёма): оставить обязательно; ИСПРАВИТЬ КРИТИЧЕСКИЙ БАГ Начало == Конец (e702 -&gt; c702,c702) и добавить &#x27;Название&#x27;.</div>
+              </td>
+            </tr>
+            
+            <tr>
+              <td><strong>Узел.csv</strong><br><span class="muted">nodes.csv</span></td>
+              <td>
+                <div><strong>0.05%</strong> (7.2 КБ)</div>
+                <div class="bar-track"><div class="bar-fill" style="width:2.0%;"></div></div>
+              </td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num"><span class="score-pill" style="background:#15803d;">98/100</span></td>
+              <td>
+                <span class="tier-badge" style="background:#15803d;">ЯДРО: ОСТАВИТЬ И ОБОГАТИТЬ</span>
+                <div class="verdict-text">ЯДРО МОДЕЛИ (&lt;0.3% объёма): оставить обязательно; добавить колонку &#x27;Название&#x27; (диспетчерское имя узла).</div>
+              </td>
+            </tr>
+            
+            <tr>
+              <td><strong>Потребители Узел.csv</strong><br><span class="muted">demands.csv</span></td>
+              <td>
+                <div><strong>0.02%</strong> (3.3 КБ)</div>
+                <div class="bar-track"><div class="bar-fill" style="width:2.0%;"></div></div>
+              </td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num"><span class="score-pill" style="background:#15803d;">96/100</span></td>
+              <td>
+                <span class="tier-badge" style="background:#15803d;">ЯДРО: ОСТАВИТЬ И ОБОГАТИТЬ</span>
+                <div class="verdict-text">ЯДРО НАГРУЗОК (&lt;0.2% объёма): компактно хранит только узлы с реальными абонентами и ссылкой на График — полностью заменяет гигантский Потребление Узел.csv!</div>
+              </td>
+            </tr>
+            
+            <tr>
+              <td><strong>График потребления.csv</strong><br><span class="muted">irregularity_curves.csv</span></td>
+              <td>
+                <div><strong>0.02%</strong> (2.1 КБ)</div>
+                <div class="bar-track"><div class="bar-fill" style="width:2.0%;"></div></div>
+              </td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num"><span class="score-pill" style="background:#15803d;">95/100</span></td>
+              <td>
+                <span class="tier-badge" style="background:#15803d;">ЯДРО: ОСТАВИТЬ И ОБОГАТИТЬ</span>
+                <div class="verdict-text">ЯДРО ГРАФИКОВ (&lt;0.05% объёма): оставить обязательно; добавить явную колонку step_index (0..23) к паре ID,Данные.</div>
+              </td>
+            </tr>
+            
+            <tr>
+              <td><strong>Насос.csv</strong><br><span class="muted">pumps.csv</span></td>
+              <td>
+                <div><strong>0.00%</strong> (536 Б)</div>
+                <div class="bar-track"><div class="bar-fill" style="width:2.0%;"></div></div>
+              </td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num"><span class="score-pill" style="background:#15803d;">96/100</span></td>
+              <td>
+                <span class="tier-badge" style="background:#15803d;">ЯДРО: ОСТАВИТЬ И ОБОГАТИТЬ</span>
+                <div class="verdict-text">ЯДРО МОДЕЛИ (&lt;0.05% объёма): оставить обязательно; ИСПРАВИТЬ БАГ Начало == Конец (p1263 -&gt; c1263,c1263) и добавить &#x27;Название&#x27;.</div>
+              </td>
+            </tr>
+            
+            <tr>
+              <td><strong>Клапан.csv</strong><br><span class="muted">valves.csv</span></td>
+              <td>
+                <div><strong>0.00%</strong> (125 Б)</div>
+                <div class="bar-track"><div class="bar-fill" style="width:2.0%;"></div></div>
+              </td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num"><span class="score-pill" style="background:#15803d;">92/100</span></td>
+              <td>
+                <span class="tier-badge" style="background:#15803d;">ЯДРО: ОСТАВИТЬ И ОБОГАТИТЬ</span>
+                <div class="verdict-text">ЯДРО МОДЕЛИ (&lt;0.05% объёма): оставить обязательно; ИСПРАВИТЬ БАГ Начало == Конец (v1284 -&gt; c1284,c1284), диаметр и единицу уставки.</div>
+              </td>
+            </tr>
+            
+            <tr>
+              <td><strong>Кривая QH.csv</strong><br><span class="muted">pump_curves.csv</span></td>
+              <td>
+                <div><strong>0.00%</strong> (91 Б)</div>
+                <div class="bar-track"><div class="bar-fill" style="width:2.0%;"></div></div>
+              </td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num"><span class="score-pill" style="background:#15803d;">94/100</span></td>
+              <td>
+                <span class="tier-badge" style="background:#15803d;">ЯДРО: ОСТАВИТЬ И ОБОГАТИТЬ</span>
+                <div class="verdict-text">ЯДРО ПАСПОРТОВ (&lt;0.05% объёма): оставить обязательно; переименовать безразмерные X,Y в flow_m3_h,head_m и выгружать ≥3 точки на кривую.</div>
+              </td>
+            </tr>
+            
+            <tr>
+              <td><strong>Источники.csv</strong><br><span class="muted">sources.csv</span></td>
+              <td>
+                <div><strong>0.00%</strong> (44 Б)</div>
+                <div class="bar-track"><div class="bar-fill" style="width:2.0%;"></div></div>
+              </td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num"><span class="score-pill" style="background:#15803d;">95/100</span></td>
+              <td>
+                <span class="tier-badge" style="background:#15803d;">ЯДРО: ОСТАВИТЬ И ОБОГАТИТЬ</span>
+                <div class="verdict-text">ЯДРО МОДЕЛИ (&lt;0.05% объёма): оставить обязательно; добавить &#x27;Название&#x27; и привязку к узлу/подачу источника.</div>
+              </td>
+            </tr>
+            
+        </tbody>
+      </table>
+    </section>
+
+    
+            <section class="card">
+              <h2>Город: тенино <span class="muted">(13.37 МБ, 13 файлов, 1440 шагов по 60 с, парсинг 295.8 мс)</span></h2>
+              <div class="alert-bug">КРИТИЧЕСКИЙ БАГ ТОПОЛОГИИ: 585 участков с Начало == Конец ('c' + ID самого участка, напр. e702 &rarr; c702,c702). Топология сети разрушена при сериализации!</div>
+              <p><strong>Аудит избыточности спроса:</strong> Транзитных узлов без абонентов: 320/530 (60.38%), полностью нулевых строк в Потребление Узел.csv: 320/530 (60.38%). На проверенных узлах с известными графиками (210 шт.) расхождение с Потребители Узел × График потребления составляет max=0.0050 м³/ч — таблица Потребление Узел.csv на ~100% избыточна и может быть исключена!</p>
+              <table class="compact-table">
+                <thead>
+                  <tr>
+                    <th>Файл</th>
+                    <th>Объём (доля)</th>
+                    <th>Размерность</th>
+                    <th>Строки из нулей</th>
+                    <th>Квазиконст. (&Delta;&le;0.05)</th>
+                    <th>Макс. погр. 60-мин интерп.</th>
+                    <th>Внутричас. переключений</th>
+                  </tr>
+                </thead>
+                <tbody>
+            <tr>
+              <td>Напор Узел.csv</td>
+              <td class="num">5.10 МБ (38.2%)</td>
+              <td class="num">530 &times; 1441</td>
+              <td class="num">0.0%</td>
+              <td class="num">99.8%</td>
+              <td class="num">0.0092</td>
+              <td class="num">0</td>
+            </tr>
+            
+            <tr>
+              <td>Поток Труба.csv</td>
+              <td class="num">4.39 МБ (32.8%)</td>
+              <td class="num">561 &times; 1441</td>
+              <td class="num">4.8%</td>
+              <td class="num">4.8%</td>
+              <td class="num">0.0098</td>
+              <td class="num">0</td>
+            </tr>
+            
+            <tr>
+              <td>Потребление Узел.csv</td>
+              <td class="num">3.65 МБ (27.3%)</td>
+              <td class="num">530 &times; 1441</td>
+              <td class="num">60.4%</td>
+              <td class="num">62.1%</td>
+              <td class="num">0.0098</td>
+              <td class="num">0</td>
+            </tr>
+            
+            <tr>
+              <td>Поток Насос.csv</td>
+              <td class="num">161.7 КБ (1.2%)</td>
+              <td class="num">21 &times; 1441</td>
+              <td class="num">71.4%</td>
+              <td class="num">71.4%</td>
+              <td class="num">0.0093</td>
+              <td class="num">0</td>
+            </tr>
+            
+            <tr>
+              <td>Поток Клапан.csv</td>
+              <td class="num">33.8 КБ (0.2%)</td>
+              <td class="num">3 &times; 1441</td>
+              <td class="num">0.0%</td>
+              <td class="num">0.0%</td>
+              <td class="num">0.0093</td>
+              <td class="num">0</td>
+            </tr>
+            
+            <tr>
+              <td>Труба.csv</td>
+              <td class="num">18.8 КБ (0.1%)</td>
+              <td class="num">561 &times; 7</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr>
+              <td>Узел.csv</td>
+              <td class="num">7.2 КБ (0.1%)</td>
+              <td class="num">530 &times; 3</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr>
+              <td>Потребители Узел.csv</td>
+              <td class="num">3.3 КБ (0.0%)</td>
+              <td class="num">210 &times; 3</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr>
+              <td>График потребления.csv</td>
+              <td class="num">2.1 КБ (0.0%)</td>
+              <td class="num">145 &times; 3</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr>
+              <td>Насос.csv</td>
+              <td class="num">536 Б (0.0%)</td>
+              <td class="num">21 &times; 4</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr>
+              <td>Клапан.csv</td>
+              <td class="num">125 Б (0.0%)</td>
+              <td class="num">3 &times; 5</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr>
+              <td>Кривая QH.csv</td>
+              <td class="num">91 Б (0.0%)</td>
+              <td class="num">7 &times; 4</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr>
+              <td>Источники.csv</td>
+              <td class="num">44 Б (0.0%)</td>
+              <td class="num">1 &times; 2</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+            </tr>
+            </tbody>
+              </table>
+              <div class="missing-box">
+                <strong>Недостающие высокозначимые признаки для гидравлической интерпретации:</strong>
+                <ul><li>Диспетчерское поле &#x27;Название&#x27; в статических таблицах (Узел, Труба, Насос, Клапан, Источники)</li><li>Скорость потока в трубах (velocity_m_s / max_velocity_m_s) — без неё невозможен контроль заиливания и эрозии (&gt;5 м/с) по Принципу 1</li><li>Свободный напор / давление в узлах (pressure_m) — выгружается только полный пьезометрический напор (Напор Узел), тогда как норматив Требуемое давление задан для свободного напора!</li><li>Динамический напор и статус насоса (head_m, state) — сейчас выгружается только Поток Насос (Q), чего недостаточно для проверки рабочей точки на кривой Q-H</li><li>Таблицы резервуаров (Резервуар.csv + уровни РЧВ/ВБ) — необходимы для контроля опорожнения и перелива емкостей</li><li>Паспорт расчёта manifest.json (шаг расчёта step_seconds, статус сходимости решателя converged, формула потерь напора)</li></ul>
+              </div>
+            </section>
+            
+  </div>
+</body>
+</html>

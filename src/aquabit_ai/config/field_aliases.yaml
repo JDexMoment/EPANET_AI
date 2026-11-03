@@ -1,0 +1,527 @@
+# Декларативный реестр канонических полей, допустимых алиасов заголовков CSV AquaBit,
+# правил линейного перевода единиц и допустимых enum-значений (§4, п. 3.2–3.4).
+# Обновлено по результатам аудита реальных выгрузок AquaBit («Темино», «Куляб», «Модель сетей»).
+
+schema_version: "1.2"
+
+recognized_unit_suffixes:
+  - "_m"
+  - "_mm"
+  - "_km"
+  - "_m3_h"
+  - "_m3_s"
+  - "_m3"
+  - "_l_s"
+  - "_l_min"
+  - "_bar"
+  - "_mpa"
+  - "_kpa"
+  - "_m_s"
+  - "_iso8601"
+  - "_s"
+  - "_sec"
+  - "_min"
+  - "_h"
+  - "_pct"
+  - "_kw"
+
+# Линейные коэффициенты перевода неканонических единиц измерения (только размерности, НЕ гидравлика!)
+unit_conversions:
+  l_s_to_m3_h:
+    from_unit: "l_s"
+    to_unit: "m3_h"
+    multiplier: 3.6
+  m3_s_to_m3_h:
+    from_unit: "m3_s"
+    to_unit: "m3_h"
+    multiplier: 3600.0
+  l_min_to_m3_h:
+    from_unit: "l_min"
+    to_unit: "m3_h"
+    multiplier: 0.06
+  km_to_m:
+    from_unit: "km"
+    to_unit: "m"
+    multiplier: 1000.0
+  kpa_to_bar:
+    from_unit: "kpa"
+    to_unit: "bar"
+    multiplier: 0.01
+  mpa_to_bar:
+    from_unit: "mpa"
+    to_unit: "bar"
+    multiplier: 10.0
+  m_to_mm:
+    from_unit: "m"
+    to_unit: "mm"
+    multiplier: 1000.0
+
+# Колонки с явной неканонической единицей -> целевая каноническая колонка и правило конвертации
+non_canonical_unit_columns:
+  flow_l_s:
+    target_canonical: "flow_m3_h"
+    conversion: "l_s_to_m3_h"
+    is_hydraulic_quantity: true
+  Расход в л/с:
+    target_canonical: "flow_m3_h"
+    conversion: "l_s_to_m3_h"
+    is_hydraulic_quantity: true
+  demand_l_s:
+    target_canonical: "demand_m3_h"
+    conversion: "l_s_to_m3_h"
+    is_hydraulic_quantity: true
+  base_demand_l_s:
+    target_canonical: "base_demand_m3_h"
+    conversion: "l_s_to_m3_h"
+    is_hydraulic_quantity: true
+  length_km:
+    target_canonical: "length_m"
+    conversion: "km_to_m"
+    is_hydraulic_quantity: false
+  Длина в км:
+    target_canonical: "length_m"
+    conversion: "km_to_m"
+    is_hydraulic_quantity: false
+  pressure_kpa:
+    target_canonical: "pressure_bar"
+    conversion: "kpa_to_bar"
+    is_hydraulic_quantity: true
+  pressure_mpa:
+    target_canonical: "pressure_bar"
+    conversion: "mpa_to_bar"
+    is_hydraulic_quantity: true
+  diameter_m:
+    target_canonical: "diameter_mm"
+    conversion: "m_to_mm"
+    is_hydraulic_quantity: false
+
+# Глобальные алиасы: каноническое_имя -> список точных сырых заголовков
+canonical_fields:
+  id:
+    requires_unit_suffix: false
+    kind: "str_id"
+    aliases:
+      - "id"
+      - "ID"
+      - "Id"
+      - "object_id"
+      - "Идентификатор"
+      - "ID объекта"
+      - "Код"
+
+  name:
+    requires_unit_suffix: false
+    kind: "str_text"
+    aliases:
+      - "name"
+      - "Name"
+      - "object_name"
+      - "Наименование"
+      - "Название"
+      - "Имя"
+
+  node_id:
+    requires_unit_suffix: false
+    kind: "str_id"
+    aliases:
+      - "node_id"
+      - "NodeID"
+      - "ID узла"
+      - "Название узла"
+      - "Узел"
+
+  pump_id:
+    requires_unit_suffix: false
+    kind: "str_id"
+    aliases:
+      - "pump_id"
+      - "PumpID"
+      - "ID насоса"
+      - "Название насоса"
+      - "Насос"
+      - "Название"
+
+  curve_id:
+    requires_unit_suffix: false
+    kind: "str_id"
+    aliases:
+      - "curve_id"
+      - "pattern_id"
+      - "CurveID"
+      - "PatternID"
+      - "ID кривой"
+      - "ID графика"
+      - "Кривая насоса"
+      - "График"
+      - "Кривая неравномерности"
+      - "Идентификатор суточной неравномерности"
+      - "Идентификатор"
+
+  start_node_id:
+    requires_unit_suffix: false
+    kind: "str_id"
+    aliases:
+      - "start_node_id"
+      - "start_node"
+      - "from_node_id"
+      - "node1"
+      - "Начало"
+      - "Начальный узел"
+      - "Узел начала"
+      - "ID начального узла"
+
+  end_node_id:
+    requires_unit_suffix: false
+    kind: "str_id"
+    aliases:
+      - "end_node_id"
+      - "end_node"
+      - "to_node_id"
+      - "node2"
+      - "Конец"
+      - "Конечный узел"
+      - "Узел конца"
+      - "ID конечного узла"
+
+  elevation_m:
+    requires_unit_suffix: true
+    canonical_unit: "m"
+    kind: "float_qty"
+    aliases:
+      - "elevation_m"
+      - "elevation"
+      - "z_m"
+      - "Высота"
+      - "Геодезическая отметка в метрах"
+      - "Отметка в метрах"
+      - "Высота в метрах"
+      - "Отметка, м"
+
+  required_pressure_m:
+    requires_unit_suffix: true
+    canonical_unit: "m"
+    kind: "float_qty"
+    aliases:
+      - "required_pressure_m"
+      - "required_head_m"
+      - "min_pressure_m"
+      - "Требуемое давление"
+      - "Требуемый напор в метрах"
+      - "Требуемое давление в метрах"
+      - "Свободный напор требуемый, м"
+
+  calculated_head_m:
+    requires_unit_suffix: true
+    canonical_unit: "m"
+    kind: "float_qty"
+    aliases:
+      - "calculated_head_m"
+      - "calc_head_m"
+      - "Рассчитанный Напор в метрах"
+      - "Рассчитанный напор в метрах"
+      - "Расчётный напор, м"
+
+  calculated_demand_m3_h:
+    requires_unit_suffix: true
+    canonical_unit: "m3_h"
+    kind: "float_qty"
+    aliases:
+      - "calculated_demand_m3_h"
+      - "Рассчитанное Потребление в кубических метрах"
+      - "Рассчитанное потребление в м3/ч"
+
+  head_m:
+    requires_unit_suffix: true
+    canonical_unit: "m"
+    kind: "float_qty"
+    aliases:
+      - "head_m"
+      - "total_head_m"
+      - "Расчетный напор"
+      - "Расчётный напор"
+      - "Напор в метрах"
+      - "Полный напор в метрах"
+      - "Напор, м"
+
+  pressure_m:
+    requires_unit_suffix: true
+    canonical_unit: "m"
+    kind: "float_qty"
+    aliases:
+      - "pressure_m"
+      - "free_head_m"
+      - "Свободный напор в метрах"
+      - "Давление в метрах"
+
+  pressure_bar:
+    requires_unit_suffix: true
+    canonical_unit: "bar"
+    kind: "float_qty"
+    aliases:
+      - "pressure_bar"
+      - "pressure_kpa"
+      - "pressure_mpa"
+      - "Давление в барах"
+      - "Давление, бар"
+
+  base_demand_m3_h:
+    requires_unit_suffix: true
+    canonical_unit: "m3_h"
+    kind: "float_qty"
+    aliases:
+      - "base_demand_m3_h"
+      - "base_demand_l_s"
+      - "demand_m3_h"
+      - "Потребление"
+      - "Объем в кубических метрах"
+      - "Базовое водопотребление в м3/ч"
+      - "Потребность в кубических метрах в час"
+      - "Базовый расход, м3/ч"
+
+  demand_m3_h:
+    requires_unit_suffix: true
+    canonical_unit: "m3_h"
+    kind: "float_qty"
+    aliases:
+      - "demand_m3_h"
+      - "demand_l_s"
+      - "Отбор в кубических метрах в час"
+      - "Водопотребление в м3/ч"
+      - "Потребление, м3/ч"
+
+  flow_m3_h:
+    requires_unit_suffix: true
+    canonical_unit: "m3_h"
+    kind: "float_qty"
+    aliases:
+      - "flow_m3_h"
+      - "flow_l_s"
+      - "q_m3_h"
+      - "Поток в кубических метрах"
+      - "Поток в кубических метрах в час"
+      - "Расход в м3/ч"
+      - "Расход в л/с"
+      - "Расход, м3/ч"
+
+  velocity_m_s:
+    requires_unit_suffix: true
+    canonical_unit: "m_s"
+    kind: "float_qty"
+    aliases:
+      - "velocity_m_s"
+      - "Скорость в м/с"
+      - "Скорость потока в метрах в секунду"
+      - "Скорость, м/с"
+
+  length_m:
+    requires_unit_suffix: true
+    canonical_unit: "m"
+    kind: "float_qty"
+    aliases:
+      - "length_m"
+      - "length_km"
+      - "Длина"
+      - "Длина в метрах"
+      - "Длину в метрах"
+      - "Длина в км"
+      - "Длина участка в метрах"
+      - "Длина, м"
+
+  diameter_mm:
+    requires_unit_suffix: true
+    canonical_unit: "mm"
+    kind: "float_qty"
+    aliases:
+      - "diameter_mm"
+      - "diameter_m"
+      - "d_mm"
+      - "Диаметр"
+      - "Диаметр в миллиметрах"
+      - "Диаметр в мм"
+      - "Внутренний диаметр, мм"
+
+  roughness:
+    requires_unit_suffix: false
+    kind: "float_qty"
+    aliases:
+      - "roughness"
+      - "roughness_mm"
+      - "c_hazen_williams"
+      - "Шероховатость"
+      - "Коэффициент шероховатости"
+
+  minor_loss_coeff:
+    requires_unit_suffix: false
+    kind: "float_qty"
+    aliases:
+      - "minor_loss_coeff"
+      - "minor_loss"
+      - "k_local"
+      - "Малые потери"
+      - "Местное сопротивление"
+      - "Коэффициент местных потерь"
+
+  level_m:
+    requires_unit_suffix: true
+    canonical_unit: "m"
+    kind: "float_qty"
+    aliases:
+      - "level_m"
+      - "init_level_m"
+      - "Уровень в метрах"
+      - "Начальный уровень в метрах"
+      - "Уровень воды, м"
+
+  min_level_m:
+    requires_unit_suffix: true
+    canonical_unit: "m"
+    kind: "float_qty"
+    aliases:
+      - "min_level_m"
+      - "Минимальный уровень в метрах"
+      - "Мин. уровень, м"
+
+  max_level_m:
+    requires_unit_suffix: true
+    canonical_unit: "m"
+    kind: "float_qty"
+    aliases:
+      - "max_level_m"
+      - "Максимальный уровень в метрах"
+      - "Макс. уровень, м"
+
+  time_iso8601:
+    requires_unit_suffix: true
+    canonical_unit: "iso8601"
+    kind: "datetime_iso"
+    aliases:
+      - "time_iso8601"
+      - "timestamp_iso8601"
+      - "timestamp"
+      - "time"
+      - "Время"
+      - "Метка времени"
+
+  step_index:
+    requires_unit_suffix: false
+    kind: "int_qty"
+    aliases:
+      - "step_index"
+      - "step"
+      - "hour_index"
+      - "point_index"
+      - "Шаг"
+      - "Час"
+      - "Номер точки"
+
+  multiplier:
+    requires_unit_suffix: false
+    kind: "float_qty"
+    aliases:
+      - "multiplier"
+      - "factor"
+      - "Данные"
+      - "Коэффициент"
+      - "Коэффициент неравномерности"
+      - "Cписок значений"
+      - "Список значений"
+
+  state:
+    requires_unit_suffix: false
+    kind: "enum_val"
+    allowed_values:
+      - "working"
+      - "in_working_zone"
+      - "out_of_working_zone"
+      - "off"
+      - "open"
+      - "closed"
+      - "active"
+      - "bypass"
+      - "В работе"
+      - "Отключен"
+      - "Открыт"
+      - "Закрыт"
+    aliases:
+      - "state"
+      - "status"
+      - "Состояние"
+      - "Статус"
+
+  valve_type:
+    requires_unit_suffix: false
+    kind: "enum_val"
+    allowed_values:
+      - "PRV"
+      - "PSV"
+      - "PBV"
+      - "FCV"
+      - "TCV"
+      - "GPV"
+      - "prv"
+      - "psv"
+      - "pbv"
+      - "fcv"
+      - "tcv"
+      - "gpv"
+      - "V1"
+      - "V2"
+      - "V3"
+      - "V4"
+      - "V5"
+      - "V6"
+      - "V7"
+      - "V8"
+      - "v1"
+      - "v2"
+      - "v3"
+      - "v4"
+      - "v5"
+      - "v6"
+      - "Редукционный"
+      - "Огр.потока"
+      - "Поддерживающий"
+      - "Дроссельный"
+      - "Обратный"
+      - "Задвижка"
+    aliases:
+      - "valve_type"
+      - "type"
+      - "Тип"
+      - "Тип клапана"
+      - "Тип запорной арматуры"
+
+  setting:
+    requires_unit_suffix: false
+    kind: "float_qty"
+    aliases:
+      - "setting"
+      - "setting_m"
+      - "Уставка"
+      - "Настройка"
+
+  is_active:
+    requires_unit_suffix: false
+    kind: "bool_flag"
+    aliases:
+      - "is_active"
+      - "enabled"
+      - "Активен"
+
+# Таблично-зависимые алиасы для 13-файлового формата папок городов AquaBit (ADR-0007):
+# применяются контекстно к конкретной таблице без загрязнения глобального словаря алиасов.
+table_specific_aliases:
+  sources.csv:
+    Расчетный напор: "head_m"
+    Расчётный напор: "head_m"
+  demands.csv:
+    ID: "node_id"
+    Потребление: "base_demand_m3_h"
+    График: "curve_id"
+  irregularity_curves.csv:
+    ID: "curve_id"
+    Данные: "multiplier"
+  pump_curves.csv:
+    ID: "curve_id"
+    X: "flow_m3_h"
+    Y: "head_m"

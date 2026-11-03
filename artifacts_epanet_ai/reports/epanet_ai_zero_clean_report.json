@@ -1,0 +1,88 @@
+{
+  "project": "EPANET-AI",
+  "cities_processed": 6,
+  "total_rows_removed": 279799,
+  "total_kb_before": 2684855.1,
+  "total_kb_after": 2294254.8,
+  "saved_pct": 14.55,
+  "cities": [
+    {
+      "city_name": "Алматы",
+      "output_dir": "D:\\Zhenechka\\code\\EPANET_AI\\data_cleaned\\Алматы",
+      "elapsed_ms": 60178.2,
+      "rows_removed_total": 193768,
+      "kb_before": 1673233.0,
+      "kb_after": 1331191.7,
+      "saved_pct": 20.44,
+      "pruned_transit_nodes_count": 98006,
+      "pruned_standby_pumps_count": 0,
+      "pruned_zero_consumers_count": 47536,
+      "pruned_zero_demand_rows_count": 48226
+    },
+    {
+      "city_name": "куляб",
+      "output_dir": "D:\\Zhenechka\\code\\EPANET_AI\\data_cleaned\\куляб",
+      "elapsed_ms": 1853.5,
+      "rows_removed_total": 2566,
+      "kb_before": 31757.2,
+      "kb_after": 30760.2,
+      "saved_pct": 3.14,
+      "pruned_transit_nodes_count": 1218,
+      "pruned_standby_pumps_count": 16,
+      "pruned_zero_consumers_count": 1212,
+      "pruned_zero_demand_rows_count": 120
+    },
+    {
+      "city_name": "модель семей",
+      "output_dir": "D:\\Zhenechka\\code\\EPANET_AI\\data_cleaned\\модель семей",
+      "elapsed_ms": 13278.8,
+      "rows_removed_total": 42258,
+      "kb_before": 515728.8,
+      "kb_after": 512768.6,
+      "saved_pct": 0.57,
+      "pruned_transit_nodes_count": 21004,
+      "pruned_standby_pumps_count": 35,
+      "pruned_zero_consumers_count": 20927,
+      "pruned_zero_demand_rows_count": 292
+    },
+    {
+      "city_name": "Орша",
+      "output_dir": "D:\\Zhenechka\\code\\EPANET_AI\\data_cleaned\\Орша",
+      "elapsed_ms": 4088.7,
+      "rows_removed_total": 18913,
+      "kb_before": 201477.9,
+      "kb_after": 175381.6,
+      "saved_pct": 12.95,
+      "pruned_transit_nodes_count": 8451,
+      "pruned_standby_pumps_count": 44,
+      "pruned_zero_consumers_count": 2435,
+      "pruned_zero_demand_rows_count": 7983
+    },
+    {
+      "city_name": "тенино",
+      "output_dir": "D:\\Zhenechka\\code\\EPANET_AI\\data_cleaned\\тенино",
+      "elapsed_ms": 662.6,
+      "rows_removed_total": 971,
+      "kb_before": 13699.8,
+      "kb_after": 11335.0,
+      "saved_pct": 17.26,
+      "pruned_transit_nodes_count": 316,
+      "pruned_standby_pumps_count": 15,
+      "pruned_zero_consumers_count": 320,
+      "pruned_zero_demand_rows_count": 320
+    },
+    {
+      "city_name": "хорезмская",
+      "output_dir": "D:\\Zhenechka\\code\\EPANET_AI\\data_cleaned\\хорезмская",
+      "elapsed_ms": 6050.5,
+      "rows_removed_total": 21323,
+      "kb_before": 248958.4,
+      "kb_after": 232817.7,
+      "saved_pct": 6.48,
+      "pruned_transit_nodes_count": 9878,
+      "pruned_standby_pumps_count": 365,
+      "pruned_zero_consumers_count": 9209,
+      "pruned_zero_demand_rows_count": 1871
+    }
+  ]
+}
