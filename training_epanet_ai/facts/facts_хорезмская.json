@@ -1,0 +1,53 @@
+{
+  "city_name": "хорезмская",
+  "schema_version": "epanet_ai_facts_v1",
+  "traceability_note": "Все числа извлечены детерминированно из data_cleaned/<город>/расчетные_параметры/ без пересчёта в LLM",
+  "zero_cleaning_summary": {
+    "pruned_transit_nodes_count": 0,
+    "pruned_standby_pumps_count": 0,
+    "pruned_zero_consumers_count": 0
+  },
+  "nodes_summary": {
+    "consumer_nodes_count": 8007,
+    "total_daily_consumption_m3_day": 176116.21,
+    "sum_peak_node_demand_m3_h": 14263.69,
+    "free_pressure_network_min_m": null,
+    "free_pressure_network_max_m": null,
+    "deficit_nodes_count": 0,
+    "excess_pressure_over_60m_nodes_count": 0,
+    "floors_distribution": {},
+    "worst_deficit_nodes": [],
+    "highest_excess_pressure_nodes": []
+  },
+  "pipes_summary": {
+    "pipes_count": 11194,
+    "total_length_km": 891.596,
+    "total_internal_water_volume_m3": 50657.99,
+    "network_max_velocity_m_s": 30.973,
+    "pipes_over_1_5_m_s_count": 121,
+    "pipes_over_3_0_m_s_water_hammer_risk_count": 29,
+    "stagnant_pipes_under_0_3_m_s_count": 9457,
+    "reverse_flow_pipes_count": 1911,
+    "self_loop_topology_pipes_count": 10670,
+    "top_high_velocity_pipes": [],
+    "top_stagnant_pipes": [],
+    "top_reverse_flow_pipes": []
+  },
+  "pumps_summary": {
+    "total_pumps_declared": 0,
+    "active_pumps_count": 0,
+    "standby_off_pumps_count": 0,
+    "total_pumped_volume_m3_day": 0.0,
+    "total_hydraulic_energy_kwh_day": 0.0,
+    "active_pumps_details": []
+  },
+  "schedules_summary": {
+    "schedules_count": 0,
+    "all_24_hours_valid": true,
+    "max_peaking_factor_k_max": null,
+    "min_night_factor_k_min": null
+  },
+  "data_quality_flags": [
+    "В исходной таблице Узел.csv города «хорезмская» на всех узлах стояло Требуемое давление = 0 (нормативная этажность не задавалась автором модели); показатели водоразбора и напоров собраны по фактическим узлам-абонентам"
+  ]
+}

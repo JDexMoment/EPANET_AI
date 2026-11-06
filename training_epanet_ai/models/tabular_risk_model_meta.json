@@ -1,0 +1,12 @@
+{
+  "engine": "Встроенная регуляризованная логистическая модель (NumPy)",
+  "pipes_trained_on": 19397,
+  "feature_importances": {
+    "Диаметр_мм": 0.0276,
+    "Длина_м": 0.3968,
+    "Скорость_макс_м_с": 0.0028,
+    "Время_пробега_воды_мин": 0.0862,
+    "Шагов_обратного_потока": 0.4865
+  },
+  "ranked_output_csv": "E:\\Code\\EPANET_AI\\training_epanet_ai\\models\\ranked_pipes_by_ai_risk.csv"
+}

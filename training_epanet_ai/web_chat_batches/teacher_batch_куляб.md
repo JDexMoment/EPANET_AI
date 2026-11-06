@@ -1,0 +1,1580 @@
+# Пакет задач для разметки Моделью-Учителем (город: куляб)
+
+**Системная инструкция Учителю:**
+> Ты — главный инженер-гидравлик систем водоснабжения (уровня авторов руководства Walski et al. 'Advanced Water Distribution Modeling and Management' и СП 31.13330.2021). Напиши глубокий, живой, профессиональный инженерный ответ для обучения младшей локальной модели EPANET-AI.
+
+ЖЕЛЕЗНЫЕ ПРАВИЛА ДИСТИЛЛЯЦИИ (нарушение бракует пример!):
+1. Опирайся ИСКЛЮЧИТЕЛЬНО на переданный JSON `facts_inline`.
+2. КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО считать в уме (не вычисляй проценты, разности или суммы, которых нет в JSON) и запрещено писать любые числа, отсутствующие во входном `facts_inline` (разрешены только константы нормативов: 10 м и +4 м на этаж по СП 31.13330.2021, 60 м макс. напор, 0.3 / 1.5 / 3.0 м/с скорости по Walski, 24 ч, 1440 шагов).
+3. Обязательно указывай конкретные строковые ID узлов (c*), труб (e*), насосов (p*), кривых (u*, t*) и объясняй физику процессов.
+4. Если спрашивают данные, которых нет в `facts_inline` (КПД двигателя, тариф в рублях, остаточный хлор), чётко перечисли недостающие таблицы и НЕ выдумывай оценочных цифр.
+
+---
+## Задача 1 (`куляб_teacher_exec_memo_a7bb5884e5`)
+
+Вопрос инженера: Подготовь аналитическую записку главному инженеру водоканала по расчёту сети «куляб»: оцени баланс, главные гидравлические риски и очерёдность мероприятий.
+
+Факты расчёта (facts_inline):
+```json
+{
+  "city_name": "куляб",
+  "zero_cleaning_summary": {
+    "pruned_transit_nodes_count": 1218,
+    "pruned_standby_pumps_count": 16,
+    "pruned_zero_consumers_count": 1212
+  },
+  "nodes_overview": {
+    "consumer_nodes_count": 1098,
+    "total_daily_consumption_m3_day": 71604.89,
+    "sum_peak_node_demand_m3_h": 5413.06,
+    "free_pressure_network_min_m": null,
+    "free_pressure_network_max_m": null,
+    "deficit_nodes_count": 0,
+    "excess_pressure_over_60m_nodes_count": 0,
+    "floors_distribution": {}
+  },
+  "pipes_overview": {
+    "pipes_count": 1270,
+    "total_length_km": 100.62,
+    "total_internal_water_volume_m3": 4331.84,
+    "network_max_velocity_m_s": 8.441,
+    "pipes_over_1_5_m_s_count": 90,
+    "pipes_over_3_0_m_s_water_hammer_risk_count": 10,
+    "stagnant_pipes_under_0_3_m_s_count": 619,
+    "reverse_flow_pipes_count": 505,
+    "self_loop_topology_pipes_count": 1188
+  },
+  "pumps_overview": {
+    "total_pumps_declared": 49,
+    "active_pumps_count": 33,
+    "standby_off_pumps_count": 16,
+    "total_pumped_volume_m3_day": 105656.38,
+    "total_hydraulic_energy_kwh_day": 36409.29
+  },
+  "data_quality_flags": [
+    "В исходной таблице Узел.csv города «куляб» на всех узлах стояло Требуемое давление = 0 (нормативная этажность не задавалась автором модели); показатели водоразбора и напоров собраны по фактическим узлам-абонентам",
+    "В Труба.csv обнаружено 1188 участков с петлёй экспорта Начало == Конец (потери напора dH по ним заблокированы до исправления топологии в AquaBit)",
+    "В График потребления.csv найдено 1 графиков с числом точек != 24"
+  ]
+}
+```
+
+---
+## Задача 2 (`куляб_teacher_tu_developer_207d18a106`)
+
+Вопрос инженера: Застройщик просит техусловия на подключение нового жилого дома в городе «куляб». Судя по свободным напорам и этажности существующих узлов, какие ограничения и риски просадки давления есть в сети?
+
+Факты расчёта (facts_inline):
+```json
+{
+  "city_name": "куляб",
+  "nodes_summary": {
+    "consumer_nodes_count": 1098,
+    "total_daily_consumption_m3_day": 71604.89,
+    "sum_peak_node_demand_m3_h": 5413.06,
+    "free_pressure_network_min_m": null,
+    "free_pressure_network_max_m": null,
+    "deficit_nodes_count": 0,
+    "excess_pressure_over_60m_nodes_count": 0,
+    "floors_distribution": {},
+    "worst_deficit_nodes": [],
+    "highest_excess_pressure_nodes": []
+  }
+}
+```
+
+---
+## Задача 3 (`куляб_teacher_prv_zoning_91fd340c4e`)
+
+Вопрос инженера: Проанализируй зоны минимального и избыточного (>60 м) свободного напора в «куляб». Где целесообразно зонирование сети или установка регуляторов давления PRV?
+
+Факты расчёта (facts_inline):
+```json
+{
+  "city_name": "куляб",
+  "nodes_summary": {
+    "consumer_nodes_count": 1098,
+    "total_daily_consumption_m3_day": 71604.89,
+    "sum_peak_node_demand_m3_h": 5413.06,
+    "free_pressure_network_min_m": null,
+    "free_pressure_network_max_m": null,
+    "deficit_nodes_count": 0,
+    "excess_pressure_over_60m_nodes_count": 0,
+    "floors_distribution": {},
+    "worst_deficit_nodes": [],
+    "highest_excess_pressure_nodes": []
+  }
+}
+```
+
+---
+## Задача 4 (`куляб_teacher_water_hammer_3900ccb84d`)
+
+Вопрос инженера: Оцени трубопроводы города «куляб» по критериям книги Walski: какие участки работают с повышенной скоростью, риском гидравлического удара (>3.0 м/с) и частыми реверсами потока?
+
+Факты расчёта (facts_inline):
+```json
+{
+  "city_name": "куляб",
+  "pipes_summary": {
+    "pipes_count": 1270,
+    "total_length_km": 100.62,
+    "total_internal_water_volume_m3": 4331.84,
+    "network_max_velocity_m_s": 8.441,
+    "pipes_over_1_5_m_s_count": 90,
+    "pipes_over_3_0_m_s_water_hammer_risk_count": 10,
+    "stagnant_pipes_under_0_3_m_s_count": 619,
+    "reverse_flow_pipes_count": 505,
+    "self_loop_topology_pipes_count": 1188,
+    "top_high_velocity_pipes": [
+      {
+        "pipe_id": "e641595",
+        "diameter_mm": 63.0,
+        "length_m": 80.0,
+        "q_max_m3_h": 94.72,
+        "q_over_d_index": 1.5035,
+        "velocity_max_m_s": 8.441,
+        "reynolds_max": 406849.0,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e639081",
+        "diameter_mm": 80.0,
+        "length_m": 80.0,
+        "q_max_m3_h": 137.83,
+        "q_over_d_index": 1.7229,
+        "velocity_max_m_s": 7.617,
+        "reynolds_max": 466216.0,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e638879",
+        "diameter_mm": 100.0,
+        "length_m": 80.0,
+        "q_max_m3_h": 117.81,
+        "q_over_d_index": 1.1781,
+        "velocity_max_m_s": 4.167,
+        "reynolds_max": 318799.0,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e636327",
+        "diameter_mm": 100.0,
+        "length_m": 80.0,
+        "q_max_m3_h": 114.01,
+        "q_over_d_index": 1.1401,
+        "velocity_max_m_s": 4.032,
+        "reynolds_max": 308516.0,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e643424",
+        "diameter_mm": 219.0,
+        "length_m": 80.0,
+        "q_max_m3_h": 479.15,
+        "q_over_d_index": 2.1879,
+        "velocity_max_m_s": 3.533,
+        "reynolds_max": 592054.0,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e638421",
+        "diameter_mm": 100.0,
+        "length_m": 80.0,
+        "q_max_m3_h": 94.72,
+        "q_over_d_index": 0.9472,
+        "velocity_max_m_s": 3.35,
+        "reynolds_max": 256312.0,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e637656",
+        "diameter_mm": 425.0,
+        "length_m": 77.0,
+        "q_max_m3_h": 1677.97,
+        "q_over_d_index": 3.9482,
+        "velocity_max_m_s": 3.286,
+        "reynolds_max": 1068386.0,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e635904",
+        "diameter_mm": 150.0,
+        "length_m": 80.0,
+        "q_max_m3_h": 197.83,
+        "q_over_d_index": 1.3189,
+        "velocity_max_m_s": 3.11,
+        "reynolds_max": 356890.0,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      }
+    ],
+    "top_stagnant_pipes": [
+      {
+        "pipe_id": "e642923",
+        "diameter_mm": 426.0,
+        "length_m": 80.0,
+        "velocity_max_m_s": 0.0333,
+        "travel_time_min": 325.2,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e643176",
+        "diameter_mm": 325.0,
+        "length_m": 80.0,
+        "velocity_max_m_s": 0.0572,
+        "travel_time_min": 190.5,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e637661",
+        "diameter_mm": 426.0,
+        "length_m": 80.0,
+        "velocity_max_m_s": 0.119,
+        "travel_time_min": 168.8,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e637674",
+        "diameter_mm": 426.0,
+        "length_m": 80.0,
+        "velocity_max_m_s": 0.1187,
+        "travel_time_min": 166.7,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e637520",
+        "diameter_mm": 150.0,
+        "length_m": 80.0,
+        "velocity_max_m_s": 0.2087,
+        "travel_time_min": 148.2,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e636307",
+        "diameter_mm": 80.0,
+        "length_m": 80.0,
+        "velocity_max_m_s": 0.016,
+        "travel_time_min": 133.3,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e637286",
+        "diameter_mm": 325.0,
+        "length_m": 80.0,
+        "velocity_max_m_s": 0.0124,
+        "travel_time_min": 125.8,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e636260",
+        "diameter_mm": 300.0,
+        "length_m": 80.0,
+        "velocity_max_m_s": 0.0154,
+        "travel_time_min": 120.1,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      }
+    ],
+    "top_reverse_flow_pipes": [
+      {
+        "pipe_id": "e635441",
+        "reverse_steps_of_1440": 1440,
+        "direction_sign_flips_per_day": 0,
+        "velocity_max_m_s": 0.138
+      },
+      {
+        "pipe_id": "e635444",
+        "reverse_steps_of_1440": 1440,
+        "direction_sign_flips_per_day": 0,
+        "velocity_max_m_s": 0.163
+      },
+      {
+        "pipe_id": "e635454",
+        "reverse_steps_of_1440": 1440,
+        "direction_sign_flips_per_day": 0,
+        "velocity_max_m_s": 0.155
+      },
+      {
+        "pipe_id": "e635455",
+        "reverse_steps_of_1440": 1440,
+        "direction_sign_flips_per_day": 0,
+        "velocity_max_m_s": 0.159
+      },
+      {
+        "pipe_id": "e637858",
+        "reverse_steps_of_1440": 1440,
+        "direction_sign_flips_per_day": 0,
+        "velocity_max_m_s": 0.288
+      },
+      {
+        "pipe_id": "e637680",
+        "reverse_steps_of_1440": 1440,
+        "direction_sign_flips_per_day": 0,
+        "velocity_max_m_s": 0.125
+      },
+      {
+        "pipe_id": "e637692",
+        "reverse_steps_of_1440": 1440,
+        "direction_sign_flips_per_day": 0,
+        "velocity_max_m_s": 1.125
+      },
+      {
+        "pipe_id": "e637528",
+        "reverse_steps_of_1440": 1440,
+        "direction_sign_flips_per_day": 0,
+        "velocity_max_m_s": 0.893
+      }
+    ]
+  }
+}
+```
+
+---
+## Задача 5 (`куляб_teacher_stagnation_flushing_627ef2d00c`)
+
+Вопрос инженера: Выдели застойные участки сети «куляб» со скоростью ниже 0.3 м/с и большим временем пробега воды. Как это влияет на качество воды и где нужна промывка или переключение задвижек?
+
+Факты расчёта (facts_inline):
+```json
+{
+  "city_name": "куляб",
+  "pipes_summary": {
+    "pipes_count": 1270,
+    "total_length_km": 100.62,
+    "total_internal_water_volume_m3": 4331.84,
+    "network_max_velocity_m_s": 8.441,
+    "pipes_over_1_5_m_s_count": 90,
+    "pipes_over_3_0_m_s_water_hammer_risk_count": 10,
+    "stagnant_pipes_under_0_3_m_s_count": 619,
+    "reverse_flow_pipes_count": 505,
+    "self_loop_topology_pipes_count": 1188,
+    "top_high_velocity_pipes": [
+      {
+        "pipe_id": "e641595",
+        "diameter_mm": 63.0,
+        "length_m": 80.0,
+        "q_max_m3_h": 94.72,
+        "q_over_d_index": 1.5035,
+        "velocity_max_m_s": 8.441,
+        "reynolds_max": 406849.0,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e639081",
+        "diameter_mm": 80.0,
+        "length_m": 80.0,
+        "q_max_m3_h": 137.83,
+        "q_over_d_index": 1.7229,
+        "velocity_max_m_s": 7.617,
+        "reynolds_max": 466216.0,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e638879",
+        "diameter_mm": 100.0,
+        "length_m": 80.0,
+        "q_max_m3_h": 117.81,
+        "q_over_d_index": 1.1781,
+        "velocity_max_m_s": 4.167,
+        "reynolds_max": 318799.0,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e636327",
+        "diameter_mm": 100.0,
+        "length_m": 80.0,
+        "q_max_m3_h": 114.01,
+        "q_over_d_index": 1.1401,
+        "velocity_max_m_s": 4.032,
+        "reynolds_max": 308516.0,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e643424",
+        "diameter_mm": 219.0,
+        "length_m": 80.0,
+        "q_max_m3_h": 479.15,
+        "q_over_d_index": 2.1879,
+        "velocity_max_m_s": 3.533,
+        "reynolds_max": 592054.0,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e638421",
+        "diameter_mm": 100.0,
+        "length_m": 80.0,
+        "q_max_m3_h": 94.72,
+        "q_over_d_index": 0.9472,
+        "velocity_max_m_s": 3.35,
+        "reynolds_max": 256312.0,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e637656",
+        "diameter_mm": 425.0,
+        "length_m": 77.0,
+        "q_max_m3_h": 1677.97,
+        "q_over_d_index": 3.9482,
+        "velocity_max_m_s": 3.286,
+        "reynolds_max": 1068386.0,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e635904",
+        "diameter_mm": 150.0,
+        "length_m": 80.0,
+        "q_max_m3_h": 197.83,
+        "q_over_d_index": 1.3189,
+        "velocity_max_m_s": 3.11,
+        "reynolds_max": 356890.0,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      }
+    ],
+    "top_stagnant_pipes": [
+      {
+        "pipe_id": "e642923",
+        "diameter_mm": 426.0,
+        "length_m": 80.0,
+        "velocity_max_m_s": 0.0333,
+        "travel_time_min": 325.2,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e643176",
+        "diameter_mm": 325.0,
+        "length_m": 80.0,
+        "velocity_max_m_s": 0.0572,
+        "travel_time_min": 190.5,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e637661",
+        "diameter_mm": 426.0,
+        "length_m": 80.0,
+        "velocity_max_m_s": 0.119,
+        "travel_time_min": 168.8,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e637674",
+        "diameter_mm": 426.0,
+        "length_m": 80.0,
+        "velocity_max_m_s": 0.1187,
+        "travel_time_min": 166.7,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e637520",
+        "diameter_mm": 150.0,
+        "length_m": 80.0,
+        "velocity_max_m_s": 0.2087,
+        "travel_time_min": 148.2,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e636307",
+        "diameter_mm": 80.0,
+        "length_m": 80.0,
+        "velocity_max_m_s": 0.016,
+        "travel_time_min": 133.3,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e637286",
+        "diameter_mm": 325.0,
+        "length_m": 80.0,
+        "velocity_max_m_s": 0.0124,
+        "travel_time_min": 125.8,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      },
+      {
+        "pipe_id": "e636260",
+        "diameter_mm": 300.0,
+        "length_m": 80.0,
+        "velocity_max_m_s": 0.0154,
+        "travel_time_min": 120.1,
+        "source": {
+          "file": "Труба_скорости_и_режимы_Walski.csv",
+          "aggregation": "row_exact"
+        }
+      }
+    ],
+    "top_reverse_flow_pipes": [
+      {
+        "pipe_id": "e635441",
+        "reverse_steps_of_1440": 1440,
+        "direction_sign_flips_per_day": 0,
+        "velocity_max_m_s": 0.138
+      },
+      {
+        "pipe_id": "e635444",
+        "reverse_steps_of_1440": 1440,
+        "direction_sign_flips_per_day": 0,
+        "velocity_max_m_s": 0.163
+      },
+      {
+        "pipe_id": "e635454",
+        "reverse_steps_of_1440": 1440,
+        "direction_sign_flips_per_day": 0,
+        "velocity_max_m_s": 0.155
+      },
+      {
+        "pipe_id": "e635455",
+        "reverse_steps_of_1440": 1440,
+        "direction_sign_flips_per_day": 0,
+        "velocity_max_m_s": 0.159
+      },
+      {
+        "pipe_id": "e637858",
+        "reverse_steps_of_1440": 1440,
+        "direction_sign_flips_per_day": 0,
+        "velocity_max_m_s": 0.288
+      },
+      {
+        "pipe_id": "e637680",
+        "reverse_steps_of_1440": 1440,
+        "direction_sign_flips_per_day": 0,
+        "velocity_max_m_s": 0.125
+      },
+      {
+        "pipe_id": "e637692",
+        "reverse_steps_of_1440": 1440,
+        "direction_sign_flips_per_day": 0,
+        "velocity_max_m_s": 1.125
+      },
+      {
+        "pipe_id": "e637528",
+        "reverse_steps_of_1440": 1440,
+        "direction_sign_flips_per_day": 0,
+        "velocity_max_m_s": 0.893
+      }
+    ]
+  }
+}
+```
+
+---
+## Задача 6 (`куляб_teacher_pump_vfd_audit_ab008b0dde`)
+
+Вопрос инженера: Проведи энергоаудит насосов модели «куляб»: сколько агрегатов в резерве, какова наработка, число пусков и полезная гидравлическая мощность? Оцени целесообразность ЧРП.
+
+Факты расчёта (facts_inline):
+```json
+{
+  "city_name": "куляб",
+  "pumps_summary": {
+    "total_pumps_declared": 49,
+    "active_pumps_count": 33,
+    "standby_off_pumps_count": 16,
+    "total_pumped_volume_m3_day": 105656.38,
+    "total_hydraulic_energy_kwh_day": 36409.29,
+    "active_pumps_details": [
+      {
+        "pump_id": "p637786",
+        "curve_id": "u637791",
+        "run_hours_per_day": 21.0,
+        "starts_per_day": 2,
+        "flow_mean_m3_h": 419.83,
+        "flow_max_m3_h": 463.22,
+        "tdh_head_m": 210.0,
+        "hydraulic_power_kw": 240.16,
+        "hydraulic_energy_kwh_day": 5043.36
+      },
+      {
+        "pump_id": "p638005",
+        "curve_id": "u638027",
+        "run_hours_per_day": 20.0,
+        "starts_per_day": 1,
+        "flow_mean_m3_h": 495.45,
+        "flow_max_m3_h": 556.93,
+        "tdh_head_m": 90.0,
+        "hydraulic_power_kw": 121.47,
+        "hydraulic_energy_kwh_day": 2429.4
+      },
+      {
+        "pump_id": "p638011",
+        "curve_id": "u642609",
+        "run_hours_per_day": 11.0,
+        "starts_per_day": 2,
+        "flow_mean_m3_h": 912.73,
+        "flow_max_m3_h": 971.83,
+        "tdh_head_m": 63.0,
+        "hydraulic_power_kw": 156.64,
+        "hydraulic_energy_kwh_day": 1723.04
+      },
+      {
+        "pump_id": "p638014",
+        "curve_id": "u638029",
+        "run_hours_per_day": 2.0,
+        "starts_per_day": 1,
+        "flow_mean_m3_h": 1251.92,
+        "flow_max_m3_h": 1265.65,
+        "tdh_head_m": 125.0,
+        "hydraulic_power_kw": 426.29,
+        "hydraulic_energy_kwh_day": 852.58
+      },
+      {
+        "pump_id": "p638017",
+        "curve_id": "u638025",
+        "run_hours_per_day": 11.0,
+        "starts_per_day": 3,
+        "flow_mean_m3_h": 451.51,
+        "flow_max_m3_h": 487.64,
+        "tdh_head_m": 210.0,
+        "hydraulic_power_kw": 258.29,
+        "hydraulic_energy_kwh_day": 2841.19
+      },
+      {
+        "pump_id": "p638023",
+        "curve_id": "u638029",
+        "run_hours_per_day": 9.0,
+        "starts_per_day": 2,
+        "flow_mean_m3_h": 884.49,
+        "flow_max_m3_h": 891.87,
+        "tdh_head_m": 125.0,
+        "hydraulic_power_kw": 301.18,
+        "hydraulic_energy_kwh_day": 2710.62
+      },
+      {
+        "pump_id": "p638286",
+        "curve_id": "u638281",
+        "run_hours_per_day": 20.0,
+        "starts_per_day": 4,
+        "flow_mean_m3_h": 526.63,
+        "flow_max_m3_h": 825.31,
+        "tdh_head_m": 90.0,
+        "hydraulic_power_kw": 129.11,
+        "hydraulic_energy_kwh_day": 2582.2
+      },
+      {
+        "pump_id": "p638509",
+        "curve_id": "u638515",
+        "run_hours_per_day": 2.0,
+        "starts_per_day": 1,
+        "flow_mean_m3_h": 50.93,
+        "flow_max_m3_h": 87.6,
+        "tdh_head_m": 32.0,
+        "hydraulic_power_kw": 4.44,
+        "hydraulic_energy_kwh_day": 8.88
+      },
+      {
+        "pump_id": "p638512",
+        "curve_id": "u638515",
+        "run_hours_per_day": 2.0,
+        "starts_per_day": 1,
+        "flow_mean_m3_h": 48.78,
+        "flow_max_m3_h": 94.72,
+        "tdh_head_m": 32.0,
+        "hydraulic_power_kw": 4.25,
+        "hydraulic_energy_kwh_day": 8.5
+      },
+      {
+        "pump_id": "p638594",
+        "curve_id": "u638670",
+        "run_hours_per_day": 2.0,
+        "starts_per_day": 1,
+        "flow_mean_m3_h": 30.52,
+        "flow_max_m3_h": 30.59,
+        "tdh_head_m": 50.0,
+        "hydraulic_power_kw": 4.16,
+        "hydraulic_energy_kwh_day": 8.32
+      },
+      {
+        "pump_id": "p638605",
+        "curve_id": "u638673",
+        "run_hours_per_day": 3.0,
+        "starts_per_day": 1,
+        "flow_mean_m3_h": 39.28,
+        "flow_max_m3_h": 39.36,
+        "tdh_head_m": 50.0,
+        "hydraulic_power_kw": 5.35,
+        "hydraulic_energy_kwh_day": 16.05
+      },
+      {
+        "pump_id": "p638608",
+        "curve_id": "u638673",
+        "run_hours_per_day": 3.0,
+        "starts_per_day": 1,
+        "flow_mean_m3_h": 19.99,
+        "flow_max_m3_h": 20.01,
+        "tdh_head_m": 50.0,
+        "hydraulic_power_kw": 2.72,
+        "hydraulic_energy_kwh_day": 8.16
+      },
+      {
+        "pump_id": "p638779",
+        "curve_id": "u638824",
+        "run_hours_per_day": 12.0,
+        "starts_per_day": 6,
+        "flow_mean_m3_h": 264.06,
+        "flow_max_m3_h": 275.98,
+        "tdh_head_m": 125.0,
+        "hydraulic_power_kw": 89.92,
+        "hydraulic_energy_kwh_day": 1079.04
+      },
+      {
+        "pump_id": "p638929",
+        "curve_id": "u638937",
+        "run_hours_per_day": 9.0,
+        "starts_per_day": 2,
+        "flow_mean_m3_h": 108.72,
+        "flow_max_m3_h": 117.81,
+        "tdh_head_m": 150.0,
+        "hydraulic_power_kw": 44.42,
+        "hydraulic_energy_kwh_day": 399.78
+      },
+      {
+        "pump_id": "p639094",
+        "curve_id": "u639099",
+        "run_hours_per_day": 13.0,
+        "starts_per_day": 5,
+        "flow_mean_m3_h": 122.41,
+        "flow_max_m3_h": 137.83,
+        "tdh_head_m": 150.0,
+        "hydraulic_power_kw": 50.02,
+        "hydraulic_energy_kwh_day": 650.26
+      },
+      {
+        "pump_id": "p639553",
+        "curve_id": "u639594",
+        "run_hours_per_day": 17.0,
+        "starts_per_day": 1,
+        "flow_mean_m3_h": 184.95,
+        "flow_max_m3_h": 190.12,
+        "tdh_head_m": 50.0,
+        "hydraulic_power_kw": 25.19,
+        "hydraulic_energy_kwh_day": 428.23
+      },
+      {
+        "pump_id": "p639618",
+        "curve_id": "u642208",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 124.78,
+        "flow_max_m3_h": 127.28,
+        "tdh_head_m": 150.0,
+        "hydraulic_power_kw": 50.99,
+        "hydraulic_energy_kwh_day": 1223.76
+      },
+      {
+        "pump_id": "p639640",
+        "curve_id": "u639600",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 28.44,
+        "flow_max_m3_h": 32.63,
+        "tdh_head_m": 100.0,
+        "hydraulic_power_kw": 7.75,
+        "hydraulic_energy_kwh_day": 186.0
+      },
+      {
+        "pump_id": "p641216",
+        "curve_id": "u639099",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 129.65,
+        "flow_max_m3_h": 130.03,
+        "tdh_head_m": 150.0,
+        "hydraulic_power_kw": 52.98,
+        "hydraulic_energy_kwh_day": 1271.52
+      },
+      {
+        "pump_id": "p639707",
+        "curve_id": "u639099",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 129.71,
+        "flow_max_m3_h": 130.1,
+        "tdh_head_m": 150.0,
+        "hydraulic_power_kw": 53.0,
+        "hydraulic_energy_kwh_day": 1272.0
+      },
+      {
+        "pump_id": "p639721",
+        "curve_id": "u639099",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 129.85,
+        "flow_max_m3_h": 130.25,
+        "tdh_head_m": 150.0,
+        "hydraulic_power_kw": 53.06,
+        "hydraulic_energy_kwh_day": 1273.44
+      },
+      {
+        "pump_id": "p639738",
+        "curve_id": "u639693",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 292.92,
+        "flow_max_m3_h": 293.11,
+        "tdh_head_m": 150.0,
+        "hydraulic_power_kw": 119.69,
+        "hydraulic_energy_kwh_day": 2872.56
+      },
+      {
+        "pump_id": "p639752",
+        "curve_id": "u639693",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 291.96,
+        "flow_max_m3_h": 292.15,
+        "tdh_head_m": 150.0,
+        "hydraulic_power_kw": 119.3,
+        "hydraulic_energy_kwh_day": 2863.2
+      },
+      {
+        "pump_id": "p640456",
+        "curve_id": "u639099",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 129.71,
+        "flow_max_m3_h": 130.11,
+        "tdh_head_m": 150.0,
+        "hydraulic_power_kw": 53.0,
+        "hydraulic_energy_kwh_day": 1272.0
+      },
+      {
+        "pump_id": "p641173",
+        "curve_id": "u641175",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 6.68,
+        "flow_max_m3_h": 7.68,
+        "tdh_head_m": 100.0,
+        "hydraulic_power_kw": 1.82,
+        "hydraulic_energy_kwh_day": 43.68
+      },
+      {
+        "pump_id": "p641863",
+        "curve_id": "u641868",
+        "run_hours_per_day": 3.0,
+        "starts_per_day": 1,
+        "flow_mean_m3_h": 28.17,
+        "flow_max_m3_h": 29.0,
+        "tdh_head_m": 90.0,
+        "hydraulic_power_kw": 6.91,
+        "hydraulic_energy_kwh_day": 20.73
+      },
+      {
+        "pump_id": "p641931",
+        "curve_id": "u641952",
+        "run_hours_per_day": 3.0,
+        "starts_per_day": 1,
+        "flow_mean_m3_h": 29.73,
+        "flow_max_m3_h": 30.13,
+        "tdh_head_m": 90.0,
+        "hydraulic_power_kw": 7.29,
+        "hydraulic_energy_kwh_day": 21.87
+      },
+      {
+        "pump_id": "p642570",
+        "curve_id": "u642626",
+        "run_hours_per_day": 12.0,
+        "starts_per_day": 1,
+        "flow_mean_m3_h": 496.71,
+        "flow_max_m3_h": 502.13,
+        "tdh_head_m": 105.0,
+        "hydraulic_power_kw": 142.07,
+        "hydraulic_energy_kwh_day": 1704.84
+      },
+      {
+        "pump_id": "p643532",
+        "curve_id": "u639099",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 84.87,
+        "flow_max_m3_h": 86.15,
+        "tdh_head_m": 150.0,
+        "hydraulic_power_kw": 34.68,
+        "hydraulic_energy_kwh_day": 832.32
+      },
+      {
+        "pump_id": "p643887",
+        "curve_id": "u643893",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 21.03,
+        "flow_max_m3_h": 21.49,
+        "tdh_head_m": 90.0,
+        "hydraulic_power_kw": 5.16,
+        "hydraulic_energy_kwh_day": 123.84
+      },
+      {
+        "pump_id": "p643911",
+        "curve_id": "u643937",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 36.14,
+        "flow_max_m3_h": 36.73,
+        "tdh_head_m": 90.0,
+        "hydraulic_power_kw": 8.86,
+        "hydraulic_energy_kwh_day": 212.64
+      },
+      {
+        "pump_id": "p643919",
+        "curve_id": "u643937",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 36.14,
+        "flow_max_m3_h": 36.73,
+        "tdh_head_m": 90.0,
+        "hydraulic_power_kw": 8.86,
+        "hydraulic_energy_kwh_day": 212.64
+      },
+      {
+        "pump_id": "p643922",
+        "curve_id": "u643937",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 36.14,
+        "flow_max_m3_h": 36.73,
+        "tdh_head_m": 90.0,
+        "hydraulic_power_kw": 8.86,
+        "hydraulic_energy_kwh_day": 212.64
+      }
+    ]
+  },
+  "excess_nodes_over_60m": 0
+}
+```
+
+---
+## Задача 7 (`куляб_teacher_dispatcher_shift_cb84503f2d`)
+
+Вопрос инженера: Объясни сменному диспетчеру особенности суточного режима сети «куляб»: где меняет направление поток в трубах, как включаются насосы и какие узлы требуют контроля?
+
+Факты расчёта (facts_inline):
+```json
+{
+  "city_name": "куляб",
+  "top_reverse_flow_pipes": [
+    {
+      "pipe_id": "e635441",
+      "reverse_steps_of_1440": 1440,
+      "direction_sign_flips_per_day": 0,
+      "velocity_max_m_s": 0.138
+    },
+    {
+      "pipe_id": "e635444",
+      "reverse_steps_of_1440": 1440,
+      "direction_sign_flips_per_day": 0,
+      "velocity_max_m_s": 0.163
+    },
+    {
+      "pipe_id": "e635454",
+      "reverse_steps_of_1440": 1440,
+      "direction_sign_flips_per_day": 0,
+      "velocity_max_m_s": 0.155
+    },
+    {
+      "pipe_id": "e635455",
+      "reverse_steps_of_1440": 1440,
+      "direction_sign_flips_per_day": 0,
+      "velocity_max_m_s": 0.159
+    },
+    {
+      "pipe_id": "e637858",
+      "reverse_steps_of_1440": 1440,
+      "direction_sign_flips_per_day": 0,
+      "velocity_max_m_s": 0.288
+    },
+    {
+      "pipe_id": "e637680",
+      "reverse_steps_of_1440": 1440,
+      "direction_sign_flips_per_day": 0,
+      "velocity_max_m_s": 0.125
+    },
+    {
+      "pipe_id": "e637692",
+      "reverse_steps_of_1440": 1440,
+      "direction_sign_flips_per_day": 0,
+      "velocity_max_m_s": 1.125
+    },
+    {
+      "pipe_id": "e637528",
+      "reverse_steps_of_1440": 1440,
+      "direction_sign_flips_per_day": 0,
+      "velocity_max_m_s": 0.893
+    }
+  ],
+  "pumps_summary": {
+    "total_pumps_declared": 49,
+    "active_pumps_count": 33,
+    "standby_off_pumps_count": 16,
+    "total_pumped_volume_m3_day": 105656.38,
+    "total_hydraulic_energy_kwh_day": 36409.29,
+    "active_pumps_details": [
+      {
+        "pump_id": "p637786",
+        "curve_id": "u637791",
+        "run_hours_per_day": 21.0,
+        "starts_per_day": 2,
+        "flow_mean_m3_h": 419.83,
+        "flow_max_m3_h": 463.22,
+        "tdh_head_m": 210.0,
+        "hydraulic_power_kw": 240.16,
+        "hydraulic_energy_kwh_day": 5043.36
+      },
+      {
+        "pump_id": "p638005",
+        "curve_id": "u638027",
+        "run_hours_per_day": 20.0,
+        "starts_per_day": 1,
+        "flow_mean_m3_h": 495.45,
+        "flow_max_m3_h": 556.93,
+        "tdh_head_m": 90.0,
+        "hydraulic_power_kw": 121.47,
+        "hydraulic_energy_kwh_day": 2429.4
+      },
+      {
+        "pump_id": "p638011",
+        "curve_id": "u642609",
+        "run_hours_per_day": 11.0,
+        "starts_per_day": 2,
+        "flow_mean_m3_h": 912.73,
+        "flow_max_m3_h": 971.83,
+        "tdh_head_m": 63.0,
+        "hydraulic_power_kw": 156.64,
+        "hydraulic_energy_kwh_day": 1723.04
+      },
+      {
+        "pump_id": "p638014",
+        "curve_id": "u638029",
+        "run_hours_per_day": 2.0,
+        "starts_per_day": 1,
+        "flow_mean_m3_h": 1251.92,
+        "flow_max_m3_h": 1265.65,
+        "tdh_head_m": 125.0,
+        "hydraulic_power_kw": 426.29,
+        "hydraulic_energy_kwh_day": 852.58
+      },
+      {
+        "pump_id": "p638017",
+        "curve_id": "u638025",
+        "run_hours_per_day": 11.0,
+        "starts_per_day": 3,
+        "flow_mean_m3_h": 451.51,
+        "flow_max_m3_h": 487.64,
+        "tdh_head_m": 210.0,
+        "hydraulic_power_kw": 258.29,
+        "hydraulic_energy_kwh_day": 2841.19
+      },
+      {
+        "pump_id": "p638023",
+        "curve_id": "u638029",
+        "run_hours_per_day": 9.0,
+        "starts_per_day": 2,
+        "flow_mean_m3_h": 884.49,
+        "flow_max_m3_h": 891.87,
+        "tdh_head_m": 125.0,
+        "hydraulic_power_kw": 301.18,
+        "hydraulic_energy_kwh_day": 2710.62
+      },
+      {
+        "pump_id": "p638286",
+        "curve_id": "u638281",
+        "run_hours_per_day": 20.0,
+        "starts_per_day": 4,
+        "flow_mean_m3_h": 526.63,
+        "flow_max_m3_h": 825.31,
+        "tdh_head_m": 90.0,
+        "hydraulic_power_kw": 129.11,
+        "hydraulic_energy_kwh_day": 2582.2
+      },
+      {
+        "pump_id": "p638509",
+        "curve_id": "u638515",
+        "run_hours_per_day": 2.0,
+        "starts_per_day": 1,
+        "flow_mean_m3_h": 50.93,
+        "flow_max_m3_h": 87.6,
+        "tdh_head_m": 32.0,
+        "hydraulic_power_kw": 4.44,
+        "hydraulic_energy_kwh_day": 8.88
+      },
+      {
+        "pump_id": "p638512",
+        "curve_id": "u638515",
+        "run_hours_per_day": 2.0,
+        "starts_per_day": 1,
+        "flow_mean_m3_h": 48.78,
+        "flow_max_m3_h": 94.72,
+        "tdh_head_m": 32.0,
+        "hydraulic_power_kw": 4.25,
+        "hydraulic_energy_kwh_day": 8.5
+      },
+      {
+        "pump_id": "p638594",
+        "curve_id": "u638670",
+        "run_hours_per_day": 2.0,
+        "starts_per_day": 1,
+        "flow_mean_m3_h": 30.52,
+        "flow_max_m3_h": 30.59,
+        "tdh_head_m": 50.0,
+        "hydraulic_power_kw": 4.16,
+        "hydraulic_energy_kwh_day": 8.32
+      },
+      {
+        "pump_id": "p638605",
+        "curve_id": "u638673",
+        "run_hours_per_day": 3.0,
+        "starts_per_day": 1,
+        "flow_mean_m3_h": 39.28,
+        "flow_max_m3_h": 39.36,
+        "tdh_head_m": 50.0,
+        "hydraulic_power_kw": 5.35,
+        "hydraulic_energy_kwh_day": 16.05
+      },
+      {
+        "pump_id": "p638608",
+        "curve_id": "u638673",
+        "run_hours_per_day": 3.0,
+        "starts_per_day": 1,
+        "flow_mean_m3_h": 19.99,
+        "flow_max_m3_h": 20.01,
+        "tdh_head_m": 50.0,
+        "hydraulic_power_kw": 2.72,
+        "hydraulic_energy_kwh_day": 8.16
+      },
+      {
+        "pump_id": "p638779",
+        "curve_id": "u638824",
+        "run_hours_per_day": 12.0,
+        "starts_per_day": 6,
+        "flow_mean_m3_h": 264.06,
+        "flow_max_m3_h": 275.98,
+        "tdh_head_m": 125.0,
+        "hydraulic_power_kw": 89.92,
+        "hydraulic_energy_kwh_day": 1079.04
+      },
+      {
+        "pump_id": "p638929",
+        "curve_id": "u638937",
+        "run_hours_per_day": 9.0,
+        "starts_per_day": 2,
+        "flow_mean_m3_h": 108.72,
+        "flow_max_m3_h": 117.81,
+        "tdh_head_m": 150.0,
+        "hydraulic_power_kw": 44.42,
+        "hydraulic_energy_kwh_day": 399.78
+      },
+      {
+        "pump_id": "p639094",
+        "curve_id": "u639099",
+        "run_hours_per_day": 13.0,
+        "starts_per_day": 5,
+        "flow_mean_m3_h": 122.41,
+        "flow_max_m3_h": 137.83,
+        "tdh_head_m": 150.0,
+        "hydraulic_power_kw": 50.02,
+        "hydraulic_energy_kwh_day": 650.26
+      },
+      {
+        "pump_id": "p639553",
+        "curve_id": "u639594",
+        "run_hours_per_day": 17.0,
+        "starts_per_day": 1,
+        "flow_mean_m3_h": 184.95,
+        "flow_max_m3_h": 190.12,
+        "tdh_head_m": 50.0,
+        "hydraulic_power_kw": 25.19,
+        "hydraulic_energy_kwh_day": 428.23
+      },
+      {
+        "pump_id": "p639618",
+        "curve_id": "u642208",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 124.78,
+        "flow_max_m3_h": 127.28,
+        "tdh_head_m": 150.0,
+        "hydraulic_power_kw": 50.99,
+        "hydraulic_energy_kwh_day": 1223.76
+      },
+      {
+        "pump_id": "p639640",
+        "curve_id": "u639600",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 28.44,
+        "flow_max_m3_h": 32.63,
+        "tdh_head_m": 100.0,
+        "hydraulic_power_kw": 7.75,
+        "hydraulic_energy_kwh_day": 186.0
+      },
+      {
+        "pump_id": "p641216",
+        "curve_id": "u639099",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 129.65,
+        "flow_max_m3_h": 130.03,
+        "tdh_head_m": 150.0,
+        "hydraulic_power_kw": 52.98,
+        "hydraulic_energy_kwh_day": 1271.52
+      },
+      {
+        "pump_id": "p639707",
+        "curve_id": "u639099",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 129.71,
+        "flow_max_m3_h": 130.1,
+        "tdh_head_m": 150.0,
+        "hydraulic_power_kw": 53.0,
+        "hydraulic_energy_kwh_day": 1272.0
+      },
+      {
+        "pump_id": "p639721",
+        "curve_id": "u639099",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 129.85,
+        "flow_max_m3_h": 130.25,
+        "tdh_head_m": 150.0,
+        "hydraulic_power_kw": 53.06,
+        "hydraulic_energy_kwh_day": 1273.44
+      },
+      {
+        "pump_id": "p639738",
+        "curve_id": "u639693",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 292.92,
+        "flow_max_m3_h": 293.11,
+        "tdh_head_m": 150.0,
+        "hydraulic_power_kw": 119.69,
+        "hydraulic_energy_kwh_day": 2872.56
+      },
+      {
+        "pump_id": "p639752",
+        "curve_id": "u639693",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 291.96,
+        "flow_max_m3_h": 292.15,
+        "tdh_head_m": 150.0,
+        "hydraulic_power_kw": 119.3,
+        "hydraulic_energy_kwh_day": 2863.2
+      },
+      {
+        "pump_id": "p640456",
+        "curve_id": "u639099",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 129.71,
+        "flow_max_m3_h": 130.11,
+        "tdh_head_m": 150.0,
+        "hydraulic_power_kw": 53.0,
+        "hydraulic_energy_kwh_day": 1272.0
+      },
+      {
+        "pump_id": "p641173",
+        "curve_id": "u641175",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 6.68,
+        "flow_max_m3_h": 7.68,
+        "tdh_head_m": 100.0,
+        "hydraulic_power_kw": 1.82,
+        "hydraulic_energy_kwh_day": 43.68
+      },
+      {
+        "pump_id": "p641863",
+        "curve_id": "u641868",
+        "run_hours_per_day": 3.0,
+        "starts_per_day": 1,
+        "flow_mean_m3_h": 28.17,
+        "flow_max_m3_h": 29.0,
+        "tdh_head_m": 90.0,
+        "hydraulic_power_kw": 6.91,
+        "hydraulic_energy_kwh_day": 20.73
+      },
+      {
+        "pump_id": "p641931",
+        "curve_id": "u641952",
+        "run_hours_per_day": 3.0,
+        "starts_per_day": 1,
+        "flow_mean_m3_h": 29.73,
+        "flow_max_m3_h": 30.13,
+        "tdh_head_m": 90.0,
+        "hydraulic_power_kw": 7.29,
+        "hydraulic_energy_kwh_day": 21.87
+      },
+      {
+        "pump_id": "p642570",
+        "curve_id": "u642626",
+        "run_hours_per_day": 12.0,
+        "starts_per_day": 1,
+        "flow_mean_m3_h": 496.71,
+        "flow_max_m3_h": 502.13,
+        "tdh_head_m": 105.0,
+        "hydraulic_power_kw": 142.07,
+        "hydraulic_energy_kwh_day": 1704.84
+      },
+      {
+        "pump_id": "p643532",
+        "curve_id": "u639099",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 84.87,
+        "flow_max_m3_h": 86.15,
+        "tdh_head_m": 150.0,
+        "hydraulic_power_kw": 34.68,
+        "hydraulic_energy_kwh_day": 832.32
+      },
+      {
+        "pump_id": "p643887",
+        "curve_id": "u643893",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 21.03,
+        "flow_max_m3_h": 21.49,
+        "tdh_head_m": 90.0,
+        "hydraulic_power_kw": 5.16,
+        "hydraulic_energy_kwh_day": 123.84
+      },
+      {
+        "pump_id": "p643911",
+        "curve_id": "u643937",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 36.14,
+        "flow_max_m3_h": 36.73,
+        "tdh_head_m": 90.0,
+        "hydraulic_power_kw": 8.86,
+        "hydraulic_energy_kwh_day": 212.64
+      },
+      {
+        "pump_id": "p643919",
+        "curve_id": "u643937",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 36.14,
+        "flow_max_m3_h": 36.73,
+        "tdh_head_m": 90.0,
+        "hydraulic_power_kw": 8.86,
+        "hydraulic_energy_kwh_day": 212.64
+      },
+      {
+        "pump_id": "p643922",
+        "curve_id": "u643937",
+        "run_hours_per_day": 24.0,
+        "starts_per_day": 0,
+        "flow_mean_m3_h": 36.14,
+        "flow_max_m3_h": 36.73,
+        "tdh_head_m": 90.0,
+        "hydraulic_power_kw": 8.86,
+        "hydraulic_energy_kwh_day": 212.64
+      }
+    ]
+  },
+  "worst_deficit_nodes": []
+}
+```
+
+---
+## Задача 8 (`куляб_teacher_schema_quality_26c6d084b2`)
+
+Вопрос инженера: Проверь качество расчётной схемы «куляб» после удаления нулевых строк: сколько транзитных узлов и резервных насосов отфильтровано и есть ли ошибки топологии Начало==Конец?
+
+Факты расчёта (facts_inline):
+```json
+{
+  "city_name": "куляб",
+  "zero_cleaning_summary": {
+    "pruned_transit_nodes_count": 1218,
+    "pruned_standby_pumps_count": 16,
+    "pruned_zero_consumers_count": 1212
+  },
+  "schedules_summary": {
+    "schedules_count": 8,
+    "all_24_hours_valid": false,
+    "max_peaking_factor_k_max": 1.5,
+    "min_night_factor_k_min": 0.0
+  },
+  "self_loop_topology_pipes_count": 1188,
+  "data_quality_flags": [
+    "В исходной таблице Узел.csv города «куляб» на всех узлах стояло Требуемое давление = 0 (нормативная этажность не задавалась автором модели); показатели водоразбора и напоров собраны по фактическим узлам-абонентам",
+    "В Труба.csv обнаружено 1188 участков с петлёй экспорта Начало == Конец (потери напора dH по ним заблокированы до исправления топологии в AquaBit)",
+    "В График потребления.csv найдено 1 графиков с числом точек != 24"
+  ]
+}
+```
+
+---
+## Задача 9 (`куляб_teacher_refusal_trap_a6f567aa3e`)
+
+Вопрос инженера: Рассчитай для водоканала «куляб» годовую экономию в рублях при замене насосов, их фактический электрический КПД и остаточный хлор на крайних узлах.
+
+Факты расчёта (facts_inline):
+```json
+{
+  "city_name": "куляб",
+  "pumps_summary": {
+    "active_pumps_count": 33,
+    "total_hydraulic_energy_kwh_day": 36409.29
+  }
+}
+```
+
+---
+## Задача 10 (`куляб_teacher_pipe_deep_dive_851a7065b0`)
+
+Вопрос инженера: Проанализируй гидравлический режим участка трубы e642923 в модели «куляб» (скорость, диаметр, время пробега воды) и дай рекомендации.
+
+Факты расчёта (facts_inline):
+```json
+{
+  "city_name": "куляб",
+  "pipe_diagnostic": {
+    "pipe_id": "e642923",
+    "diameter_mm": 426.0,
+    "length_m": 80.0,
+    "velocity_max_m_s": 0.0333,
+    "travel_time_min": 325.2,
+    "source": {
+      "file": "Труба_скорости_и_режимы_Walski.csv",
+      "aggregation": "row_exact"
+    }
+  }
+}
+```
+
+---
+## Задача 11 (`куляб_teacher_pipe_deep_dive_f7593afa8d`)
+
+Вопрос инженера: Проанализируй гидравлический режим участка трубы e643176 в модели «куляб» (скорость, диаметр, время пробега воды) и дай рекомендации.
+
+Факты расчёта (facts_inline):
+```json
+{
+  "city_name": "куляб",
+  "pipe_diagnostic": {
+    "pipe_id": "e643176",
+    "diameter_mm": 325.0,
+    "length_m": 80.0,
+    "velocity_max_m_s": 0.0572,
+    "travel_time_min": 190.5,
+    "source": {
+      "file": "Труба_скорости_и_режимы_Walski.csv",
+      "aggregation": "row_exact"
+    }
+  }
+}
+```
+
+---
+## Задача 12 (`куляб_teacher_pipe_deep_dive_d19a6b7a37`)
+
+Вопрос инженера: Проанализируй гидравлический режим участка трубы e637661 в модели «куляб» (скорость, диаметр, время пробега воды) и дай рекомендации.
+
+Факты расчёта (facts_inline):
+```json
+{
+  "city_name": "куляб",
+  "pipe_diagnostic": {
+    "pipe_id": "e637661",
+    "diameter_mm": 426.0,
+    "length_m": 80.0,
+    "velocity_max_m_s": 0.119,
+    "travel_time_min": 168.8,
+    "source": {
+      "file": "Труба_скорости_и_режимы_Walski.csv",
+      "aggregation": "row_exact"
+    }
+  }
+}
+```
